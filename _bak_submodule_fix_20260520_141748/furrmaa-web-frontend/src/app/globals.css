@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+body {
+  font-family: var(--font-mona), sans-serif;
+}
+
+/* Product Description HTML Content Styles */
+.product-description {
+  line-height: 1.6;
+}
+
+.product-description p {
+  margin-bottom: 1rem;
+}
+
+.product-description h1,
+.product-description h2,
+.product-description h3,
+.product-description h4,
+.product-description h5,
+.product-description h6 {
+  font-weight: bold;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+}
+
+.product-description h1 {
+  font-size: 1.5rem;
+}
+
+.product-description h2 {
+  font-size: 1.25rem;
+}
+
+.product-description h3 {
+  font-size: 1.125rem;
+}
+
+.product-description ul,
+.product-description ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.product-description li {
+  margin-bottom: 0.5rem;
+}
+
+.product-description table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.product-description table th,
+.product-description table td {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.product-description table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.product-description table tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.product-description table tr:hover {
+  background-color: #f3f4f6;
+}
+
+.product-description img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.product-description strong {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.product-description em {
+  font-style: italic;
+}
+
+.product-description a {
+  color: #1F2E46;
+  text-decoration: underline;
+}
+
+.product-description a:hover {
+  color: #0f172a;
+}
+
+.product-description blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.product-description code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: monospace;
+}
+
+.product-description pre {
+  background-color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.product-description pre code {
+  background-color: transparent;
+  padding: 0;
+}
