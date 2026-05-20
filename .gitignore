@@ -1,0 +1,24 @@
+# Never commit archives (GitHub rejects >100MB; slow push)
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+
+# Dependencies / build (any subfolder)
+**/node_modules/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+
+# Next.js build (if tracked from monorepo root)
+**/.next/
+**/out/
