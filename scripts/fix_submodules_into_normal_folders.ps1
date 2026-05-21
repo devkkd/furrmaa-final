@@ -1,4 +1,4 @@
-# Converts farmaa2-backend + furrmaa-web-frontend from Git submodules/gitlinks into normal folders,
+# Converts farmaa2-backend, furrmaa-web-frontend, and Farmaa from Git submodules/gitlinks into normal folders,
 # so GitHub shows all source files inside the parent repo.
 #
 # Run (PowerShell, from repo root):
@@ -6,7 +6,7 @@
 #   powershell -ExecutionPolicy Bypass -File .\scripts\fix_submodules_into_normal_folders.ps1
 #
 # Then commit + push (history may rewrite if you combine with ZIP cleanup — that's separate):
-#   git add farmaa2-backend furrmaa-web-frontend .gitmodules
+#   git add farmaa2-backend furrmaa-web-frontend Farmaa .gitmodules
 #   git status
 #   git commit -m "fix: track backend and web as normal folders (not submodules)"
 #   git push origin main --force-with-lease
@@ -31,7 +31,7 @@ if (-not (git rev-parse --show-toplevel 2>$null)) {
   exit 1
 }
 
-$folders = @('farmaa2-backend', 'furrmaa-web-frontend')
+$folders = @('farmaa2-backend', 'furrmaa-web-frontend', 'Farmaa')
 Write-Host "`nRepo: $(git rev-parse --show-toplevel)" -ForegroundColor Cyan
 
 # --- Light backup (no node_modules/.next inside backup to save space) ---

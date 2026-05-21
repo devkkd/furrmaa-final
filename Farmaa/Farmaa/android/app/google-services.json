@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "56111389395",
+    "project_id": "furmaa-app",
+    "storage_bucket": "furmaa-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:56111389395:android:1d6b8b045c4b0b09b31226",
+        "android_client_info": {
+          "package_name": "com.furmaa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB66NrnVCfBS_cexfZ3Pq_H494Qnv_HDK0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
