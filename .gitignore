@@ -1,3 +1,6 @@
+# Script backups — do not commit (real code lives at repo root)
+_bak_submodule_fix_*/
+
 # Never commit archives (GitHub rejects >100MB; slow push)
 *.zip
 *.7z
