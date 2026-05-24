@@ -157,6 +157,7 @@ export default {
       LOGIN: '/auth/login',
       SEND_OTP: '/auth/send-otp',
       VERIFY_OTP: '/auth/verify-otp',
+      PUBLIC_CONFIG: '/auth/public-config',
       ME: '/auth/me',
     },
 

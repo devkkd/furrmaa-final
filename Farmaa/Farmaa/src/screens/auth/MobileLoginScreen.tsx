@@ -23,11 +23,8 @@ const MobileLoginScreen = () => {
   const navigation = useNavigation();
   const {
     sendOTP,
-    loginWithGoogle,
-    loginWithApple,
-    loginWithAuth0Google,
-    loginWithAuth0Apple,
-    auth0SocialLoginEnabled,
+    loginSocialGoogle,
+    loginSocialApple,
   } = useAuth();
   const [mobileNumber, setMobileNumber] = useState('');
   const [loading, setLoading] = useState(false);
@@ -53,11 +50,7 @@ const MobileLoginScreen = () => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      if (auth0SocialLoginEnabled) {
-        await loginWithAuth0Google();
-      } else {
-        await loginWithGoogle();
-      }
+      await loginSocialGoogle();
       (navigation as any).reset({
         index: 0,
         routes: [{ name: 'MainTabs' }],
@@ -70,18 +63,9 @@ const MobileLoginScreen = () => {
   };
 
   const handleAppleLogin = async () => {
-    if (!auth0SocialLoginEnabled && Platform.OS !== 'ios') {
-      Alert.alert('Not Available', 'Apple on iOS only, or set Auth0 in src/config/auth0.ts');
-      return;
-    }
-
     setLoading(true);
     try {
-      if (auth0SocialLoginEnabled) {
-        await loginWithAuth0Apple();
-      } else {
-        await loginWithApple();
-      }
+      await loginSocialApple();
       (navigation as any).reset({
         index: 0,
         routes: [{ name: 'MainTabs' }],

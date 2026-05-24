@@ -19,11 +19,8 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const {
     login,
-    loginWithGoogle,
-    loginWithApple,
-    loginWithAuth0Google,
-    loginWithAuth0Apple,
-    auth0SocialLoginEnabled,
+    loginSocialGoogle,
+    loginSocialApple,
   } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -52,11 +49,7 @@ const LoginScreen = () => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      if (auth0SocialLoginEnabled) {
-        await loginWithAuth0Google();
-      } else {
-        await loginWithGoogle();
-      }
+      await loginSocialGoogle();
       (navigation as any).reset({
         index: 0,
         routes: [{ name: 'MainTabs' }],
@@ -69,18 +62,9 @@ const LoginScreen = () => {
   };
 
   const handleAppleLogin = async () => {
-    if (Platform.OS !== 'ios') {
-      Alert.alert('Not Available', 'Apple Sign-In is only available on iOS devices');
-      return;
-    }
-
     setLoading(true);
     try {
-      if (auth0SocialLoginEnabled) {
-        await loginWithAuth0Apple();
-      } else {
-        await loginWithApple();
-      }
+      await loginSocialApple();
       (navigation as any).reset({
         index: 0,
         routes: [{ name: 'MainTabs' }],

@@ -16,6 +16,8 @@ _bak_submodule_fix_*/
 .env
 .env.*
 !.env.example
+**/secrets/
+**/*firebase-adminsdk*.json
 
 # Logs & OS
 *.log

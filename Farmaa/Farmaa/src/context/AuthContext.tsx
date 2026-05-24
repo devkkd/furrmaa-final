@@ -58,7 +58,12 @@ interface AuthContextType {
   loginWithAuth0Apple: () => Promise<void>;
   /** Web jaisa Auth0 + Google connection */
   loginWithAuth0Google: () => Promise<void>;
+  /** useFirebaseAuth=true → Firebase; warna Auth0 (agar configured); warna Firebase */
+  loginSocialGoogle: () => Promise<void>;
+  loginSocialApple: () => Promise<void>;
   auth0SocialLoginEnabled: boolean;
+  /** Backend GET /auth/public-config — phone OTP via Firebase SMS */
+  useFirebaseAuth: boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
@@ -70,14 +75,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [useFirebaseAuth, setUseFirebaseAuth] = useState(false);
 
   useEffect(() => {
     loadStoredAuth();
-    
+
     GoogleSignin.configure({
       webClientId: GOOGLE_WEB_CLIENT_ID,
       offlineAccess: true,
     });
+
+    (async () => {
+      try {
+        const res = await api.CLIENT.get(api.ENDPOINTS.AUTH.PUBLIC_CONFIG);
+        if (res.data?.useFirebaseAuth === true) {
+          setUseFirebaseAuth(true);
+        }
+      } catch (_) {
+        // backend offline — Firebase OTP off until config loads
+      }
+    })();
   }, []);
 
   const loadStoredAuth = async () => {
@@ -350,6 +367,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendOTP = async (phone: string) => {
+    if (useFirebaseAuth) {
+      await sendOTPWithFirebase(phone);
+      return '';
+    }
+
     try {
       console.log('📱 Sending OTP to:', phone);
 
@@ -437,7 +459,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else if (error.code === 'auth/billing-not' || error.message?.includes('BILLING_NOT_ENABLED')) {
         errorMessage = 'Phone OTP requires Firebase Blaze plan. Enable billing in Firebase Console → Project Settings → Usage and billing → Modify plan.';
       } else if (error.message?.includes('API') || error.message?.includes('api')) {
-        errorMessage = 'Firebase API error. Please check:\n1. Phone Authentication enabled in Firebase Console\n2. Test numbers added in Firebase Console\n3. Project ID correct: furmaa-app';
+        errorMessage = 'Firebase API error. Please check:\n1. Phone Authentication enabled in Firebase Console\n2. google-services.json is from project furrmaa-45315\n3. Test numbers added in Firebase Console';
       }
       
       throw new Error(errorMessage);
@@ -555,6 +577,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const verifyOTP = async (identifier: string, otp: string, type: 'phone' | 'email' = 'phone') => {
+    if (useFirebaseAuth && type === 'phone') {
+      return verifyOTPWithFirebase(identifier, otp);
+    }
+
     try {
       console.log('🔐 Verifying OTP for:', identifier, `(${type})`);
       console.log('🌐 API URL:', api.BASE_URL + api.ENDPOINTS.AUTH.VERIFY_OTP);
@@ -1041,6 +1067,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  /** Web login page jaisa: Firebase mode me social bhi Firebase se */
+  const loginSocialGoogle = async () => {
+    if (useFirebaseAuth) return loginWithGoogle();
+    if (isAuth0Configured()) return loginWithAuth0Google();
+    return loginWithGoogle();
+  };
+
+  const loginSocialApple = async () => {
+    if (useFirebaseAuth) {
+      if (Platform.OS !== 'ios') {
+        throw new Error('Apple Sign-In on iOS only with Firebase. Use Google or phone OTP.');
+      }
+      return loginWithApple();
+    }
+    if (isAuth0Configured()) return loginWithAuth0Apple();
+    if (Platform.OS !== 'ios') {
+      throw new Error('Apple Sign-In is only available on iOS devices');
+    }
+    return loginWithApple();
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -1062,7 +1109,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginWithApple,
         loginWithAuth0Apple,
         loginWithAuth0Google,
+        loginSocialGoogle,
+        loginSocialApple,
         auth0SocialLoginEnabled: isAuth0Configured(),
+        useFirebaseAuth,
         logout,
         refreshUser,
         isAuthenticated: !!token,
