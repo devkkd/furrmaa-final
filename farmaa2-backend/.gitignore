@@ -6,5 +6,7 @@ uploads/
 .DS_Store
 dist/
 build/
+secrets/
+**/*firebase-adminsdk*.json
 
 

@@ -15,7 +15,18 @@ import {
     fetchAuthPublicConfig,
 } from '@/lib/api'
 import { mergeGuestCartToServer } from '@/lib/cartActions'
-import { getFirebaseAuthCompat, isFirebaseWebConfigReady } from '@/lib/firebaseWebRuntime'
+import {
+    getFirebaseAuthInstance,
+    setupPhoneRecaptcha,
+    sendFirebasePhoneOtp,
+    clearPhoneRecaptcha,
+    GoogleAuthProvider,
+    OAuthProvider,
+    signInWithPopup,
+    isFirebaseWebConfigReady,
+    mapFirebaseAuthError,
+    RECAPTCHA_CONTAINER_ID,
+} from '@/lib/firebaseWebRuntime'
 import {
     isAuth0WebConfigReady,
     auth0LoginWithGoogle,
@@ -39,7 +50,9 @@ const AuthPage = () => {
     )
     const [modeReady, setModeReady] = useState(false)
     const firebaseRecaptchaRef = useRef(null)
+    const firebaseAuthRef = useRef(null)
     const firebaseConfirmationRef = useRef(null)
+    const [recaptchaBooting, setRecaptchaBooting] = useState(false)
 
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -140,6 +153,37 @@ const AuthPage = () => {
         }
     }, [isAdminRedirect, login, modeReady, router, useFirebaseAuth])
 
+    useEffect(() => {
+        if (!modeReady || !useFirebaseAuth || step !== 'PHONE') return
+        if (!isFirebaseWebConfigReady()) return
+
+        let cancelled = false
+        setRecaptchaBooting(true)
+
+        ;(async () => {
+            try {
+                clearPhoneRecaptcha(firebaseRecaptchaRef.current)
+                firebaseRecaptchaRef.current = null
+                firebaseAuthRef.current = null
+
+                const { auth, verifier } = await setupPhoneRecaptcha(RECAPTCHA_CONTAINER_ID)
+                if (cancelled) return
+                firebaseAuthRef.current = auth
+                firebaseRecaptchaRef.current = verifier
+            } catch (e) {
+                if (!cancelled) {
+                    console.warn('reCAPTCHA setup:', e)
+                }
+            } finally {
+                if (!cancelled) setRecaptchaBooting(false)
+            }
+        })()
+
+        return () => {
+            cancelled = true
+        }
+    }, [modeReady, useFirebaseAuth, step])
+
     const digitsOnly = (v) => v.replace(/\D/g, '').slice(-10)
     const isEmail = (v) => v.includes('@')
 
@@ -196,27 +240,21 @@ const AuthPage = () => {
                 if (!isFirebaseWebConfigReady()) {
                     throw new Error('Firebase config missing in .env')
                 }
-                const auth = await getFirebaseAuthCompat()
                 const fullPhone = `+91${digitsOnly(value)}`
-                if (firebaseRecaptchaRef.current?.clear) {
-                    firebaseRecaptchaRef.current.clear()
-                    firebaseRecaptchaRef.current = null
-                }
-                firebaseRecaptchaRef.current = new window.firebase.auth.RecaptchaVerifier(
-                    'recaptcha-container',
-                    { size: 'invisible' },
-                    auth
-                )
-                firebaseConfirmationRef.current = await auth.signInWithPhoneNumber(
+                const { confirmation, verifier, auth } = await sendFirebasePhoneOtp(
                     fullPhone,
-                    firebaseRecaptchaRef.current
+                    firebaseRecaptchaRef.current,
+                    firebaseAuthRef.current
                 )
+                firebaseRecaptchaRef.current = verifier
+                firebaseAuthRef.current = auth
+                firebaseConfirmationRef.current = confirmation
             } else {
                 await sendOtpApi(value)
             }
             setStep('OTP')
         } catch (e) {
-            setError(e.message || 'Failed to send OTP')
+            setError(mapFirebaseAuthError(e) || 'Failed to send OTP')
         } finally {
             setLoading(false)
         }
@@ -242,7 +280,7 @@ const AuthPage = () => {
                 await completeJwtLogin(token, user)
             }
         } catch (e) {
-            setError(e.message || 'Invalid OTP')
+            setError(mapFirebaseAuthError(e) || 'Invalid OTP')
         } finally {
             setLoading(false)
         }
@@ -255,9 +293,8 @@ const AuthPage = () => {
         try {
             if (useFirebaseAuth) {
                 if (!isFirebaseWebConfigReady()) throw new Error('Firebase config missing in .env')
-                const auth = await getFirebaseAuthCompat()
-                const provider = new window.firebase.auth.GoogleAuthProvider()
-                const cred = await auth.signInWithPopup(provider)
+                const auth = await getFirebaseAuthInstance()
+                const cred = await signInWithPopup(auth, new GoogleAuthProvider())
                 const idToken = await cred.user.getIdToken()
                 await completeFirebaseTokenLogin(idToken)
             } else {
@@ -279,9 +316,9 @@ const AuthPage = () => {
         try {
             if (useFirebaseAuth) {
                 if (!isFirebaseWebConfigReady()) throw new Error('Firebase config missing in .env')
-                const auth = await getFirebaseAuthCompat()
-                const provider = new window.firebase.auth.OAuthProvider('apple.com')
-                const cred = await auth.signInWithPopup(provider)
+                const auth = await getFirebaseAuthInstance()
+                const provider = new OAuthProvider('apple.com')
+                const cred = await signInWithPopup(auth, provider)
                 const idToken = await cred.user.getIdToken()
                 await completeFirebaseTokenLogin(idToken)
             } else {
@@ -338,16 +375,33 @@ const AuthPage = () => {
                                     onChange={(e) => setIdentifier(e.target.value)}
                                     className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50 text-sm focus:outline-none"
                                 />
-                                <div id="recaptcha-container" />
+                                {process.env.NEXT_PUBLIC_FIREBASE_RECAPTCHA_VISIBLE === 'true' ? (
+                                    <div
+                                        id={RECAPTCHA_CONTAINER_ID}
+                                        className="min-h-[78px] flex justify-center my-2"
+                                    />
+                                ) : (
+                                    <div id={RECAPTCHA_CONTAINER_ID} className="hidden" aria-hidden />
+                                )}
+                                {process.env.NODE_ENV === 'development' && (
+                                    <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                                        Phone OTP: <strong>http://127.0.0.1:3000/login</strong> kholo (
+                                        localhost mat). Send OTP dabao — reCAPTCHA auto verify hoga.
+                                    </p>
+                                )}
 
                                 {error && <p className="text-red-500 text-xs">{error}</p>}
 
                                 <button
                                     onClick={sendOtp}
-                                    disabled={loading}
+                                    disabled={loading || recaptchaBooting}
                                     className="w-full bg-[#1F2E46] text-white font-bold py-3.5 rounded-full mt-2 disabled:opacity-70"
                                 >
-                                    {loading ? 'Sending...' : 'Send OTP →'}
+                                    {loading
+                                        ? 'Sending...'
+                                        : recaptchaBooting
+                                          ? 'Preparing...'
+                                          : 'Send OTP →'}
                                 </button>
                             </>
                         )}

@@ -1033,6 +1033,7 @@ const adminFetch = async (path, options = {}) => {
   });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) throw new Error('Session expired. Please login again.');
+  if (res.status === 403) throw new Error('Admin access required.');
   if (!res.ok) throw new Error(data.message || 'Request failed');
   return data;
 };

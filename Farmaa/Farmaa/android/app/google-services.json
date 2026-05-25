@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "56111389395",
-    "project_id": "furmaa-app",
-    "storage_bucket": "furmaa-app.firebasestorage.app"
+    "project_number": "200582949604",
+    "project_id": "furrmaa-45315",
+    "storage_bucket": "furrmaa-45315.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:56111389395:android:1d6b8b045c4b0b09b31226",
+        "mobilesdk_app_id": "1:200582949604:android:a6ab53e742c09ef68adaf1",
         "android_client_info": {
           "package_name": "com.furmaa"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "200582949604-t8eu8n505o9di3ta15uuum7s8la32jc6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyB66NrnVCfBS_cexfZ3Pq_H494Qnv_HDK0"
+          "current_key": "AIzaSyCltJDaLDCLXcOj4gyK99B0odsitisokuk"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "200582949604-t8eu8n505o9di3ta15uuum7s8la32jc6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
