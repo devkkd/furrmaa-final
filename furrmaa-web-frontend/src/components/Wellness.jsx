@@ -62,12 +62,12 @@ export default function Wellness() {
       <div className="max-w-[1400px] mx-auto px-4 flex items-center justify-center gap-2 md:gap-6">
         {data.length > 0 ? (
           <>
-            {/* Custom Previous Button - using class 'wellness-prev' */}
+            {/* Custom Previous Button - Now visible on mobile */}
             <button
-              className="wellness-prev hidden sm:flex shrink-0 w-10 h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="wellness-prev flex shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Previous slide"
             >
-              <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
               </svg>
             </button>
@@ -119,12 +119,12 @@ export default function Wellness() {
               </Swiper>
             </div>
 
-            {/* Custom Next Button - using class 'wellness-next' */}
+            {/* Custom Next Button - Now visible on mobile */}
             <button
-              className="wellness-next hidden sm:flex shrink-0 w-10 h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="wellness-next flex shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Next slide"
             >
-              <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </button>

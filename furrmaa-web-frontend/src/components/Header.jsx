@@ -8,17 +8,6 @@ import {
   FaDownload,
   FaBars,
   FaTimes,
-  FaStore,
-  FaBone,
-  FaCapsules,
-  FaPuzzlePiece,
-  FaPaw,
-  FaCut,
-  FaFirstAid,
-  FaDog,
-  FaStethoscope,
-  FaHeart,
-  FaCalendarAlt,
   FaUsers,
 } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
@@ -38,6 +27,22 @@ export default function Header() {
 
   const shopCat = (cat) =>
     `/shop?category=${cat}${petType ? `&petType=${petType}` : ""}`;
+
+  // Centralized Navigation Links to keep code clean
+  const navItems = [
+    { label: "Shop", href: "/shop", icon: "/images/icons/shop.svg" },
+    { label: "Food", href: shopCat("food"), icon: "/images/icons/food.svg" },
+    { label: "Medicine", href: shopCat("medicine"), icon: "/images/icons/medicine.svg" },
+    { label: "Toys", href: shopCat("toys"), icon: "/images/icons/toys.svg" },
+    { label: "Accessories", href: shopCat("accessories"), icon: "/images/icons/Accessories.svg" },
+    { label: "Grooming", href: shopCat("grooming"), icon: "/images/icons/Grooming.svg" },
+    { label: "Supplements", href: shopCat("supplements"), icon: "/images/icons/Supplements.svg" },
+    { label: "Pet Training", href: "/training", icon: "/images/icons/Pet Training.svg" },
+    { label: "Near By", href: "/vet", icon: "/images/icons/vet services.svg" },
+    { label: "Hope", href: "/hope", icon: "/images/icons/hope.svg" },
+    { label: "Pet Events", href: "/events", icon: "/images/icons/pet events.svg" },
+    { label: "Pet Social", href: "/social", fallbackIcon: <FaUsers className="w-4 h-4 text-gray-700" /> },
+  ];
 
   return (
     <div className="relative z-20 text-[#1F2E46]">
@@ -79,7 +84,7 @@ export default function Header() {
               {/* AI CHAT */}
               <div className="flex items-center gap-2 border border-gray-300 rounded-xl px-4 py-2 text-sm">
                 <BsStars />
-                <span>Furrmaa Pet AI Chat</span>
+                <span>Ask Charlie</span>
                 <span className="bg-lime-400 text-black text-xs px-2 py-0.5 rounded-xl">
                   Premium
                 </span>
@@ -167,21 +172,20 @@ export default function Header() {
       {/* MOBILE MENU */}
       <div
         className={`lg:hidden absolute left-0 right-0 bg-white border-b border-gray-300 transition-all duration-300 overflow-hidden ${
-          open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+          open ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="px-6 py-6 space-y-6">
-          <Link href="/shop" className="flex items-center gap-4"><FaStore /> Shop</Link>
-          <Link href={shopCat("food")} className="flex items-center gap-4"><FaBone /> Food</Link>
-          <Link href={shopCat("medicine")} className="flex items-center gap-4"><FaCapsules /> Medicine</Link>
-          <Link href={shopCat("toys")} className="flex items-center gap-4"><FaPuzzlePiece /> Toys</Link>
-          <Link href={shopCat("accessories")} className="flex items-center gap-4"><FaPaw /> Accessories</Link>
-          <Link href={shopCat("grooming")} className="flex items-center gap-4"><FaCut /> Grooming</Link>
-          <Link href={shopCat("supplements")} className="flex items-center gap-4"><FaFirstAid /> Supplements</Link>
-          <Link href="/training" className="flex items-center gap-4"><FaDog /> Pet Training</Link>
-          <Link href="/vet" className="flex items-center gap-4"><FaStethoscope /> Vet Services</Link>
-          <Link href="/hope" className="flex items-center gap-4"><FaHeart /> Hope</Link>
-          <Link href="/events" className="flex items-center gap-4"><FaCalendarAlt /> Pet Events</Link>
+          {navItems.map((item, index) => (
+            <Link key={index} href={item.href} className="flex items-center gap-4 text-sm font-medium">
+              {item.icon ? (
+                <img src={item.icon} alt={item.label} className="w-5 h-5 object-contain" />
+              ) : (
+                item.fallbackIcon
+              )}
+              {item.label}
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -189,18 +193,18 @@ export default function Header() {
       <nav className="w-full bg-white border-b border-gray-300 hidden lg:block">
         <div className="max-w-7xl mx-auto px-4">
           <ul className="flex items-center justify-between py-3 text-sm text-gray-700">
-            <li><Link href="/shop" className="flex items-center gap-2"><FaStore /> Shop</Link></li>
-            <li><Link href={shopCat("food")} className="flex items-center gap-2"><FaBone /> Food</Link></li>
-            <li><Link href={shopCat("medicine")} className="flex items-center gap-2"><FaCapsules /> Medicine</Link></li>
-            <li><Link href={shopCat("toys")} className="flex items-center gap-2"><FaPuzzlePiece /> Toys</Link></li>
-            <li><Link href={shopCat("accessories")} className="flex items-center gap-2"><FaPaw /> Accessories</Link></li>
-            <li><Link href={shopCat("grooming")} className="flex items-center gap-2"><FaCut /> Grooming</Link></li>
-            <li><Link href={shopCat("supplements")} className="flex items-center gap-2"><FaFirstAid /> Supplements</Link></li>
-            <li><Link href="/training" className="flex items-center gap-2"><FaDog /> Pet Training</Link></li>
-            <li><Link href="/vet" className="flex items-center gap-2"><FaStethoscope /> Vet Services</Link></li>
-            <li><Link href="/hope" className="flex items-center gap-2"><FaHeart /> Hope</Link></li>
-            <li><Link href="/events" className="flex items-center gap-2"><FaCalendarAlt /> Pet Events</Link></li>
-            <li><Link href="/social" className="flex items-center gap-2"><FaUsers /> Pet Social</Link></li>
+            {navItems.map((item, index) => (
+              <li key={index}>
+                <Link href={item.href} className="flex items-center gap-2 hover:text-[#1F2E46] transition-colors font-medium">
+                  {item.icon ? (
+                    <img src={item.icon} alt={item.label} className="w-4 h-4 object-contain" />
+                  ) : (
+                    item.fallbackIcon
+                  )}
+                  {item.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
       </nav>

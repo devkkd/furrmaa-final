@@ -144,11 +144,11 @@ const SubscriptionPage = () => {
                         <div className="w-full lg:w-[450px]">
                             <div className="bg-white border border-gray-100 rounded-[40px] p-8 md:p-10 shadow-2xl shadow-blue-50/50">
                                 {/* Trial Badge */}
-                                <div className="mb-8">
+                                {/* <div className="mb-8">
                                     <span className="bg-[#a3e635] text-black text-sm font-bold px-6 py-2.5 rounded-full shadow-sm">
                                         3-Day Free Trial
                                     </span>
-                                </div>
+                                </div> */}
 
                                 {/* Feature List */}
                                 <div className="space-y-6 mb-10">
