@@ -86,13 +86,25 @@ export type LocationSuggestion = {
   displayName: string;
   lat: number;
   lng: number;
+  city?: string;
 };
 
 /**
- * Search locations by query (Nominatim). Use with debounce (e.g. 400ms). Limit 1 req/sec.
+ * Search locations by query. Google Places when configured, else Nominatim.
+ * Use with debounce (e.g. 400–500ms).
  */
 export async function searchLocations(query: string): Promise<LocationSuggestion[]> {
   if (!query?.trim() || query.trim().length < 2) return [];
+
+  try {
+    const { searchGooglePlaces, isGooglePlacesConfigured } = await import('./googlePlaces');
+    if (isGooglePlacesConfigured()) {
+      const googleResults = await searchGooglePlaces(query);
+      if (googleResults.length > 0) return googleResults;
+    }
+  } catch {
+    /* fall through to Nominatim */
+  }
   const q = encodeURIComponent(query.trim());
   const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=8`;
   const res = await fetch(url, {

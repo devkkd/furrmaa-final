@@ -96,7 +96,7 @@ const HopeChangeLocationScreen = () => {
         <View style={styles.searchBox}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search or type location (e.g. Jaipur, Rajasthan)"
+            placeholder="Search address or area (Google suggestions)"
             placeholderTextColor="#9CA3AF"
             value={q}
             onChangeText={setQ}

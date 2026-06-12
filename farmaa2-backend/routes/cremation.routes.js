@@ -3,27 +3,9 @@ import mongoose from 'mongoose';
 import { protect } from '../middleware/auth.middleware.js';
 import CremationCenter from '../models/CremationCenter.model.js';
 import CremationRequest from '../models/CremationRequest.model.js';
+import { escapeRegex, cremationLocationClause } from '../utils/locationFilter.js';
 
 const router = express.Router();
-
-function escapeRegex(s) {
-  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function locationFilter(locationOrCity) {
-  const raw = String(locationOrCity || '').trim();
-  if (!raw) return null;
-  const token = raw.split(',')[0].trim();
-  if (!token) return null;
-  const re = escapeRegex(token);
-  return {
-    $or: [
-      { city: { $regex: re, $options: 'i' } },
-      { state: { $regex: re, $options: 'i' } },
-      { address: { $regex: re, $options: 'i' } },
-    ],
-  };
-}
 
 // Get cremation centers (by location/city) — admin-added active centers only
 router.get('/centers', async (req, res) => {
@@ -31,7 +13,7 @@ router.get('/centers', async (req, res) => {
     const { city, location, search, state } = req.query;
     const query = { isActive: true };
 
-    const locClause = locationFilter(location || city);
+    const locClause = cremationLocationClause(location || city);
     if (locClause) Object.assign(query, locClause);
     if (state && !locClause) {
       query.state = { $regex: escapeRegex(String(state)), $options: 'i' };

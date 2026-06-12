@@ -17,6 +17,8 @@ import AdminTextInput from './AdminTextInput';
 import { VET_SERVICE_TYPES } from '../../constants/vetServiceTypes';
 import { pickAndUploadImage } from '../../utils/imageUpload';
 import { forwardGeocode } from '../../utils/geolocation';
+import LocationAutocompleteInput from '../../components/LocationAutocompleteInput';
+import type { LocationSuggestion } from '../../utils/geolocation';
 
 interface Veterinarian {
   _id: string;
@@ -58,6 +60,7 @@ const AdminVeterinariansScreen = () => {
     serviceType: '',
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [typeList, setTypeList] = useState<{ name: string; slug: string }[]>([]);
   const [showTypePicker, setShowTypePicker] = useState(false);
 
@@ -98,6 +101,12 @@ const AdminVeterinariansScreen = () => {
       serviceType: '',
     });
     setEditingId(null);
+    setLocationCoords(null);
+  };
+
+  const applyLocationSuggestion = (p: LocationSuggestion) => {
+    setFormData((f) => ({ ...f, location: p.displayName }));
+    setLocationCoords({ lat: p.lat, lng: p.lng });
   };
 
   const handleAdd = async () => {
@@ -112,13 +121,18 @@ const AdminVeterinariansScreen = () => {
       let address: { street: string; city: string; latitude?: number; longitude?: number } | undefined;
       if (loc) {
         address = { street: loc, city: loc };
-        try {
-          const coords = await forwardGeocode(loc);
-          if (coords) {
-            address.latitude = coords.lat;
-            address.longitude = coords.lng;
-          }
-        } catch (_) {}
+        if (locationCoords) {
+          address.latitude = locationCoords.lat;
+          address.longitude = locationCoords.lng;
+        } else {
+          try {
+            const coords = await forwardGeocode(loc);
+            if (coords) {
+              address.latitude = coords.lat;
+              address.longitude = coords.lng;
+            }
+          } catch (_) {}
+        }
       }
       const payload = {
         name: formData.name.trim(),
@@ -153,6 +167,11 @@ const AdminVeterinariansScreen = () => {
       profileImage: vet.profileImage || '',
       serviceType: vet.serviceType || '',
     });
+    if (vet.address?.latitude != null && vet.address?.longitude != null) {
+      setLocationCoords({ lat: vet.address.latitude, lng: vet.address.longitude });
+    } else {
+      setLocationCoords(null);
+    }
     setActiveTab('update');
   };
 
@@ -169,13 +188,18 @@ const AdminVeterinariansScreen = () => {
       let address: { street: string; city: string; latitude?: number; longitude?: number } | undefined;
       if (loc) {
         address = { street: loc, city: loc };
-        try {
-          const coords = await forwardGeocode(loc);
-          if (coords) {
-            address.latitude = coords.lat;
-            address.longitude = coords.lng;
-          }
-        } catch (_) {}
+        if (locationCoords) {
+          address.latitude = locationCoords.lat;
+          address.longitude = locationCoords.lng;
+        } else {
+          try {
+            const coords = await forwardGeocode(loc);
+            if (coords) {
+              address.latitude = coords.lat;
+              address.longitude = coords.lng;
+            }
+          } catch (_) {}
+        }
       }
       const payload: any = {
         name: formData.name.trim(),
@@ -258,11 +282,15 @@ const AdminVeterinariansScreen = () => {
           keyboardType="phone-pad"
         />
         <Text style={styles.fieldLabel}>Location</Text>
-        <AdminTextInput
-          style={styles.input}
-          placeholder="e.g. MG Road, Mumbai"
+        <LocationAutocompleteInput
+          placeholder="Search clinic address"
           value={formData.location}
-          onChangeText={(t) => setFormData({ ...formData, location: t })}
+          onChangeText={(t) => {
+            setFormData({ ...formData, location: t });
+            setLocationCoords(null);
+          }}
+          onSelectSuggestion={applyLocationSuggestion}
+          inputStyle={styles.input}
         />
         <Text style={styles.fieldLabel}>Photo</Text>
         <TouchableOpacity style={styles.photoBox} onPress={handlePickPhoto}>

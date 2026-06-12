@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { adminGetVeterinarians, adminDeleteVeterinarian, adminCreateVeterinarian, adminUpdateVeterinarian, adminUploadImage } from '@/lib/api';
 import { AdminImage } from '../components/AdminImage';
+import LocationAutocomplete from '@/components/LocationAutocomplete';
 
 export default function AdminVeterinariansPage() {
   const photoInputRef = useRef(null);
@@ -14,6 +15,7 @@ export default function AdminVeterinariansPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', location: '', profileImage: '', serviceType: '' });
+  const [locationCoords, setLocationCoords] = useState({ lat: null, lng: null });
 
   const fetchList = () => {
     adminGetVeterinarians()
@@ -35,7 +37,15 @@ export default function AdminVeterinariansPage() {
     setSaving(true);
     try {
       const email = `vet_${(form.phone?.trim() || Date.now()).replace(/\D/g, '')}@farmaa.local`;
-      const address = form.location?.trim() ? { street: form.location.trim(), city: form.location.trim() } : undefined;
+      const address = form.location?.trim()
+        ? {
+            street: form.location.trim(),
+            city: form.location.trim(),
+            ...(locationCoords.lat != null && locationCoords.lng != null
+              ? { latitude: locationCoords.lat, longitude: locationCoords.lng }
+              : {}),
+          }
+        : undefined;
       await adminCreateVeterinarian({
         name: form.name.trim(),
         email,
@@ -45,6 +55,7 @@ export default function AdminVeterinariansPage() {
         serviceType: form.serviceType?.trim() || undefined,
       });
       setForm({ name: '', phone: '', location: '', profileImage: '', serviceType: '' });
+      setLocationCoords({ lat: null, lng: null });
       setShowForm(false);
       setEditingId(null);
       fetchList();
@@ -64,6 +75,10 @@ export default function AdminVeterinariansPage() {
       profileImage: v.profileImage || '',
       serviceType: v.serviceType || '',
     });
+    setLocationCoords({
+      lat: v.address?.latitude ?? null,
+      lng: v.address?.longitude ?? null,
+    });
     setShowForm(true);
   };
 
@@ -72,7 +87,15 @@ export default function AdminVeterinariansPage() {
     if (!editingId) return;
     setSaving(true);
     try {
-      const address = form.location?.trim() ? { street: form.location.trim(), city: form.location.trim() } : undefined;
+      const address = form.location?.trim()
+        ? {
+            street: form.location.trim(),
+            city: form.location.trim(),
+            ...(locationCoords.lat != null && locationCoords.lng != null
+              ? { latitude: locationCoords.lat, longitude: locationCoords.lng }
+              : {}),
+          }
+        : undefined;
       await adminUpdateVeterinarian(editingId, {
         name: form.name.trim(),
         phone: form.phone?.trim() || undefined,
@@ -81,6 +104,7 @@ export default function AdminVeterinariansPage() {
         serviceType: form.serviceType?.trim() || undefined,
       });
       setForm({ name: '', phone: '', location: '', profileImage: '', serviceType: '' });
+      setLocationCoords({ lat: null, lng: null });
       setShowForm(false);
       setEditingId(null);
       fetchList();
@@ -142,7 +166,22 @@ export default function AdminVeterinariansPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-              <input type="text" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="e.g. MG Road, Mumbai" />
+              <LocationAutocomplete
+                value={form.location}
+                onChange={(location) => {
+                  setForm({ ...form, location });
+                  setLocationCoords({ lat: null, lng: null });
+                }}
+                onPlaceSelect={(p) => {
+                  setForm({ ...form, location: p.label });
+                  if (p.lat != null && p.lng != null) {
+                    setLocationCoords({ lat: p.lat, lng: p.lng });
+                  }
+                }}
+                placeholder="Search clinic address"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                types={['establishment', 'geocode']}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>

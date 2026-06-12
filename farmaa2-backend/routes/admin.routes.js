@@ -2031,7 +2031,7 @@ router.get('/hope-posts', async (req, res) => {
 // Update hope post (admin can edit location, status, etc.)
 router.put('/hope-posts/:id', async (req, res) => {
   try {
-    const { status, locationText, description, postType, petType } = req.body;
+    const { status, locationText, latitude, longitude, description, postType, petType } = req.body;
     const post = await HopePost.findById(req.params.id);
     if (!post) {
       return res.status(404).json({ success: false, message: 'Post not found' });
@@ -2039,6 +2039,8 @@ router.put('/hope-posts/:id', async (req, res) => {
 
     if (status) post.status = status;
     if (locationText) post.locationText = locationText;
+    if (latitude != null) post.latitude = latitude;
+    if (longitude != null) post.longitude = longitude;
     if (description !== undefined) post.description = description;
     if (postType) post.postType = postType;
     if (petType) post.petType = petType;

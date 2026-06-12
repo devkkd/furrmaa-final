@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { adminGetPetEvents, adminCreatePetEvent, adminUpdatePetEvent, adminDeletePetEvent } from '@/lib/api';
 import { AdminImage } from '../components/AdminImage';
+import LocationAutocomplete from '@/components/LocationAutocomplete';
 
 const TABS = ['list', 'add', 'edit', 'delete'];
 
@@ -23,6 +24,23 @@ export default function AdminPetEventsPage() {
     isActive: true,
   });
   const [saving, setSaving] = useState(false);
+  const [eventGeo, setEventGeo] = useState({
+    latitude: null,
+    longitude: null,
+    formattedAddress: '',
+    state: '',
+  });
+
+  const geoPayload = () => {
+    const p = {};
+    if (eventGeo.latitude != null && eventGeo.longitude != null) {
+      p.latitude = eventGeo.latitude;
+      p.longitude = eventGeo.longitude;
+    }
+    if (eventGeo.formattedAddress?.trim()) p.formattedAddress = eventGeo.formattedAddress.trim();
+    if (eventGeo.state?.trim()) p.state = eventGeo.state.trim();
+    return p;
+  };
 
   const fetchEvents = () => {
     adminGetPetEvents()
@@ -47,6 +65,7 @@ export default function AdminPetEventsPage() {
       isActive: true,
     });
     setEditingId(null);
+    setEventGeo({ latitude: null, longitude: null, formattedAddress: '', state: '' });
   };
 
   const handleAdd = async (e) => {
@@ -67,6 +86,7 @@ export default function AdminPetEventsPage() {
         images: images.length ? images : undefined,
         description: form.description?.trim() || undefined,
         isActive: !!form.isActive,
+        ...geoPayload(),
       });
       resetForm();
       setActiveTab('list');
@@ -90,6 +110,12 @@ export default function AdminPetEventsPage() {
       description: ev.description || '',
       isActive: ev.isActive !== false,
     });
+    setEventGeo({
+      latitude: ev.latitude ?? null,
+      longitude: ev.longitude ?? null,
+      formattedAddress: ev.formattedAddress || '',
+      state: ev.state || '',
+    });
     setActiveTab('edit');
   };
 
@@ -111,6 +137,7 @@ export default function AdminPetEventsPage() {
         images: images.length ? images : undefined,
         description: form.description?.trim() || undefined,
         isActive: !!form.isActive,
+        ...geoPayload(),
       });
       resetForm();
       setActiveTab('list');
@@ -169,12 +196,51 @@ export default function AdminPetEventsPage() {
               <input type="text" value={form.dateText} onChange={(e) => setForm({ ...form, dateText: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="e.g. 15 March 2025" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Venue *</label>
-              <input type="text" value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="Venue name" required />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Venue / address *</label>
+              <LocationAutocomplete
+                value={form.venue}
+                onChange={(venue) => setForm({ ...form, venue })}
+                onPlaceSelect={(p) => {
+                  setForm((f) => ({
+                    ...f,
+                    venue: p.venue || p.label,
+                    city: p.city || f.city,
+                  }));
+                  if (p.lat != null && p.lng != null) {
+                    setEventGeo({
+                      latitude: p.lat,
+                      longitude: p.lng,
+                      formattedAddress: p.formattedAddress || p.label,
+                      state: p.state || '',
+                    });
+                  }
+                }}
+                placeholder="Search venue or address"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                types={['establishment', 'geocode']}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
-              <input type="text" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="City" required />
+              <LocationAutocomplete
+                value={form.city}
+                onChange={(city) => setForm({ ...form, city })}
+                onPlaceSelect={(p) => {
+                  setForm((f) => ({ ...f, city: p.city || p.label.split(',')[0] }));
+                  if (p.lat != null && p.lng != null) {
+                    setEventGeo((g) => ({
+                      ...g,
+                      latitude: p.lat,
+                      longitude: p.lng,
+                      formattedAddress: g.formattedAddress || p.formattedAddress || p.label,
+                      state: p.state || g.state,
+                    }));
+                  }
+                }}
+                placeholder="Search city"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                types={['(cities)']}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Poster / Image 1 URL</label>

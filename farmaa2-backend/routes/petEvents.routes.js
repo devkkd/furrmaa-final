@@ -4,31 +4,14 @@ import PetEventRegistration from '../models/PetEventRegistration.model.js';
 
 const router = express.Router();
 
-function escapeRegex(s) {
-  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/** "Jaipur, Rajasthan" → match admin event city "Jaipur" */
-function locationFilter(locationOrCity) {
-  const raw = String(locationOrCity || '').trim();
-  if (!raw || raw.toLowerCase() === 'all') return null;
-  const token = raw.split(',')[0].trim();
-  if (!token) return null;
-  const re = escapeRegex(token);
-  return {
-    $or: [
-      { city: { $regex: re, $options: 'i' } },
-      { venue: { $regex: re, $options: 'i' } },
-    ],
-  };
-}
+import { escapeRegex, petEventLocationClause } from '../utils/locationFilter.js';
 
 // List events (location/city + search) — admin-created active events only
 router.get('/', async (req, res) => {
   try {
     const { city, location, search } = req.query;
     const query = { isActive: true };
-    const locClause = locationFilter(location || city);
+    const locClause = petEventLocationClause(location || city);
     if (locClause) Object.assign(query, locClause);
     if (search) {
       const s = escapeRegex(String(search).trim());

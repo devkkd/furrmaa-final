@@ -16,6 +16,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../config/api';
 import { pickAndUploadImage } from '../../utils/imageUpload';
 import { getCurrentLocationString } from '../../utils/geolocation';
+import LocationAutocompleteInput from '../../components/LocationAutocompleteInput';
 import leftArrow from '../../assets/images/arrow-left.png';
 import petImage from '../../assets/images/pet.png';
 import galleryIcon from '../../assets/images/gallery.png';
@@ -36,6 +37,7 @@ export default function PostScreen({ }) {
   const [petAge, setPetAge] = useState('');
   const initialLoc = (route.params as any)?.selectedLocation || user?.address?.city || '';
   const [location, setLocation] = useState(initialLoc);
+  const [locationGeo, setLocationGeo] = useState<{ latitude?: number; longitude?: number }>({});
   const [description, setDescription] = useState('');
   const [imageUrls, setImageUrls] = useState<(string | null)[]>([null, null, null, null]);
 
@@ -102,6 +104,9 @@ export default function PostScreen({ }) {
         petName: petName.trim(),
         petAgeText: petAge.trim(),
         locationText: location.trim(),
+        ...(locationGeo.latitude != null && locationGeo.longitude != null
+          ? { latitude: locationGeo.latitude, longitude: locationGeo.longitude }
+          : {}),
         description: description.trim() || undefined,
         images: uploadedUrls.length ? uploadedUrls : undefined,
       };
@@ -204,14 +209,20 @@ export default function PostScreen({ }) {
 
         {/* Location - same format as Hope list (current / manual) */}
         <Text style={styles.sectionTitle}>Location</Text>
+        <LocationAutocompleteInput
+          placeholder="Search address (e.g. Sector 62, Noida)"
+          value={location}
+          onChangeText={(t) => {
+            setLocation(t);
+            setLocationGeo({});
+          }}
+          onSelectSuggestion={(p) => {
+            setLocation(p.displayName);
+            setLocationGeo({ latitude: p.lat, longitude: p.lng });
+          }}
+          containerStyle={styles.locationAutocompleteWrap}
+        />
         <View style={styles.locationRow}>
-          <TextInput
-            placeholder="e.g. Noida, Uttar Pradesh or Jaipur, Rajasthan"
-            style={styles.locationInput}
-            placeholderTextColor="#9CA3AF"
-            value={location}
-            onChangeText={setLocation}
-          />
           <TouchableOpacity
             style={[styles.useCurrentLocBtn, locationLoading && styles.useCurrentLocBtnDisabled]}
             onPress={handleUseCurrentLocation}
@@ -401,10 +412,13 @@ pillIcon: {
   removeImageText: { color: '#FFF', fontSize: 12, fontWeight: '700' },
   uploadIcon: { width: 22, height: 22, resizeMode: 'contain' },
 
+  locationAutocompleteWrap: {
+    marginBottom: 10,
+  },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    justifyContent: 'flex-end',
     marginBottom: 18,
   },
   locationInput: {

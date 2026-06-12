@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Google Places dropdown above modals */
+.pac-container {
+  z-index: 10000 !important;
+}
+
 body {
   font-family: var(--font-mona), sans-serif;
 }

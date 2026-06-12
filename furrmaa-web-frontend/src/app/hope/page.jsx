@@ -9,6 +9,7 @@ import { FaApple, FaGooglePlay } from "react-icons/fa";
 import WhyChooseFurrmaa from "@/components/WhyChooseFurrmaa";
 import { fetchHopePosts } from "@/lib/api";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import LocationPickerModal from "@/components/LocationPickerModal";
 
 const CheckCircle = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +33,6 @@ function HopePageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [manualLocation, setManualLocation] = useState("");
   const { location, loading: locLoading, error: locError, fetchCurrentLocation, setLocation } = useGeolocation("");
 
   useEffect(() => {
@@ -43,13 +43,9 @@ function HopePageContent() {
     const addr = await fetchCurrentLocation();
     if (addr) setShowLocationModal(false);
   };
-  const handleUseManualLocation = () => {
-    const val = manualLocation.trim();
-    if (val) {
-      setLocation(val);
-      setShowLocationModal(false);
-      setManualLocation("");
-    }
+  const handleConfirmLocation = (val) => {
+    setLocation(val);
+    setShowLocationModal(false);
   };
 
   const params = useMemo(() => {
@@ -68,8 +64,7 @@ function HopePageContent() {
     }
     // Only add location filter if location is set
     if (location && location.trim()) {
-      const locationValue = location.split(",")[0]?.trim();
-      if (locationValue) p.location = locationValue;
+      p.location = location.trim();
     }
     // Only add search filter if search query is not empty
     if (searchQuery && searchQuery.trim()) {
@@ -193,47 +188,14 @@ function HopePageContent() {
                 Change
               </button>
             </div>
-            {showLocationModal && (
-              <>
-                <div className="fixed inset-0 bg-black/40 z-30" onClick={() => setShowLocationModal(false)} />
-                <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-40 w-full max-w-sm bg-white rounded-2xl shadow-xl p-5">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">Set your location</h3>
-                  {locError && (
-                    <p className="text-xs text-amber-700 bg-amber-50 rounded-lg p-2 mb-3">{locError}</p>
-                  )}
-                  <button
-                    onClick={handleUseMyLocation}
-                    disabled={locLoading}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#95E562] text-black font-semibold rounded-xl mb-3 disabled:opacity-60"
-                  >
-                    {locLoading ? "Getting..." : "Use my current location"}
-                  </button>
-                  <p className="text-xs text-gray-500 mb-2">Or enter manually</p>
-                  <input
-                    type="text"
-                    placeholder="e.g. Jaipur, Rajasthan"
-                    value={manualLocation}
-                    onChange={(e) => setManualLocation(e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm mb-3"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleUseManualLocation}
-                      disabled={!manualLocation.trim()}
-                      className="flex-1 py-2.5 bg-gray-900 text-white font-semibold rounded-xl disabled:opacity-50"
-                    >
-                      Use this location
-                    </button>
-                    <button
-                      onClick={() => setShowLocationModal(false)}
-                      className="px-4 py-2.5 border border-gray-200 rounded-xl font-medium"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
+            <LocationPickerModal
+              open={showLocationModal}
+              onClose={() => setShowLocationModal(false)}
+              onConfirm={handleConfirmLocation}
+              locLoading={locLoading}
+              locError={locError}
+              onUseCurrentLocation={handleUseMyLocation}
+            />
           </div>
 
           <div className="flex flex-wrap gap-2 mb-6">

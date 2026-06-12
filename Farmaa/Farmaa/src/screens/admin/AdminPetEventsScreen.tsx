@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 import { pickAndUploadImage } from '../../utils/imageUpload';
 import AdminTextInput from './AdminTextInput';
+import LocationAutocompleteInput from '../../components/LocationAutocompleteInput';
 
 interface PetEvent {
   _id: string;
@@ -54,6 +55,12 @@ const AdminPetEventsScreen = () => {
   const [registrationsList, setRegistrationsList] = useState<any[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState<'photo1' | 'photo2' | null>(null);
+  const [eventGeo, setEventGeo] = useState<{
+    latitude?: number;
+    longitude?: number;
+    formattedAddress?: string;
+    state?: string;
+  }>({});
 
   useEffect(() => {
     fetchEvents();
@@ -105,6 +112,18 @@ const AdminPetEventsScreen = () => {
       isActive: true,
     });
     setEditingId(null);
+    setEventGeo({});
+  };
+
+  const geoPayload = () => {
+    const p: Record<string, string | number> = {};
+    if (eventGeo.latitude != null && eventGeo.longitude != null) {
+      p.latitude = eventGeo.latitude;
+      p.longitude = eventGeo.longitude;
+    }
+    if (eventGeo.formattedAddress?.trim()) p.formattedAddress = eventGeo.formattedAddress.trim();
+    if (eventGeo.state?.trim()) p.state = eventGeo.state.trim();
+    return p;
   };
 
   const handleAdd = async () => {
@@ -125,6 +144,7 @@ const AdminPetEventsScreen = () => {
         images: images.length ? images : undefined,
         description: formData.description.trim() || undefined,
         isActive: formData.isActive,
+        ...geoPayload(),
       };
       await api.CLIENT.post(api.ENDPOINTS.ADMIN.PET_EVENTS, payload);
       Alert.alert('Success', 'Pet event created successfully');
@@ -150,6 +170,12 @@ const AdminPetEventsScreen = () => {
       description: ev.description || '',
       isActive: ev.isActive ?? true,
     });
+    setEventGeo({
+      latitude: (ev as any).latitude,
+      longitude: (ev as any).longitude,
+      formattedAddress: (ev as any).formattedAddress,
+      state: (ev as any).state,
+    });
     setActiveTab('edit');
   };
 
@@ -172,6 +198,7 @@ const AdminPetEventsScreen = () => {
         images: images.length ? images : undefined,
         description: formData.description.trim() || undefined,
         isActive: formData.isActive,
+        ...geoPayload(),
       };
       await api.CLIENT.put(`${api.ENDPOINTS.ADMIN.PET_EVENTS}/${editingId}`, payload);
       Alert.alert('Success', 'Pet event updated successfully');
@@ -239,19 +266,41 @@ const AdminPetEventsScreen = () => {
       />
 
       <Text style={styles.inputLabel}>Venue – event ki jagah / address</Text>
-      <AdminTextInput
-        style={styles.input}
-        placeholder="e.g. Bharat Sanskar, Jaipur"
+      <LocationAutocompleteInput
+        placeholder="Search venue or address"
         value={formData.venue}
         onChangeText={(text) => setFormData({ ...formData, venue: text })}
+        onSelectSuggestion={(p) => {
+          setFormData((f) => ({
+            ...f,
+            venue: p.displayName.split(',')[0] || p.displayName,
+            city: p.city || f.city,
+          }));
+          setEventGeo({
+            latitude: p.lat,
+            longitude: p.lng,
+            formattedAddress: p.displayName,
+            state: p.city,
+          });
+        }}
+        inputStyle={styles.input}
       />
 
       <Text style={styles.inputLabel}>City – sheher ka naam</Text>
-      <AdminTextInput
-        style={styles.input}
-        placeholder="e.g. Jaipur"
+      <LocationAutocompleteInput
+        placeholder="Search city"
         value={formData.city}
         onChangeText={(text) => setFormData({ ...formData, city: text })}
+        onSelectSuggestion={(p) => {
+          setFormData((f) => ({ ...f, city: p.city || p.displayName.split(',')[0] }));
+          setEventGeo((g) => ({
+            ...g,
+            latitude: p.lat,
+            longitude: p.lng,
+            formattedAddress: g.formattedAddress || p.displayName,
+          }));
+        }}
+        inputStyle={styles.input}
       />
 
       <Text style={styles.inputLabel}>Photo 1 (Poster) – main event image / poster</Text>

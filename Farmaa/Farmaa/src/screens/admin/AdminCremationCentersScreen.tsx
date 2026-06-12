@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 import { pickAndUploadImage } from '../../utils/imageUpload';
 import AdminTextInput from './AdminTextInput';
+import LocationAutocompleteInput from '../../components/LocationAutocompleteInput';
 
 interface CremationCenter {
   _id: string;
@@ -46,6 +47,7 @@ const AdminCremationCentersScreen = () => {
     description: '',
     isActive: true,
   });
+  const [centerGeo, setCenterGeo] = useState<{ latitude?: number; longitude?: number }>({});
 
   const fetchCenters = async () => {
     try {
@@ -75,6 +77,7 @@ const AdminCremationCentersScreen = () => {
       description: '',
       isActive: true,
     });
+    setCenterGeo({});
   };
 
   const openAdd = () => {
@@ -119,6 +122,9 @@ const AdminCremationCentersScreen = () => {
       address: form.address.trim(),
       city: form.city.trim(),
       state: form.state.trim(),
+      ...(centerGeo.latitude != null && centerGeo.longitude != null
+        ? { latitude: centerGeo.latitude, longitude: centerGeo.longitude }
+        : {}),
       phone: form.phone.trim() || undefined,
       image: form.image.trim() || undefined,
       description: form.description.trim() || undefined,
@@ -212,15 +218,48 @@ const AdminCremationCentersScreen = () => {
       <Modal visible={modalVisible} animationType="slide">
         <ScrollView style={styles.modal} keyboardShouldPersistTaps="handled">
           <Text style={styles.modalTitle}>{editing ? 'Edit Center' : 'Add Center'}</Text>
-          {['name', 'address', 'city', 'state', 'phone'].map((key) => (
-            <AdminTextInput
-              key={key}
-              style={styles.input}
-              placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-              value={(form as any)[key]}
-              onChangeText={(t) => setForm((f) => ({ ...f, [key]: t }))}
-            />
-          ))}
+          <AdminTextInput
+            style={styles.input}
+            placeholder="Name"
+            value={form.name}
+            onChangeText={(t) => setForm((f) => ({ ...f, name: t }))}
+          />
+          <LocationAutocompleteInput
+            placeholder="Address"
+            value={form.address}
+            onChangeText={(t) => setForm((f) => ({ ...f, address: t }))}
+            onSelectSuggestion={(p) => {
+              setForm((f) => ({
+                ...f,
+                address: p.displayName,
+                city: p.city || f.city,
+              }));
+              setCenterGeo({ latitude: p.lat, longitude: p.lng });
+            }}
+            inputStyle={styles.input}
+          />
+          <LocationAutocompleteInput
+            placeholder="City"
+            value={form.city}
+            onChangeText={(t) => setForm((f) => ({ ...f, city: t }))}
+            onSelectSuggestion={(p) =>
+              setForm((f) => ({ ...f, city: p.city || p.displayName.split(',')[0] }))
+            }
+            inputStyle={styles.input}
+          />
+          <AdminTextInput
+            style={styles.input}
+            placeholder="State"
+            value={form.state}
+            onChangeText={(t) => setForm((f) => ({ ...f, state: t }))}
+          />
+          <AdminTextInput
+            style={styles.input}
+            placeholder="Phone"
+            value={form.phone}
+            onChangeText={(t) => setForm((f) => ({ ...f, phone: t }))}
+            keyboardType="phone-pad"
+          />
           <AdminTextInput
             style={[styles.input, styles.textArea]}
             placeholder="Description"

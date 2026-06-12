@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { FaApple, FaGooglePlay } from "react-icons/fa";
 
 
@@ -45,7 +46,13 @@ export default function FurrmaaPetAI() {
                         to access Pet AI Chat and give your pet smarter care right from your phone.
                     </p>
 
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-4 items-center">
+                        <Link
+                            href="/pet-ai/chat"
+                            className="inline-flex items-center justify-center bg-[#1F2E46] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition"
+                        >
+                            Open Pet AI Chat →
+                        </Link>
                         <button className="flex items-center gap-2 bg-black text-white px-5 py-3 rounded-xl hover:opacity-90 transition">
                             <FaApple className="text-xl" />
                             <span className="text-sm font-medium">App Store</span>

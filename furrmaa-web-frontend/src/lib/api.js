@@ -199,6 +199,7 @@ export async function fetchVeterinarians(params = {}) {
   const base = getBaseUrl();
   const q = new URLSearchParams();
   if (params.category) q.set('category', params.category);
+  if (params.location) q.set('location', params.location);
   if (params.city) q.set('city', params.city);
   if (params.specialization) q.set('specialization', params.specialization);
   if (params.serviceType && params.serviceType !== 'All') q.set('serviceType', params.serviceType);
@@ -225,6 +226,7 @@ export async function fetchServiceProviders(params = {}) {
 export async function fetchCremationCenters(params = {}) {
   const base = getBaseUrl();
   const q = new URLSearchParams();
+  if (params.location) q.set('location', params.location);
   if (params.city) q.set('city', params.city);
   if (params.state) q.set('state', params.state);
   if (params.search) q.set('search', params.search);
@@ -382,6 +384,7 @@ export async function verifyTrainingSubscriptionPayment(payload) {
 export async function fetchPetEvents(params = {}) {
   const base = getBaseUrl();
   const q = new URLSearchParams();
+  if (params.location) q.set('location', params.location);
   if (params.city && params.city !== 'All') q.set('city', params.city);
   if (params.search) q.set('search', params.search);
   const url = `${base}/pet-events${q.toString() ? `?${q}` : ''}`;
@@ -1304,4 +1307,49 @@ export async function adminCreateSize(body) {
 
 export async function adminCreateDietary(body) {
   return adminFetch('/admin/dietary', { method: 'POST', body: JSON.stringify(body) });
+}
+
+// --- Pet AI Chat (OpenAI via backend /api/ai-chat) ---
+
+async function aiChatFetch(path, options = {}) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/ai-chat${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders(),
+      ...options.headers,
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) throw new Error('Please login to use Pet AI Chat.');
+  if (!res.ok) throw new Error(data.message || 'AI chat request failed');
+  return data;
+}
+
+export async function aiCreateSession(title, petContext) {
+  return aiChatFetch('/sessions', {
+    method: 'POST',
+    body: JSON.stringify({ title, petContext }),
+  });
+}
+
+export async function aiListSessions() {
+  const data = await aiChatFetch('/sessions');
+  return data.chats || [];
+}
+
+export async function aiGetSession(sessionId) {
+  return aiChatFetch(`/sessions/${encodeURIComponent(sessionId)}`);
+}
+
+export async function aiSendMessage(sessionId, message, petContext) {
+  return aiChatFetch(`/sessions/${encodeURIComponent(sessionId)}/message`, {
+    method: 'POST',
+    body: JSON.stringify({ message, petContext }),
+  });
+}
+
+export async function aiDeleteSession(sessionId) {
+  return aiChatFetch(`/sessions/${encodeURIComponent(sessionId)}`, { method: 'DELETE' });
 }

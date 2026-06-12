@@ -16,6 +16,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../config/api';
 import leftArrow from '../../assets/images/arrow-left.png';
+import LocationAutocompleteInput from '../../components/LocationAutocompleteInput';
 
 const NAVY = '#1F2E46';
 
@@ -145,11 +146,11 @@ const CremationRequestScreen = () => {
         />
 
         <Text style={styles.label}>Address</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter Address"
+        <LocationAutocompleteInput
+          placeholder="Search pickup address"
           value={address}
           onChangeText={setAddress}
+          inputStyle={styles.input}
         />
 
         {/* Pet Information */}

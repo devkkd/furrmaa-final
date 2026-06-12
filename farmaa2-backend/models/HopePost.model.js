@@ -8,6 +8,8 @@ const hopePostSchema = new mongoose.Schema(
     petName: { type: String, required: true, trim: true },
     petAgeText: { type: String, trim: true },
     locationText: { type: String, required: true, trim: true },
+    latitude: { type: Number },
+    longitude: { type: Number },
     description: { type: String, trim: true },
     images: [String],
     status: { type: String, enum: ['active', 'closed'], default: 'active' },

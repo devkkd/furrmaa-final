@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Container from '@/components/Container'
 import { submitCremationRequest } from '@/lib/api'
+import LocationAutocomplete from '@/components/LocationAutocomplete'
 
 const RequestForCremation = () => {
     const { reqCrem_id } = useParams() // cremation center ID
@@ -117,12 +118,13 @@ const RequestForCremation = () => {
 
                                 <div className="md:col-span-1 space-y-2">
                                     <label className="text-sm font-bold text-gray-700 ml-1">Address</label>
-                                    <input
-                                        type="text"
-                                        name="address"
+                                    <LocationAutocomplete
                                         value={formData.address}
-                                        onChange={handleChange}
+                                        onChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+                                        onPlaceSelect={(p) => setFormData((prev) => ({ ...prev, address: p.label }))}
+                                        placeholder="Search pickup address"
                                         className="w-full px-5 py-3.5 border border-gray-200 rounded-xl bg-gray-50/30 focus:outline-none focus:ring-1 focus:ring-gray-300 text-[15px]"
+                                        types={['geocode', 'establishment']}
                                     />
                                 </div>
                             </div>

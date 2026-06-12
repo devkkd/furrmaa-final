@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/database.js';
 import { verifyEmailConfig } from './utils/email.service.js';
 import firebaseAdmin from './config/firebase.admin.js';
+import { isOpenAIConfigured } from './services/openai.service.js';
 
 // Import Routes
 import authRoutes from './routes/auth.routes.js';
@@ -124,6 +125,11 @@ const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);
+    if (isOpenAIConfigured()) {
+      console.log(`🤖 Pet AI: OpenAI (${process.env.OPENAI_MODEL || 'gpt-4o-mini'})`);
+    } else {
+      console.log('ℹ️  Pet AI: OPENAI_API_KEY missing — fallback replies only');
+    }
   });
 }).catch((err) => {
   console.error('Server start failed:', err.message);

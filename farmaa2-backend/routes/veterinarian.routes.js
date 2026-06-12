@@ -1,13 +1,14 @@
 import express from 'express';
 import { protect } from '../middleware/auth.middleware.js';
 import User from '../models/User.model.js';
+import { vetLocationClause } from '../utils/locationFilter.js';
 
 const router = express.Router();
 
 // Get all veterinarians
 router.get('/', async (req, res) => {
   try {
-    const { category, city, specialization, serviceType: serviceTypeRaw } = req.query;
+    const { category, city, location, specialization, serviceType: serviceTypeRaw } = req.query;
     // Normalize: query params can be string or array (e.g. ?serviceType=X)
     const serviceType = Array.isArray(serviceTypeRaw) ? serviceTypeRaw[0] : serviceTypeRaw;
     const query = { 
@@ -18,9 +19,9 @@ router.get('/', async (req, res) => {
     if (category && category !== 'All') {
       query.specialization = category;
     }
-    if (city) {
-      query['address.city'] = { $regex: city, $options: 'i' };
-    }
+    const andClauses = [];
+    const vetLoc = vetLocationClause(location || city);
+    if (vetLoc) andClauses.push(vetLoc);
     if (specialization) {
       query.specialization = { $regex: specialization, $options: 'i' };
     }
@@ -30,14 +31,17 @@ router.get('/', async (req, res) => {
       const typeRegex = new RegExp(`^${typeStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
       // Purane vets (serviceType null/empty) sirf "Veterinarians" tab me dikhen
       if (typeRegex.test('Veterinarians')) {
-        query.$or = [
-          { serviceType: typeRegex },
-          { serviceType: { $in: [null, ''] } },
-        ];
+        andClauses.push({
+          $or: [
+            { serviceType: typeRegex },
+            { serviceType: { $in: [null, ''] } },
+          ],
+        });
       } else {
         query.serviceType = typeRegex;
       }
     }
+    if (andClauses.length) query.$and = andClauses;
     
     const veterinarians = await User.find(query).select(
       'name email phone address profileImage specialization qualification clinicName experience licenseNumber rating totalReviews serviceType'

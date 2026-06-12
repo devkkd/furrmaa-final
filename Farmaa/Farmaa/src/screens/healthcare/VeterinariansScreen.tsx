@@ -68,7 +68,7 @@ const VeterinariansScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [typeList, setTypeList] = useState<{ name: string; slug: string; source: string }[]>([]);
 
-  const city = currentLocation?.split(',')[0]?.trim() || undefined;
+  const locationFilter = currentLocation?.trim() || undefined;
   const categoryList = typeList.length
     ? ['All', ...typeList.map((t) => t.name)]
     : ['All', ...VET_SERVICE_TYPES];
@@ -177,7 +177,7 @@ const VeterinariansScreen = () => {
         const slug = (t.slug || t.name || '').trim();
         if (t.source === 'cremation') {
           try {
-            const params = city ? { city } : {};
+            const params = locationFilter ? { location: locationFilter } : {};
             const res = await api.CLIENT.get(api.ENDPOINTS.CREMATION_CENTERS, { params });
             const centers = res.data?.centers || [];
             centers.forEach((c: any) => {
@@ -202,7 +202,7 @@ const VeterinariansScreen = () => {
         } else {
           // Har type ke liye dono: veterinarians (serviceType) + service providers (serviceType) – filter type ke hisaab se
           try {
-            const vetParams: Record<string, string> = city ? { city } : {};
+            const vetParams: Record<string, string> = locationFilter ? { location: locationFilter } : {};
             if (slug && slug !== 'All') vetParams.serviceType = slug;
             const vetRes = await api.CLIENT.get(api.ENDPOINTS.VETERINARIANS, { params: vetParams });
             const vets = vetRes.data?.veterinarians || [];

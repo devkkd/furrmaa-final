@@ -1,13 +1,9 @@
 import express from 'express';
 import { protect } from '../middleware/auth.middleware.js';
 import HopePost from '../models/HopePost.model.js';
+import { escapeRegex, hopeLocationClause } from '../utils/locationFilter.js';
 
 const router = express.Router();
-
-// Escape regex special chars for safe $regex
-function escapeRegex(s) {
-  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 // List posts (filters optional)
 router.get('/posts', async (req, res) => {
@@ -17,11 +13,8 @@ router.get('/posts', async (req, res) => {
     
     if (postType) query.postType = String(postType);
     if (petType) query.petType = String(petType);
-    if (location) {
-      const locStr = String(location).trim();
-      const cityPart = locStr.split(',')[0].trim() || locStr;
-      query.locationText = { $regex: escapeRegex(cityPart), $options: 'i' };
-    }
+    const locClause = hopeLocationClause(location);
+    if (locClause) Object.assign(query, locClause);
     if (search) {
       query.$or = [
         { petName: { $regex: String(search), $options: 'i' } },

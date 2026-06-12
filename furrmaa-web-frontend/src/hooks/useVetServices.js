@@ -38,7 +38,8 @@ function toServiceItem(item, typeName, index) {
 }
 
 export function useVetServices(options = {}) {
-  const { category, city, search } = options;
+  const { category, city, location, search } = options;
+  const locationQuery = location?.trim() || city?.trim() || undefined;
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeList, setTypeList] = useState([]);
@@ -75,7 +76,7 @@ export function useVetServices(options = {}) {
 
         for (const t of listToFetch) {
           if (t.source === 'cremation') {
-            const centers = await fetchCremationCenters({ city: city || undefined });
+            const centers = await fetchCremationCenters({ location: locationQuery });
             centers.forEach((c, i) =>
               all.push(toServiceItem({
                 _id: c._id,
@@ -87,7 +88,7 @@ export function useVetServices(options = {}) {
           } else {
             // Har type ke liye dono: veterinarians (serviceType) + service providers (serviceType)
             const vets = await fetchVeterinarians({
-              city: city || undefined,
+              location: locationQuery,
               serviceType: t.slug && t.slug !== 'All' ? t.slug : undefined,
             });
             vets.forEach((v, i) => all.push(toServiceItem(v, t.name, all.length + i)));
@@ -108,7 +109,7 @@ export function useVetServices(options = {}) {
 
     load();
     return () => { cancelled = true; };
-  }, [category, city, search, typeList]);
+  }, [category, city, location, search, typeList]);
 
   return { services, loading, categories };
 }

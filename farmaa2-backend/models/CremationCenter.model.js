@@ -6,6 +6,8 @@ const cremationCenterSchema = new mongoose.Schema(
     address: { type: String, required: true, trim: true },
     city: { type: String, required: true, trim: true },
     state: { type: String, required: true, trim: true },
+    latitude: { type: Number },
+    longitude: { type: Number },
     phone: { type: String, trim: true },
     image: { type: String, trim: true },
     description: { type: String, trim: true },
