@@ -2,11 +2,12 @@
  * Proxy: home page categories – fetches from backend so client doesn't hit CORS/wrong URL.
  * GET /api/categories → backend GET /categories or /admin/categories
  */
-import { API_BASE_URL } from '@/lib/apiBase';
+import { getApiBaseUrl } from '@/lib/apiBase';
 
 export async function GET() {
   try {
-    const urls = [`${API_BASE_URL}/categories`, `${API_BASE_URL}/admin/categories`];
+    const base = getApiBaseUrl();
+    const urls = [`${base}/categories`, `${base}/admin/categories`];
     for (const url of urls) {
       const res = await fetch(url, { cache: 'no-store' });
       if (res.ok) {

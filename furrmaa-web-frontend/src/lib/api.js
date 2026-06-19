@@ -1,9 +1,9 @@
 /**
  * Web API client – backend integration
  */
-import { API_BASE_URL } from '@/lib/apiBase';
+import { getApiBaseUrl } from '@/lib/apiBase';
 
-export const getBaseUrl = () => API_BASE_URL;
+export const getBaseUrl = () => getApiBaseUrl();
 
 export function getToken() {
   if (typeof window === 'undefined') return null;
