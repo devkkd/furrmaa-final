@@ -11,6 +11,12 @@ import {
   FaGooglePlay,
 } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
+import {
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_PHONE_DISPLAY,
+  COMPANY_PHONE_TEL,
+} from '@/constants/contact';
 
 export default function Footer() {
   return (
@@ -23,7 +29,7 @@ export default function Footer() {
           <div className="flex items-center gap-10">
             <div className="flex items-center gap-2">
               <FaPhoneAlt className="text-xs" />
-              <span className="text-sm font-semibold tracking-wide">+91-1234567890</span>
+              <span className="text-sm font-semibold tracking-wide">{COMPANY_PHONE_DISPLAY}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -128,17 +134,21 @@ export default function Footer() {
 
           <div className="py-4 md:border-r border-[#B8D4F7]">
             <p className="font-semibold text-gray-900">Address</p>
-            <p className="text-gray-500">100, ABCD Street, Jaipur, Rajasthan - INDIA</p>
+            <p className="text-gray-500">{COMPANY_ADDRESS}</p>
           </div>
 
           <div className="py-4 md:border-r border-[#B8D4F7]">
             <p className="font-semibold text-gray-900">Call</p>
-            <p className="text-gray-500">+91-1234567890</p>
+            <a href={`tel:${COMPANY_PHONE_TEL}`} className="text-gray-500 hover:text-gray-800">
+              {COMPANY_PHONE_DISPLAY}
+            </a>
           </div>
 
           <div className="py-4 md:border-r border-[#B8D4F7]">
             <p className="font-semibold text-gray-900">Email</p>
-            <p className="text-gray-500">Support@furrmaa.in</p>
+            <a href={`mailto:${COMPANY_EMAIL}`} className="text-gray-500 hover:text-gray-800">
+              {COMPANY_EMAIL}
+            </a>
           </div>
 
           <div className="py-4">

@@ -1,6 +1,12 @@
 import React from 'react';
 import Container from '@/components/Container';
 import WhyChooseFurrmaa from '@/components/WhyChooseFurrmaa';
+import {
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_PHONE_DISPLAY,
+  COMPANY_WEBSITE,
+} from '@/constants/contact';
 
 const TermsOfService = () => {
     // Dummy data object based on the provided images
@@ -68,7 +74,7 @@ const TermsOfService = () => {
         {
             id: 13,
             title: "Contact Us",
-            content: "support@furrmaa.in | www.furrmaa.in | +91 88290 26003"
+            content: `${COMPANY_EMAIL} | ${COMPANY_WEBSITE} | ${COMPANY_PHONE_DISPLAY} | ${COMPANY_ADDRESS}`
         }
     ];
 

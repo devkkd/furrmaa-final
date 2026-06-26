@@ -3,6 +3,10 @@ import Product from '../models/Product.model.js';
 import { protect } from '../middleware/auth.middleware.js';
 import { normalizeProductImageUrls } from '../utils/productImages.js';
 import { addProductReview, getReviewEligibility } from '../utils/productReviews.js';
+import { setPublicCache } from '../utils/httpCache.js';
+
+const LIST_FIELDS =
+  'name price discountPrice images stock brand category petType age size dietaryNeeds rating createdAt isActive';
 
 function withNormalizedImages(doc) {
   const p = doc?.toObject ? doc.toObject() : { ...doc };
@@ -18,7 +22,7 @@ const hasVal = (v) => v != null && String(v).trim() !== '';
 // Get all products ('' and '/' dono match – Express path normalisation ke liye)
 router.get(['/', ''], async (req, res) => {
   try {
-    const { category, petType, age, search, sortBy, minPrice, maxPrice, minRating, size, dietary } = req.query;
+    const { category, petType, age, search, sortBy, minPrice, maxPrice, minRating, size, dietary, limit: limitParam } = req.query;
     const query = { isActive: true };
 
     // Age filter – sirf jab age select ho
@@ -154,7 +158,13 @@ router.get(['/', ''], async (req, res) => {
       }
     }
 
-    const products = await Product.find(query).sort(sort).lean();
+    const limit = Math.min(Math.max(parseInt(limitParam, 10) || 0, 0), 100);
+
+    let queryBuilder = Product.find(query).select(LIST_FIELDS).sort(sort).lean();
+    if (limit > 0) queryBuilder = queryBuilder.limit(limit);
+
+    const products = await queryBuilder;
+    setPublicCache(res, 120);
     res.json({
       success: true,
       products: products.map((p) => withNormalizedImages(p)),

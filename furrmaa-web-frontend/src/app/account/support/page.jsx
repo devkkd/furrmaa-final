@@ -2,7 +2,13 @@
 import React, { useState } from 'react';
 import Container from '@/components/Container';
 import { submitSupportRequest } from '@/lib/api';
-import { HiOutlineMail, HiOutlinePhone, HiOutlineSupport, HiCheckCircle } from 'react-icons/hi';
+import { HiOutlineMail, HiOutlinePhone, HiOutlineSupport, HiCheckCircle, HiOutlineLocationMarker } from 'react-icons/hi';
+import {
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_PHONE_DISPLAY,
+  COMPANY_PHONE_TEL,
+} from '@/constants/contact';
 
 export default function SupportPage() {
   const [formData, setFormData] = useState({
@@ -120,7 +126,7 @@ export default function SupportPage() {
                   </div>
                   <div>
                     <h4 className="text-[13px] font-bold text-gray-900 mb-0.5">Email Us</h4>
-                    <p className="text-[14px] text-gray-500">support@furrmaa.com</p>
+                    <p className="text-[14px] text-gray-500">{COMPANY_EMAIL}</p>
                   </div>
                 </div>
 
@@ -131,8 +137,21 @@ export default function SupportPage() {
                   </div>
                   <div>
                     <h4 className="text-[13px] font-bold text-gray-900 mb-0.5">Call Us</h4>
-                    <p className="text-[14px] text-gray-500">+91 1234567890</p>
+                    <a href={`tel:${COMPANY_PHONE_TEL}`} className="text-[14px] text-gray-500 hover:text-gray-800">
+                      {COMPANY_PHONE_DISPLAY}
+                    </a>
                     <p className="text-[12px] text-gray-400 mt-0.5">Mon-Fri, 9am to 6pm</p>
+                  </div>
+                </div>
+
+                {/* Address */}
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100 shrink-0">
+                    <HiOutlineLocationMarker className="text-xl text-gray-700" />
+                  </div>
+                  <div>
+                    <h4 className="text-[13px] font-bold text-gray-900 mb-0.5">Visit Us</h4>
+                    <p className="text-[14px] text-gray-500 leading-relaxed">{COMPANY_ADDRESS}</p>
                   </div>
                 </div>
 

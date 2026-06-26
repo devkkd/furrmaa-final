@@ -102,6 +102,11 @@ const productSchema = new mongoose.Schema({
   timestamps: true
 });
 
+productSchema.index({ isActive: 1, createdAt: -1 });
+productSchema.index({ isActive: 1, category: 1 });
+productSchema.index({ isActive: 1, petType: 1 });
+productSchema.index({ isActive: 1, rating: -1 });
+
 export default mongoose.model('Product', productSchema);
 
 

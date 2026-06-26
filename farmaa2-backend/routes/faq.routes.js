@@ -1,5 +1,6 @@
 import express from 'express';
 import FAQ from '../models/FAQ.model.js';
+import { setPublicCache } from '../utils/httpCache.js';
 
 const router = express.Router();
 
@@ -13,7 +14,11 @@ router.get('/', async (req, res) => {
       query.category = category;
     }
 
-    const faqs = await FAQ.find(query).sort({ order: 1, createdAt: -1 });
+    const faqs = await FAQ.find(query)
+      .select('question answer category order isActive')
+      .sort({ order: 1, createdAt: -1 })
+      .lean();
+    setPublicCache(res, 600);
     res.json({ success: true, faqs });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -23,10 +28,14 @@ router.get('/', async (req, res) => {
 // Get FAQs by category
 router.get('/category/:category', async (req, res) => {
   try {
-    const faqs = await FAQ.find({ 
+    const faqs = await FAQ.find({
       category: req.params.category,
-      isActive: true 
-    }).sort({ order: 1 });
+      isActive: true,
+    })
+      .select('question answer category order')
+      .sort({ order: 1 })
+      .lean();
+    setPublicCache(res, 600);
 
     res.json({ success: true, faqs });
   } catch (error) {

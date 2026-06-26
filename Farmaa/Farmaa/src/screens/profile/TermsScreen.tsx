@@ -7,6 +7,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import {
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_PHONE_DISPLAY,
+} from '../../constants/contact';
 
 const TermsScreen = () => {
   const navigation = useNavigation();
@@ -47,6 +52,15 @@ const TermsScreen = () => {
           <Text style={styles.sectionTitle}>4. Acceptable Use</Text>
           <Text style={styles.sectionText}>
             Prohibited behaviors include posting false or misleading information, uploading content not owned by the user, and using the service for unlawful purposes.
+          </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>5. Contact Us</Text>
+          <Text style={styles.sectionText}>
+            {COMPANY_EMAIL}{'\n'}
+            {COMPANY_PHONE_DISPLAY}{'\n'}
+            {COMPANY_ADDRESS}
           </Text>
         </View>
       </View>

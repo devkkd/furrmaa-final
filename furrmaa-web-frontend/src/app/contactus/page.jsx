@@ -4,6 +4,13 @@ import Container from '@/components/Container';
 import { HiOutlinePhone, HiOutlineMail } from 'react-icons/hi';
 import WhyChooseFurrmaa from '@/components/WhyChooseFurrmaa';
 import { submitContact } from '@/lib/api';
+import {
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_EMAIL_PARTNERSHIPS,
+  COMPANY_PHONE_DISPLAY,
+  COMPANY_PHONE_TEL,
+} from '@/constants/contact';
 
 const ContactUs = () => {
     // State for form data
@@ -87,12 +94,13 @@ const ContactUs = () => {
     bg-[linear-gradient(180deg,#F3F8FF_0%,#C0DBFF_100%)]">
                             <h3 className="text-lg font-bold text-black">General Inquiries & Support</h3>
                             <p className="text-sm text-gray-700">For app support, orders, or general questions</p>
+                            <p className="text-sm text-gray-600">{COMPANY_ADDRESS}</p>
                             <div className="space-y-3">
-                                <a href="tel:+918829026003" className="flex items-center gap-3 bg-white px-5 py-3 rounded-full text-sm font-medium text-gray-800 shadow-sm hover:shadow-md transition">
-                                    <HiOutlinePhone className="text-lg text-gray-800" /> +91 88290 26003
+                                <a href={`tel:${COMPANY_PHONE_TEL}`} className="flex items-center gap-3 bg-white px-5 py-3 rounded-full text-sm font-medium text-gray-800 shadow-sm hover:shadow-md transition">
+                                    <HiOutlinePhone className="text-lg text-gray-800" /> {COMPANY_PHONE_DISPLAY}
                                 </a>
-                                <a href="mailto:support@furrmaa.in" className="flex items-center gap-3 bg-white px-5 py-3 rounded-full text-sm font-medium text-gray-800 shadow-sm hover:shadow-md transition">
-                                    <HiOutlineMail className="text-lg text-gray-800" /> support@furrmaa.in
+                                <a href={`mailto:${COMPANY_EMAIL}`} className="flex items-center gap-3 bg-white px-5 py-3 rounded-full text-sm font-medium text-gray-800 shadow-sm hover:shadow-md transition">
+                                    <HiOutlineMail className="text-lg text-gray-800" /> {COMPANY_EMAIL}
                                 </a>
                             </div>
                         </div>
@@ -102,12 +110,13 @@ const ContactUs = () => {
     bg-[linear-gradient(180deg,#F3F8FF_0%,#C0DBFF_100%)]">
                             <h3 className="text-lg font-bold text-black">Partnerships & Business Enquiries</h3>
                             <p className="text-sm text-gray-700">For veterinary clinics, pet shops, hostels, groomers, trainers, NGOs, and service providers</p>
+                            <p className="text-sm text-gray-600">{COMPANY_ADDRESS}</p>
                             <div className="space-y-3">
-                                <a href="tel:+918829026003" className="flex items-center gap-3 bg-white px-5 py-3 rounded-full text-sm font-medium text-gray-800 shadow-sm hover:shadow-md transition">
-                                    <HiOutlinePhone className="text-lg text-gray-800" /> +91 88290 26003
+                                <a href={`tel:${COMPANY_PHONE_TEL}`} className="flex items-center gap-3 bg-white px-5 py-3 rounded-full text-sm font-medium text-gray-800 shadow-sm hover:shadow-md transition">
+                                    <HiOutlinePhone className="text-lg text-gray-800" /> {COMPANY_PHONE_DISPLAY}
                                 </a>
-                                <a href="mailto:partnerships@furrmaa.in" className="flex items-center gap-3 bg-white px-5 py-3 rounded-full text-sm font-medium text-gray-800 shadow-sm hover:shadow-md transition">
-                                    <HiOutlineMail className="text-lg text-gray-800" /> partnerships@furrmaa.in
+                                <a href={`mailto:${COMPANY_EMAIL_PARTNERSHIPS}`} className="flex items-center gap-3 bg-white px-5 py-3 rounded-full text-sm font-medium text-gray-800 shadow-sm hover:shadow-md transition">
+                                    <HiOutlineMail className="text-lg text-gray-800" /> {COMPANY_EMAIL_PARTNERSHIPS}
                                 </a>
                             </div>
                         </div>

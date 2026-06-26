@@ -1,5 +1,6 @@
 import express from 'express';
 import ExploreContent from '../models/ExploreContent.model.js';
+import { setPublicCache } from '../utils/httpCache.js';
 
 const router = express.Router();
 
@@ -15,8 +16,11 @@ router.get('/', async (req, res) => {
     if (featured === 'true') query.featured = true;
 
     const content = await ExploreContent.find(query)
-      .sort({ order: 1, createdAt: -1 });
-    
+      .select('title description type category petType featured image videoUrl order views createdAt')
+      .sort({ order: 1, createdAt: -1 })
+      .lean();
+
+    setPublicCache(res, 300);
     res.json({ success: true, content });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

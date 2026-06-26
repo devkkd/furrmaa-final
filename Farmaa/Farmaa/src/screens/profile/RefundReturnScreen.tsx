@@ -7,6 +7,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import {
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_PHONE_DISPLAY,
+} from '../../constants/contact';
 
 const RefundReturnScreen = () => {
   const navigation = useNavigation();
@@ -86,8 +91,9 @@ const RefundReturnScreen = () => {
           <Text style={styles.contactText}>
             If you have any questions about our refund and return policy, please contact us at:
           </Text>
-          <Text style={styles.contactEmail}>Email: support@furrmaa.com</Text>
-          <Text style={styles.contactPhone}>Phone: +91 9876543210</Text>
+          <Text style={styles.contactEmail}>Email: {COMPANY_EMAIL}</Text>
+          <Text style={styles.contactPhone}>Phone: {COMPANY_PHONE_DISPLAY}</Text>
+          <Text style={styles.contactPhone}>Address: {COMPANY_ADDRESS}</Text>
         </View>
       </View>
     </ScrollView>

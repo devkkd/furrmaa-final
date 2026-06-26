@@ -10,6 +10,11 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
+import {
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_PHONE_DISPLAY,
+} from '../../constants/contact';
 
 const MailWithUsScreen = () => {
   const navigation = useNavigation();
@@ -65,7 +70,9 @@ const MailWithUsScreen = () => {
           <Text style={styles.infoText}>
             Have a question or need help? Send us an email and we'll get back to you as soon as possible.
           </Text>
-          <Text style={styles.emailText}>Email: support@furrmaa.com</Text>
+          <Text style={styles.emailText}>Email: {COMPANY_EMAIL}</Text>
+          <Text style={styles.emailText}>Phone: {COMPANY_PHONE_DISPLAY}</Text>
+          <Text style={styles.emailText}>Address: {COMPANY_ADDRESS}</Text>
         </View>
 
         <View style={styles.form}>

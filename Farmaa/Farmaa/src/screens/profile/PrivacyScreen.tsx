@@ -7,6 +7,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import {
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_PHONE_DISPLAY,
+} from '../../constants/contact';
 
 const PrivacyScreen = () => {
   const navigation = useNavigation();
@@ -45,6 +50,15 @@ const PrivacyScreen = () => {
             Facilitate payments and service bookings{'\n'}
             Improve and personalize user experience (recommend services, show relevant content){'\n'}
             Communicate with you (updates, support, notifications)
+          </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>3. Contact Us</Text>
+          <Text style={styles.sectionText}>
+            {COMPANY_EMAIL}{'\n'}
+            {COMPANY_PHONE_DISPLAY}{'\n'}
+            {COMPANY_ADDRESS}
           </Text>
         </View>
       </View>

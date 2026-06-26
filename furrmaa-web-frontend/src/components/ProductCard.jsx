@@ -97,6 +97,8 @@ export default function ProductCard({ product }) {
           <img
             src={productImage}
             alt={product.name}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-500"
           />
           <button

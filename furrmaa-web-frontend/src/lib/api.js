@@ -2,6 +2,7 @@
  * Web API client – backend integration
  */
 import { getApiBaseUrl } from '@/lib/apiBase';
+import { withCache } from '@/lib/apiCache';
 
 export const getBaseUrl = () => getApiBaseUrl();
 
@@ -150,11 +151,16 @@ export async function fetchProducts(params = {}) {
   if (params.minRating != null) q.set('minRating', params.minRating);
   if (params.minPrice != null) q.set('minPrice', params.minPrice);
   if (params.maxPrice != null) q.set('maxPrice', params.maxPrice);
+  if (params.limit != null) q.set('limit', String(params.limit));
   const url = `${base}/products${q.toString() ? `?${q}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Products fetch failed');
-  const data = await res.json();
-  return data.products || [];
+  const cacheKey = `products:${url}`;
+
+  return withCache(cacheKey, 90_000, async () => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Products fetch failed');
+    const data = await res.json();
+    return data.products || [];
+  });
 }
 
 /** Fetch single product by ID */
@@ -413,10 +419,12 @@ export async function fetchFaqs(params = {}) {
   const q = new URLSearchParams();
   if (params.category) q.set('category', params.category);
   const url = `${base}/faq${q.toString() ? `?${q}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('FAQs fetch failed');
-  const data = await res.json();
-  return data.faqs || [];
+  return withCache(`faqs:${url}`, 300_000, async () => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('FAQs fetch failed');
+    const data = await res.json();
+    return data.faqs || [];
+  });
 }
 
 /** Fetch public explore content (articles/videos/guides/news/events). */
@@ -428,10 +436,12 @@ export async function fetchExploreContent(params = {}) {
   if (params.petType) q.set('petType', params.petType);
   if (params.featured != null) q.set('featured', params.featured ? 'true' : 'false');
   const url = `${base}/explore${q.toString() ? `?${q}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Explore content fetch failed');
-  const data = await res.json();
-  return data.content || [];
+  return withCache(`explore:${url}`, 120_000, async () => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Explore content fetch failed');
+    const data = await res.json();
+    return data.content || [];
+  });
 }
  
 /** Fetch single Hope post by ID */
@@ -450,14 +460,16 @@ export async function fetchMainCategories(params = {}) {
   if (params.section) q.set('section', params.section); // 'everyday' or 'wellness'
   if (params.petType) q.set('petType', params.petType);
   const url = `${base}/categories/main${q.toString() ? `?${q}` : ''}`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.categories || [];
-  } catch {
-    return [];
-  }
+  return withCache(`categories:main:${url}`, 300_000, async () => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.categories || [];
+    } catch {
+      return [];
+    }
+  });
 }
 
 /** Fetch all categories for shop/home (admin-managed; no auth required). Tries same-origin /api/categories first (proxy), then direct backend. */
@@ -465,47 +477,52 @@ export async function fetchAllCategories() {
   const base = getBaseUrl();
   const parse = (data) => data?.categories ?? data?.data?.categories ?? (Array.isArray(data) ? data : []);
   const tryUrl = async (url) => {
-    const res = await fetch(url, { cache: 'no-store' });
+    const res = await fetch(url);
     if (!res.ok) throw new Error(res.statusText);
     const data = await res.json().catch(() => ({}));
     return parse(data);
   };
-  try {
-    // 1) Same-origin proxy (avoids CORS, works even if backend path differs)
-    const list =
-      await tryUrl('/api/categories')
-        .catch(() => tryUrl(`${base}/categories`))
-        .catch(() => tryUrl(`${base}/admin/categories`));
-    return Array.isArray(list) ? list : [];
-  } catch {
-    return [];
-  }
+  return withCache('categories:all', 300_000, async () => {
+    try {
+      const list =
+        await tryUrl('/api/categories')
+          .catch(() => tryUrl(`${base}/categories`))
+          .catch(() => tryUrl(`${base}/admin/categories`));
+      return Array.isArray(list) ? list : [];
+    } catch {
+      return [];
+    }
+  });
 }
 
 /** Fetch product sizes for filter (admin-managed) */
 export async function fetchSizes() {
   const base = getBaseUrl();
-  try {
-    const res = await fetch(`${base}/sizes`);
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.sizes || [];
-  } catch {
-    return [];
-  }
+  return withCache('sizes:all', 300_000, async () => {
+    try {
+      const res = await fetch(`${base}/sizes`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.sizes || [];
+    } catch {
+      return [];
+    }
+  });
 }
 
 /** Fetch product dietary options for filter (admin-managed) */
 export async function fetchDietary() {
   const base = getBaseUrl();
-  try {
-    const res = await fetch(`${base}/dietary`);
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.dietary || [];
-  } catch {
-    return [];
-  }
+  return withCache('dietary:all', 300_000, async () => {
+    try {
+      const res = await fetch(`${base}/dietary`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.dietary || [];
+    } catch {
+      return [];
+    }
+  });
 }
 
 /** Fetch user orders (protected) */

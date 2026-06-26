@@ -9,10 +9,14 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import {
+  COMPANY_PHONE_DISPLAY,
+  COMPANY_PHONE_WHATSAPP,
+} from '../../constants/contact';
 
 const WhatsAppUsScreen = () => {
   const navigation = useNavigation();
-  const whatsappNumber = '+919876543210'; // Replace with your WhatsApp number
+  const whatsappNumber = COMPANY_PHONE_WHATSAPP;
   const defaultMessage = 'Hello, I need help with Furrmaa app.';
 
   const openWhatsApp = (message: string = defaultMessage) => {
@@ -53,7 +57,7 @@ const WhatsAppUsScreen = () => {
           <Text style={styles.infoText}>
             Have a question or need help? Send us a message on WhatsApp and we'll respond as soon as possible.
           </Text>
-          <Text style={styles.phoneText}>Phone: {whatsappNumber}</Text>
+          <Text style={styles.phoneText}>Phone: {COMPANY_PHONE_DISPLAY}</Text>
         </View>
 
         <View style={styles.quickActions}>

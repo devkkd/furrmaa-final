@@ -11,13 +11,12 @@ export function useProducts(options = {}) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchProducts({ petType, category, age, size, dietary, search, sortBy, minRating })
+    fetchProducts({ petType, category, age, size, dietary, search, sortBy, minRating, limit })
       .then((apiProducts) => {
         if (cancelled) return;
         const list = apiProducts || [];
         const normalized = list.map(normalizeProduct);
-        const final = limit ? normalized.slice(0, limit) : normalized;
-        setProducts(final);
+        setProducts(normalized);
       })
       .catch(() => {
         if (cancelled) return;

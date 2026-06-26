@@ -9,11 +9,14 @@ export async function GET() {
     const base = getApiBaseUrl();
     const urls = [`${base}/categories`, `${base}/admin/categories`];
     for (const url of urls) {
-      const res = await fetch(url, { cache: 'no-store' });
+      const res = await fetch(url, { next: { revalidate: 600 } });
       if (res.ok) {
         const data = await res.json();
         const list = data?.categories ?? data?.data?.categories ?? (Array.isArray(data) ? data : []);
-        return Response.json({ success: true, categories: Array.isArray(list) ? list : [] });
+        return Response.json(
+          { success: true, categories: Array.isArray(list) ? list : [] },
+          { headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=120' } }
+        );
       }
     }
     return Response.json({ success: true, categories: [] });

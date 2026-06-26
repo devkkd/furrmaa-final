@@ -7,6 +7,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import {
+  COMPANY_ADDRESS,
+  COMPANY_EMAIL,
+  COMPANY_PHONE_DISPLAY,
+} from '../../constants/contact';
 
 const AboutUsScreen = () => {
   const navigation = useNavigation();
@@ -37,6 +42,13 @@ const AboutUsScreen = () => {
         <Text style={styles.contentText}>
           Thank you for trusting Furmoo with your pet's well-being.
         </Text>
+
+        <View style={styles.contactBox}>
+          <Text style={styles.contactTitle}>Contact Us</Text>
+          <Text style={styles.contactText}>{COMPANY_PHONE_DISPLAY}</Text>
+          <Text style={styles.contactText}>{COMPANY_EMAIL}</Text>
+          <Text style={styles.contactText}>{COMPANY_ADDRESS}</Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -74,6 +86,24 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     lineHeight: 24,
     marginBottom: 16,
+  },
+  contactBox: {
+    marginTop: 8,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#F3F8FF',
+  },
+  contactTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+  contactText: {
+    fontSize: 14,
+    color: '#4B5563',
+    lineHeight: 22,
+    marginBottom: 4,
   },
 });
 

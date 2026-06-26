@@ -16,6 +16,10 @@ import { WALLET_UI_ENABLED } from '../../config/featureFlags';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
+import {
+  COMPANY_ADDRESS,
+  COMPANY_PHONE_DISPLAY,
+} from '../../constants/contact';
 import sectionIcon from '../../assets/images/pet.png';
 import rightArrow from '../../assets/images/arrow-right1.png';
 import logo from '../../assets/images/Logo.png';
@@ -574,6 +578,8 @@ const ProfileScreen = () => {
         <Text style={styles.footerText}>
           Made With Gentle Care in Jaipur, India
         </Text>
+        <Text style={styles.footerContact}>{COMPANY_PHONE_DISPLAY}</Text>
+        <Text style={styles.footerContact}>{COMPANY_ADDRESS}</Text>
         <Text style={styles.footerSlogan}>
           Because Your Pet{'\n'}Deserves the Very Best 🐾
         </Text>
@@ -905,7 +911,16 @@ appVersion: {
 footerText: {
   fontSize: 12,
   color: '#9CA3AF',
-  marginBottom: 24,
+  marginBottom: 8,
+},
+
+footerContact: {
+  fontSize: 12,
+  color: '#9CA3AF',
+  textAlign: 'center',
+  lineHeight: 18,
+  marginBottom: 4,
+  paddingHorizontal: 16,
 },
 
 footerSlogan: {
