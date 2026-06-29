@@ -25,7 +25,7 @@ export default function AdminWhyChoosePage() {
   const [saving, setSaving] = useState(false);
   const [savingTagline, setSavingTagline] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ title: '', image: '', displayOrder: '0', isActive: true });
+  const [form, setForm] = useState({ title: '', description: '', image: '', displayOrder: '0', isActive: true });
 
   const load = () => {
     setLoading(true);
@@ -43,7 +43,7 @@ export default function AdminWhyChoosePage() {
   }, []);
 
   const resetForm = () => {
-    setForm({ title: '', image: '', displayOrder: '0', isActive: true });
+    setForm({ title: '', description: '', image: '', displayOrder: '0', isActive: true });
     setEditingId(null);
     setShowForm(false);
   };
@@ -85,6 +85,7 @@ export default function AdminWhyChoosePage() {
     try {
       const body = {
         title: form.title.trim(),
+        description: (form.description || '').trim(),
         image: (form.image || '').trim(),
         displayOrder: parseInt(form.displayOrder, 10) || 0,
         isActive: !!form.isActive,
@@ -107,6 +108,7 @@ export default function AdminWhyChoosePage() {
     setEditingId(f._id);
     setForm({
       title: f.title || '',
+      description: f.description || '',
       image: f.image || '',
       displayOrder: String(f.displayOrder ?? 0),
       isActive: f.isActive !== false,
@@ -183,6 +185,16 @@ export default function AdminWhyChoosePage() {
               <p className="text-xs text-gray-400 mt-1">Use Enter for line break on card</p>
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                rows={3}
+                placeholder="Short text shown under the title on homepage"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Display order</label>
               <input
                 type="number"
@@ -249,6 +261,9 @@ export default function AdminWhyChoosePage() {
               </div>
               <div className="p-3">
                 <p className="text-sm font-medium whitespace-pre-line">{f.title}</p>
+                {f.description ? (
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-3">{f.description}</p>
+                ) : null}
                 <p className="text-xs text-gray-400 mt-1">Order: {f.displayOrder ?? 0}</p>
                 <p className="text-xs mt-1">{f.isActive === false ? 'Hidden' : 'Active'}</p>
                 <div className="flex gap-2 mt-3">

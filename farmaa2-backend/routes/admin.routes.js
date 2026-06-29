@@ -1496,12 +1496,13 @@ router.put('/why-choose/settings', async (req, res) => {
 
 router.post('/why-choose', async (req, res) => {
   try {
-    const { title, image, displayOrder, isActive } = req.body;
+    const { title, description, image, displayOrder, isActive } = req.body;
     if (!title?.trim()) {
       return res.status(400).json({ success: false, message: 'Title is required' });
     }
     const feature = await WhyChooseFeature.create({
       title: String(title).trim(),
+      description: description != null ? String(description).trim() : '',
       image: image?.trim() || '',
       displayOrder: Number.isFinite(Number(displayOrder)) ? Number(displayOrder) : 0,
       isActive: isActive !== false,
@@ -1514,9 +1515,10 @@ router.post('/why-choose', async (req, res) => {
 
 router.patch('/why-choose/:id', async (req, res) => {
   try {
-    const { title, image, displayOrder, isActive } = req.body;
+    const { title, description, image, displayOrder, isActive } = req.body;
     const update = {};
     if (title != null) update.title = String(title).trim();
+    if (description != null) update.description = String(description).trim();
     if (image != null) update.image = String(image).trim();
     if (displayOrder != null && Number.isFinite(Number(displayOrder))) {
       update.displayOrder = Number(displayOrder);

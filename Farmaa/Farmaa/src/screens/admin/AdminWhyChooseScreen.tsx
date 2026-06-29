@@ -16,6 +16,7 @@ import AdminTextInput from './AdminTextInput';
 interface WhyFeature {
   _id: string;
   title: string;
+  description?: string;
   image?: string;
   displayOrder?: number;
   isActive?: boolean;
@@ -27,7 +28,7 @@ const AdminWhyChooseScreen = () => {
   const [tagline, setTagline] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: '', image: '', displayOrder: '0' });
+  const [form, setForm] = useState({ title: '', description: '', image: '', displayOrder: '0' });
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const load = async () => {
@@ -68,6 +69,7 @@ const AdminWhyChooseScreen = () => {
       setSaving(true);
       const body = {
         title: form.title.trim(),
+        description: form.description.trim(),
         image: form.image.trim(),
         displayOrder: parseInt(form.displayOrder, 10) || 0,
         isActive: true,
@@ -77,7 +79,7 @@ const AdminWhyChooseScreen = () => {
       } else {
         await api.CLIENT.post(api.ENDPOINTS.ADMIN.WHY_CHOOSE, body);
       }
-      setForm({ title: '', image: '', displayOrder: '0' });
+      setForm({ title: '', description: '', image: '', displayOrder: '0' });
       setEditingId(null);
       load();
     } catch (e: any) {
@@ -136,6 +138,7 @@ const AdminWhyChooseScreen = () => {
 
       <Text style={[styles.label, { marginTop: 24 }]}>{editingId ? 'Edit feature' : 'Add feature'}</Text>
       <AdminTextInput value={form.title} onChangeText={(t) => setForm({ ...form, title: t })} placeholder="Title" multiline />
+      <AdminTextInput value={form.description} onChangeText={(t) => setForm({ ...form, description: t })} placeholder="Description (optional)" multiline />
       <AdminTextInput value={form.image} onChangeText={(t) => setForm({ ...form, image: t })} placeholder="Image URL" />
       <AdminTextInput value={form.displayOrder} onChangeText={(t) => setForm({ ...form, displayOrder: t })} placeholder="Order (0,1,2...)" keyboardType="numeric" />
       <TouchableOpacity style={styles.btn} onPress={saveFeature} disabled={saving}>
@@ -147,12 +150,14 @@ const AdminWhyChooseScreen = () => {
         <View key={f._id} style={styles.card}>
           {f.image ? <Image source={{ uri: f.image }} style={styles.thumb} resizeMode="contain" /> : null}
           <Text style={styles.cardTitle}>{f.title}</Text>
+          {f.description ? <Text style={styles.cardDesc}>{f.description}</Text> : null}
           <View style={styles.row}>
             <TouchableOpacity
               onPress={() => {
                 setEditingId(f._id);
                 setForm({
                   title: f.title,
+                  description: f.description || '',
                   image: f.image || '',
                   displayOrder: String(f.displayOrder ?? 0),
                 });
@@ -182,7 +187,8 @@ const styles = StyleSheet.create({
   btnText: { color: '#fff', fontWeight: '600' },
   card: { borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 12, marginBottom: 12 },
   thumb: { width: 56, height: 56, marginBottom: 8 },
-  cardTitle: { fontSize: 14, color: '#1F2937', marginBottom: 8 },
+  cardTitle: { fontSize: 14, color: '#1F2937', marginBottom: 4 },
+  cardDesc: { fontSize: 12, color: '#6B7280', marginBottom: 8 },
   row: { flexDirection: 'row', gap: 16 },
   link: { color: '#1F2E46', fontWeight: '600' },
   delete: { color: '#DC2626', fontWeight: '600' },

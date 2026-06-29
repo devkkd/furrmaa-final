@@ -65,6 +65,11 @@ export default function WhyChooseFurrmaa() {
                   <p className="text-sm font-medium text-gray-700 whitespace-pre-line">
                     {item.title}
                   </p>
+                  {item.description ? (
+                    <p className="text-xs text-gray-500 mt-1 text-center max-w-[140px] leading-snug">
+                      {item.description}
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>

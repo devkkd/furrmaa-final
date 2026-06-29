@@ -2,7 +2,7 @@
  * Web API client – backend integration
  */
 import { getApiBaseUrl } from '@/lib/apiBase';
-import { withCache, clearApiCache, fetchWithTimeout } from '@/lib/apiCache';
+import { withCache, clearApiCache, fetchWithTimeout, getCached, setCached } from '@/lib/apiCache';
 
 export const getBaseUrl = () => getApiBaseUrl();
 
@@ -1492,15 +1492,24 @@ export async function fetchFeaturedFeedback(limit = 8) {
 /** Why Pet Parents Choose Furrmaa – homepage features (public) */
 export async function fetchWhyChooseFeatures() {
   const base = getBaseUrl();
-  return withCache('why-choose:homepage', 300_000, async () => {
-    const res = await fetch(`${base}/why-choose`);
-    if (!res.ok) throw new Error('Failed to load why-choose section');
-    const data = await res.json();
-    return {
-      tagline: data.tagline || '',
-      features: data.features || [],
-    };
-  });
+  const cacheKey = 'why-choose:homepage';
+  const cached = getCached(cacheKey);
+  if (cached != null && Array.isArray(cached.features) && cached.features.length > 0) {
+    return cached;
+  }
+  const res = await fetchWithTimeout(`${base}/why-choose`, { cache: 'no-store' }, 12_000);
+  if (!res.ok) throw new Error('Failed to load why-choose section');
+  const data = await res.json();
+  const result = {
+    tagline: data.tagline || '',
+    features: data.features || [],
+  };
+  if (result.features.length > 0) {
+    setCached(cacheKey, result, 120_000);
+  } else {
+    clearApiCache('why-choose:');
+  }
+  return result;
 }
 
 export async function adminGetWhyChoose() {

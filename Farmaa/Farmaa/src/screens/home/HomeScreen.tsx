@@ -120,7 +120,7 @@ const HomeScreen = () => {
   >([]);
   const [loadingHomeCategories, setLoadingHomeCategories] = useState(false);
   const [whyChooseFeatures, setWhyChooseFeatures] = useState<
-    { id: string; title: string; image: string }[]
+    { id: string; title: string; description?: string; image: string }[]
   >([]);
   const [whyChooseTagline, setWhyChooseTagline] = useState('');
   const [loadingWhyChoose, setLoadingWhyChoose] = useState(false);
@@ -277,6 +277,7 @@ const HomeScreen = () => {
         list.map((item: any) => ({
           id: String(item._id),
           title: item.title || '',
+          description: item.description || '',
           image: item.image || '',
         }))
       );
@@ -948,6 +949,9 @@ const HomeScreen = () => {
                     <View style={styles.whyChooseIconPlaceholder} />
                   )}
                   <Text style={styles.whyChooseTitle}>{item.title}</Text>
+                  {item.description ? (
+                    <Text style={styles.whyChooseDesc}>{item.description}</Text>
+                  ) : null}
                 </View>
               ))}
             </View>
@@ -1431,6 +1435,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#374151',
     textAlign: 'center',
+  },
+  whyChooseDesc: {
+    fontSize: 10,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 4,
+    paddingHorizontal: 4,
   },
   whyChooseTagline: {
     fontSize: 13,

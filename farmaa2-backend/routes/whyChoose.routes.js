@@ -18,10 +18,10 @@ router.get('/', async (req, res) => {
   try {
     const features = await WhyChooseFeature.find({ isActive: true })
       .sort({ displayOrder: 1, createdAt: 1 })
-      .select('title image displayOrder')
+      .select('title description image displayOrder')
       .lean();
     const tagline = await getTagline();
-    setPublicCache(res, 300);
+    setPublicCache(res, 60);
     res.json({ success: true, tagline, features });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
