@@ -19,13 +19,23 @@ const feedbackSchema = new mongoose.Schema({
   userType: { type: String, trim: true }, // Contact form: Pet Parent, Service Provider, etc.
   type: {
     type: String,
-    enum: ['bug', 'feature', 'suggestion', 'complaint', 'other', 'contact'], // 'contact' = Contact Us form
+    enum: ['bug', 'feature', 'suggestion', 'complaint', 'other', 'contact', 'testimonial'],
     default: 'other'
   },
+  /** Short headline shown on homepage cards */
   subject: {
     type: String,
     trim: true,
     default: ''
+  },
+  role: {
+    type: String,
+    trim: true,
+    default: 'Pet Parent'
+  },
+  featured: {
+    type: Boolean,
+    default: false
   },
   message: {
     type: String,

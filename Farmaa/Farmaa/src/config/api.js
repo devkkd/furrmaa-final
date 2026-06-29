@@ -200,6 +200,7 @@ export default {
     VET_SERVICE_TYPES: '/vet-service-types',
 
     EXPLORE: '/explore',
+    WHY_CHOOSE: '/why-choose',
     HOPE: '/hope',
     HOPE_CHATS: '/hope/chats',
     PET_EVENTS: '/pet-events',
@@ -235,6 +236,8 @@ export default {
 
       TRAINING_VIDEOS: '/admin/training-videos',
       EXPLORE_CONTENT: '/admin/explore-content',
+      WHY_CHOOSE: '/admin/why-choose',
+      WHY_CHOOSE_SETTINGS: '/admin/why-choose/settings',
       POSTS: '/admin/posts',
 
       VETERINARIANS: '/admin/veterinarians',

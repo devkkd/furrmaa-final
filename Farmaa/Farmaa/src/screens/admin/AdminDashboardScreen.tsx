@@ -232,6 +232,17 @@ const AdminDashboardScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
+          onPress={() => navigation.navigate('AdminWhyChoose' as never, {} as never)}
+        >
+          <Text style={styles.actionIcon}>⭐</Text>
+          <View style={styles.actionContent}>
+            <Text style={styles.actionTitle}>Why Choose Furrmaa</Text>
+            <Text style={styles.actionSubtitle}>Homepage features — website & app</Text>
+          </View>
+          <Text style={styles.arrowIcon}>→</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionCard}
           onPress={() => navigation.navigate('AdminExploreContent' as never, {} as never)}
         >
           <Text style={styles.actionIcon}>🔍</Text>

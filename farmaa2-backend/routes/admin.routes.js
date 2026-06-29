@@ -35,6 +35,8 @@ import VetServiceType from '../models/VetServiceType.model.js';
 import Category from '../models/Category.model.js';
 import ProductSize from '../models/ProductSize.model.js';
 import ProductDietary from '../models/ProductDietary.model.js';
+import WhyChooseFeature from '../models/WhyChooseFeature.model.js';
+import WhyChooseSettings from '../models/WhyChooseSettings.model.js';
 import { syncZohoShippingForOrder } from '../utils/zohoInventory.service.js';
 
 const router = express.Router();
@@ -187,30 +189,49 @@ router.get('/dashboard', async (req, res) => {
 // Categories (Admin) – dynamic product categories
 // ----------------------
 
-// Create category (name → slug auto, optional image)
+// Create category (name → slug auto, optional image, section, petType)
 router.post('/categories', async (req, res) => {
   try {
-    const { name, slug: slugInput, image: imageUrl } = req.body;
+    const {
+      name,
+      slug: slugInput,
+      image: imageUrl,
+      section: sectionInput,
+      petType: petTypeInput,
+      displayOrder,
+    } = req.body;
     if (!name || !String(name).trim()) {
       return res.status(400).json({ success: false, message: 'Category name is required' });
     }
+    const section = ['everyday', 'wellness', 'all'].includes(String(sectionInput || '').trim())
+      ? String(sectionInput).trim()
+      : 'all';
+    const petScope = ['dog', 'cat', 'both'].includes(String(petTypeInput || '').toLowerCase())
+      ? String(petTypeInput).toLowerCase()
+      : 'both';
+    const petType = petScope === 'both' ? ['both'] : [petScope];
+
     const slug = (slugInput && String(slugInput).trim())
       ? String(slugInput).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       : String(name).toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     if (!slug) {
       return res.status(400).json({ success: false, message: 'Valid category name is required' });
     }
-    const existing = await Category.findOne({ slug });
+    const existing = await Category.findOne({ slug, section, petScope });
     if (existing) {
-      return res.status(400).json({ success: false, message: `Category with slug "${slug}" already exists` });
+      return res.status(400).json({
+        success: false,
+        message: `Category already exists for ${section} / ${petScope} with slug "${slug}"`,
+      });
     }
     const category = await Category.create({
       name: String(name).trim(),
       slug,
       image: imageUrl && String(imageUrl).trim() ? String(imageUrl).trim() : '',
-      section: 'all',
-      petType: ['both'],
-      displayOrder: (await Category.countDocuments()) + 1,
+      section,
+      petType,
+      petScope,
+      displayOrder: Number.isFinite(Number(displayOrder)) ? Number(displayOrder) : (await Category.countDocuments()) + 1,
       isActive: true,
     });
     res.status(201).json({ success: true, category });
@@ -223,20 +244,42 @@ router.post('/categories', async (req, res) => {
 router.get('/categories', async (req, res) => {
   try {
     const categories = await Category.find().sort({ displayOrder: 1, name: 1 }).lean();
-    res.json({ success: true, categories });
+    const normalized = categories.map((c) => {
+      const petScope =
+        c.petScope ||
+        (Array.isArray(c.petType) ? c.petType[0] : c.petType) ||
+        'both';
+      return {
+        ...c,
+        section: c.section || 'all',
+        petScope,
+      };
+    });
+    res.json({ success: true, categories: normalized });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// Update category (e.g. add/change image for existing category)
+// Update category (image, name, section, pet type, order, active)
 router.patch('/categories/:id', async (req, res) => {
   try {
-    const { image, name, isActive } = req.body;
+    const { image, name, isActive, section, petType, displayOrder } = req.body;
     const update = {};
     if (typeof image === 'string') update.image = image.trim() || '';
     if (name && String(name).trim()) update.name = String(name).trim();
     if (typeof isActive === 'boolean') update.isActive = isActive;
+    if (section && ['everyday', 'wellness', 'all'].includes(String(section))) {
+      update.section = String(section);
+    }
+    if (petType && ['dog', 'cat', 'both'].includes(String(petType).toLowerCase())) {
+      const petScope = String(petType).toLowerCase();
+      update.petScope = petScope;
+      update.petType = petScope === 'both' ? ['both'] : [petScope];
+    }
+    if (displayOrder != null && Number.isFinite(Number(displayOrder))) {
+      update.displayOrder = Number(displayOrder);
+    }
     const category = await Category.findByIdAndUpdate(req.params.id, { $set: update }, { new: true }).lean();
     if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
     res.json({ success: true, category });
@@ -943,6 +986,60 @@ router.put('/feedback/:id/respond', async (req, res) => {
   }
 });
 
+// Create homepage testimonial (admin)
+router.post('/feedback', async (req, res) => {
+  try {
+    const { name, role, subject, message, rating, featured } = req.body;
+    if (!name?.trim() || !message?.trim()) {
+      return res.status(400).json({ success: false, message: 'Name and message are required' });
+    }
+    const feedback = await Feedback.create({
+      name: String(name).trim(),
+      role: role?.trim() || 'Pet Parent',
+      subject: subject?.trim() || 'Great Furrmaa experience',
+      message: String(message).trim(),
+      rating: rating ? Math.min(5, Math.max(1, Number(rating))) : 5,
+      featured: featured !== false,
+      type: 'testimonial',
+      status: 'resolved',
+    });
+    res.status(201).json({ success: true, feedback });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Delete feedback
+router.delete('/feedback/:id', async (req, res) => {
+  try {
+    const feedback = await Feedback.findByIdAndDelete(req.params.id);
+    if (!feedback) {
+      return res.status(404).json({ success: false, message: 'Feedback not found' });
+    }
+    res.json({ success: true, message: 'Feedback deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Toggle featured on homepage
+router.patch('/feedback/:id/featured', async (req, res) => {
+  try {
+    const { featured } = req.body;
+    const feedback = await Feedback.findByIdAndUpdate(
+      req.params.id,
+      { $set: { featured: featured === true } },
+      { new: true }
+    ).lean();
+    if (!feedback) {
+      return res.status(404).json({ success: false, message: 'Feedback not found' });
+    }
+    res.json({ success: true, feedback });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 // ----------------------
 // Support Chat Management (Admin)
 // ----------------------
@@ -1359,6 +1456,88 @@ router.delete('/training-videos/:id', async (req, res) => {
     }
     await video.deleteOne();
     res.json({ success: true, message: 'Video deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ----------------------
+// Why Choose Furrmaa (Homepage features)
+// ----------------------
+
+router.get('/why-choose', async (req, res) => {
+  try {
+    const features = await WhyChooseFeature.find().sort({ displayOrder: 1, createdAt: 1 }).lean();
+    const settings = await WhyChooseSettings.findOne({ key: 'homepage' }).lean();
+    res.json({
+      success: true,
+      tagline: settings?.tagline || '',
+      features,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/why-choose/settings', async (req, res) => {
+  try {
+    const { tagline } = req.body;
+    const settings = await WhyChooseSettings.findOneAndUpdate(
+      { key: 'homepage' },
+      { $set: { tagline: String(tagline || '').trim() } },
+      { upsert: true, new: true }
+    ).lean();
+    res.json({ success: true, settings });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/why-choose', async (req, res) => {
+  try {
+    const { title, image, displayOrder, isActive } = req.body;
+    if (!title?.trim()) {
+      return res.status(400).json({ success: false, message: 'Title is required' });
+    }
+    const feature = await WhyChooseFeature.create({
+      title: String(title).trim(),
+      image: image?.trim() || '',
+      displayOrder: Number.isFinite(Number(displayOrder)) ? Number(displayOrder) : 0,
+      isActive: isActive !== false,
+    });
+    res.status(201).json({ success: true, feature });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.patch('/why-choose/:id', async (req, res) => {
+  try {
+    const { title, image, displayOrder, isActive } = req.body;
+    const update = {};
+    if (title != null) update.title = String(title).trim();
+    if (image != null) update.image = String(image).trim();
+    if (displayOrder != null && Number.isFinite(Number(displayOrder))) {
+      update.displayOrder = Number(displayOrder);
+    }
+    if (typeof isActive === 'boolean') update.isActive = isActive;
+    const feature = await WhyChooseFeature.findByIdAndUpdate(req.params.id, { $set: update }, { new: true }).lean();
+    if (!feature) {
+      return res.status(404).json({ success: false, message: 'Feature not found' });
+    }
+    res.json({ success: true, feature });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.delete('/why-choose/:id', async (req, res) => {
+  try {
+    const feature = await WhyChooseFeature.findByIdAndDelete(req.params.id);
+    if (!feature) {
+      return res.status(404).json({ success: false, message: 'Feature not found' });
+    }
+    res.json({ success: true, message: 'Deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

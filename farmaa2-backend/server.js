@@ -47,7 +47,7 @@ import uploadRoutes from './routes/upload.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import sizesRoutes from './routes/sizes.routes.js';
 import dietaryRoutes from './routes/dietary.routes.js';
-import adminDevAuthRoutes from './controllers/adminlogin.js'
+import whyChooseRoutes from './routes/whyChoose.routes.js';
 
 dotenv.config();
 
@@ -106,6 +106,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/sizes', sizesRoutes);
 app.use('/api/dietary', dietaryRoutes);
+app.use('/api/why-choose', whyChooseRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {

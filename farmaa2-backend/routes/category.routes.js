@@ -20,7 +20,7 @@ async function ensureDefaultCategories() {
   if (defaultCategoriesEnsured) return;
   for (const c of DEFAULT_CATEGORIES) {
     await Category.findOneAndUpdate(
-      { slug: c.slug },
+      { slug: c.slug, section: 'all', petScope: 'both' },
       {
         $setOnInsert: {
           name: c.name,
@@ -28,6 +28,7 @@ async function ensureDefaultCategories() {
           displayOrder: c.displayOrder,
           section: 'all',
           petType: ['both'],
+          petScope: 'both',
           isActive: true,
         },
       },
@@ -37,12 +38,16 @@ async function ensureDefaultCategories() {
   defaultCategoriesEnsured = true;
 }
 
-// Get all categories (public)
+// Get all categories (public) — default: shop categories (section=all)
 router.get('/', async (req, res) => {
   try {
     await ensureDefaultCategories();
-    const categories = await Category.find({ isActive: true })
-      .select('name slug displayOrder section petType image icon isActive')
+    const { section } = req.query;
+    const query = { isActive: true };
+    query.section = section && String(section).trim() ? String(section).trim() : 'all';
+
+    const categories = await Category.find(query)
+      .select('name slug displayOrder section petType petScope image icon isActive')
       .sort({ displayOrder: 1, name: 1 })
       .lean();
     setPublicCache(res, 600);
@@ -52,22 +57,23 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get main categories for home page sections
+// Home page sections: Everyday Essentials / All Round Wellness (per pet type)
 router.get('/main', async (req, res) => {
   try {
     const { section, petType } = req.query;
-    const query = { isActive: true };
-
-    if (section) {
-      query.$or = [{ section }, { section: 'all' }];
+    if (!section || !['everyday', 'wellness'].includes(String(section))) {
+      return res.status(400).json({ success: false, message: 'section must be everyday or wellness' });
     }
 
+    const query = { isActive: true, section: String(section) };
+
     if (petType) {
-      query.petType = { $in: [petType.toLowerCase(), 'both'] };
+      const pt = String(petType).toLowerCase();
+      query.petScope = { $in: [pt, 'both'] };
     }
 
     const categories = await Category.find(query)
-      .select('name slug displayOrder section petType image icon')
+      .select('name slug displayOrder section petType petScope image icon')
       .sort({ displayOrder: 1, name: 1 })
       .limit(20)
       .lean();

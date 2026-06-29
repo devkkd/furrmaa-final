@@ -2,7 +2,7 @@
  * Web API client – backend integration
  */
 import { getApiBaseUrl } from '@/lib/apiBase';
-import { withCache } from '@/lib/apiCache';
+import { withCache, clearApiCache } from '@/lib/apiCache';
 
 export const getBaseUrl = () => getApiBaseUrl();
 
@@ -486,7 +486,7 @@ export async function fetchAllCategories() {
     try {
       const list =
         await tryUrl('/api/categories')
-          .catch(() => tryUrl(`${base}/categories`))
+          .catch(() => tryUrl(`${base}/categories?section=all`))
           .catch(() => tryUrl(`${base}/admin/categories`));
       return Array.isArray(list) ? list : [];
     } catch {
@@ -1205,6 +1205,83 @@ export async function adminRespondFeedback(id, response) {
   return adminFetch(`/admin/feedback/${id}/respond`, { method: 'PUT', body: JSON.stringify({ adminResponse: response }) });
 }
 
+export async function adminCreateFeedback(body) {
+  const d = await adminFetch('/admin/feedback', { method: 'POST', body: JSON.stringify(body) });
+  clearApiCache('feedback:');
+  return d.feedback;
+}
+
+export async function adminDeleteFeedback(id) {
+  const res = await adminFetch(`/admin/feedback/${id}`, { method: 'DELETE' });
+  clearApiCache('feedback:');
+  return res;
+}
+
+export async function adminSetFeedbackFeatured(id, featured) {
+  const d = await adminFetch(`/admin/feedback/${id}/featured`, {
+    method: 'PATCH',
+    body: JSON.stringify({ featured }),
+  });
+  clearApiCache('feedback:');
+  return d.feedback;
+}
+
+/** Homepage testimonials (public) */
+export async function fetchFeaturedFeedback(limit = 8) {
+  const base = getBaseUrl();
+  return withCache(`feedback:featured:${limit}`, 120_000, async () => {
+    const res = await fetch(`${base}/feedback/featured?limit=${limit}`);
+    if (!res.ok) throw new Error('Failed to load feedback');
+    const data = await res.json();
+    return data.feedbacks || [];
+  });
+}
+
+/** Why Pet Parents Choose Furrmaa – homepage features (public) */
+export async function fetchWhyChooseFeatures() {
+  const base = getBaseUrl();
+  return withCache('why-choose:homepage', 300_000, async () => {
+    const res = await fetch(`${base}/why-choose`);
+    if (!res.ok) throw new Error('Failed to load why-choose section');
+    const data = await res.json();
+    return {
+      tagline: data.tagline || '',
+      features: data.features || [],
+    };
+  });
+}
+
+export async function adminGetWhyChoose() {
+  return adminFetch('/admin/why-choose');
+}
+
+export async function adminSaveWhyChooseTagline(tagline) {
+  const d = await adminFetch('/admin/why-choose/settings', {
+    method: 'PUT',
+    body: JSON.stringify({ tagline }),
+  });
+  clearApiCache('why-choose:');
+  return d.settings;
+}
+
+export async function adminCreateWhyChooseFeature(body) {
+  const d = await adminFetch('/admin/why-choose', { method: 'POST', body: JSON.stringify(body) });
+  clearApiCache('why-choose:');
+  return d.feature;
+}
+
+export async function adminUpdateWhyChooseFeature(id, body) {
+  const d = await adminFetch(`/admin/why-choose/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+  clearApiCache('why-choose:');
+  return d.feature;
+}
+
+export async function adminDeleteWhyChooseFeature(id) {
+  const res = await adminFetch(`/admin/why-choose/${id}`, { method: 'DELETE' });
+  clearApiCache('why-choose:');
+  return res;
+}
+
 export async function adminGetSupport() {
   const d = await adminFetch('/admin/support');
   return d.chats || [];
@@ -1305,17 +1382,22 @@ export async function adminGetDietary() {
 }
 
 export async function adminCreateCategory(body) {
-  return adminFetch('/admin/categories', { method: 'POST', body: JSON.stringify(body) });
+  const res = await adminFetch('/admin/categories', { method: 'POST', body: JSON.stringify(body) });
+  clearApiCache('categories:');
+  return res;
 }
 
 /** Update category (e.g. image) – PATCH /admin/categories/:id */
 export async function adminUpdateCategory(id, body) {
   const d = await adminFetch(`/admin/categories/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+  clearApiCache('categories:');
   return d.category;
 }
 
 export async function adminDeleteCategory(id) {
-  return adminFetch(`/admin/categories/${id}`, { method: 'DELETE' });
+  const res = await adminFetch(`/admin/categories/${id}`, { method: 'DELETE' });
+  clearApiCache('categories:');
+  return res;
 }
 
 export async function adminCreateSize(body) {

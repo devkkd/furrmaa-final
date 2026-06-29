@@ -151,6 +151,7 @@ import AdminPetEventsScreen from '../screens/admin/AdminPetEventsScreen';
 import AdminHopePostsScreen from '../screens/admin/AdminHopePostsScreen';
 import AdminCremationCentersScreen from '../screens/admin/AdminCremationCentersScreen';
 import AdminExploreContentScreen from '../screens/admin/AdminExploreContentScreen';
+import AdminWhyChooseScreen from '../screens/admin/AdminWhyChooseScreen';
 import AdminWalletsScreen from '../screens/admin/AdminWalletsScreen';
 import AdminNotificationsScreen from '../screens/admin/AdminNotificationsScreen';
 
@@ -500,6 +501,7 @@ const AppNavigator = () => {
             <Stack.Screen name="AdminHopePosts" component={AdminHopePostsScreen} />
             <Stack.Screen name="AdminCremationCenters" component={AdminCremationCentersScreen} />
             <Stack.Screen name="AdminExploreContent" component={AdminExploreContentScreen} />
+            <Stack.Screen name="AdminWhyChoose" component={AdminWhyChooseScreen} />
             <Stack.Screen name="AdminWallets" component={AdminWalletsScreen} />
             <Stack.Screen name="AdminNotifications" component={AdminNotificationsScreen} />
             <Stack.Screen name="AllReviews" component={AllReviewsScreen} />

@@ -112,6 +112,18 @@ const HomeScreen = () => {
   const [loadingNewArrivals, setLoadingNewArrivals] = useState(false);
   const [loadingBestDeals, setLoadingBestDeals] = useState(false);
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
+  const [everydayEssentials, setEverydayEssentials] = useState<
+    { id: string; name: string; slug: string; icon: any }[]
+  >([]);
+  const [wellnessCategories, setWellnessCategories] = useState<
+    { id: string; name: string; slug: string; icon: any }[]
+  >([]);
+  const [loadingHomeCategories, setLoadingHomeCategories] = useState(false);
+  const [whyChooseFeatures, setWhyChooseFeatures] = useState<
+    { id: string; title: string; image: string }[]
+  >([]);
+  const [whyChooseTagline, setWhyChooseTagline] = useState('');
+  const [loadingWhyChoose, setLoadingWhyChoose] = useState(false);
   // Static category list (pehle jaisa – dynamic API fetch nahi)
   const STATIC_HOME_CATEGORIES: { id: string; name: string; slug: string; icon: any }[] = [
     { id: 'all', name: 'All For You', slug: '', icon: allForYouIcon },
@@ -227,44 +239,61 @@ const HomeScreen = () => {
   const categories = STATIC_HOME_CATEGORIES;
   const [selectedCategoryId, setSelectedCategoryId] = useState(categories[0]?.id || 'all');
 
-  // Everyday Essentials
-  const everydayEssentials = selectedPet === 'dog' 
-    ? [
-        { id: 1, name: 'Food', icon: dogFoodImage },
-        { id: 2, name: 'Treats', icon: dogTreatsImage },
-        { id: 3, name: 'Diet', icon: dogDietImage },
-        { id: 4, name: 'Supplements', icon: dogSupplementImage },
-        {id: 5, name: 'Toys', icon: dogToysIcon },
-        {id: 6, name: 'Grooming', icon: dogGroomingIcon },
-        {id: 7, name: 'Walk', icon: dogWalkIcon },
-        {id: 8, name: 'Feeders', icon: dogFeedersIcon },
-        
-      ]
-    : [
-        { id: 1, name: 'Food', icon: catFoodImage },
-        { id: 2, name: 'Treats', icon: catTreatsImage },
-        { id: 3, name: 'Litter', icon: catLitterImage },
-        { id: 4, name: 'Supplements', icon: catSupplementImage },
-        {id: 5, name: 'Toys', icon: catToysIcon },
-        {id: 6, name: 'Grooming', icon: catGroomingIcon },
-        {id: 7, name: 'Walk', icon: catWalkIcon },
-        {id: 8, name: 'Feeders', icon: catFeedersIcon },
-      ];
+  const mapHomeCategory = (item: any) => ({
+    id: String(item._id || item.slug),
+    name: item.name,
+    slug: item.slug,
+    icon: item.image ? { uri: item.image } : foodIcon,
+  });
 
-  // All Round Wellness
-  const wellnessCategories = [
-    { id: 1, name: 'Kidney Care', icon: dogKidneyCareIcon },
-    { id: 2, name: 'De-wormer', icon: dogDewormerIcon },
-    { id: 3, name: 'Tick & Flea', icon: dogFleaTickIcon },
-    { id: 4, name: 'Joint Care', icon: dogJointCareIcon },
-    { id: 5, name: 'Immune Care', icon: dogCardCareIcon },
-    { id: 6, name: 'Liver Care', icon: dogLiverCareIcon },
-    { id: 7, name: 'Beds & Mats', icon: dogBedIcon },  
-    { id: 8, name: 'Travel', icon: dogTravelIcon },
-  ];
+  const fetchHomeSectionCategories = async () => {
+    setLoadingHomeCategories(true);
+    try {
+      const [everydayRes, wellnessRes] = await Promise.all([
+        api.CLIENT.get(`${api.ENDPOINTS.CATEGORIES}/main`, {
+          params: { section: 'everyday', petType: selectedPet },
+        }),
+        api.CLIENT.get(`${api.ENDPOINTS.CATEGORIES}/main`, {
+          params: { section: 'wellness', petType: selectedPet },
+        }),
+      ]);
+      setEverydayEssentials((everydayRes.data?.categories || []).map(mapHomeCategory));
+      setWellnessCategories((wellnessRes.data?.categories || []).map(mapHomeCategory));
+    } catch (error) {
+      console.error('Failed to fetch home categories:', error);
+      setEverydayEssentials([]);
+      setWellnessCategories([]);
+    } finally {
+      setLoadingHomeCategories(false);
+    }
+  };
+
+  const fetchWhyChoose = async () => {
+    setLoadingWhyChoose(true);
+    try {
+      const res = await api.CLIENT.get(api.ENDPOINTS.WHY_CHOOSE);
+      const list = res.data?.features || [];
+      setWhyChooseFeatures(
+        list.map((item: any) => ({
+          id: String(item._id),
+          title: item.title || '',
+          image: item.image || '',
+        }))
+      );
+      setWhyChooseTagline(res.data?.tagline || '');
+    } catch (error) {
+      console.error('Failed to fetch why-choose:', error);
+      setWhyChooseFeatures([]);
+      setWhyChooseTagline('');
+    } finally {
+      setLoadingWhyChoose(false);
+    }
+  };
 
   // Fetch all products based on pet type
   useEffect(() => {
+    fetchHomeSectionCategories();
+    fetchWhyChoose();
     fetchTopProducts();
     fetchNewArrivals();
     fetchBestDeals();
@@ -543,16 +572,18 @@ const HomeScreen = () => {
         {/* Everyday Essentials */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Everyday Essentials</Text>
+          {loadingHomeCategories ? (
+            <ActivityIndicator color="#1F2E46" style={{ marginVertical: 16 }} />
+          ) : (
           <View style={styles.essentialsGrid}>
             {everydayEssentials.map((item) => (
               <TouchableOpacity
                 key={item.id}
                 style={styles.essentialCard}
                 onPress={() => {
-                  const backendCat = getBackendCategory(item.name);
                   navigateTo('Products', {
                     petType: selectedPet,
-                    filters: { category: [backendCat] },
+                    filters: { category: [item.slug || getBackendCategory(item.name)] },
                   });
                 }}
               >
@@ -563,6 +594,7 @@ const HomeScreen = () => {
               </TouchableOpacity>
             ))}
           </View>
+          )}
         </View>
 
         {/* Training Banner */}
@@ -583,16 +615,18 @@ const HomeScreen = () => {
         {/* All Round Wellness */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>All Round Wellness</Text>
+          {loadingHomeCategories ? (
+            <ActivityIndicator color="#1F2E46" style={{ marginVertical: 16 }} />
+          ) : (
           <View style={styles.wellnessGrid}>
             {wellnessCategories.map((item) => (
               <TouchableOpacity
                 key={item.id}
                 style={styles.wellnessCard}
                 onPress={() => {
-                  const backendCat = getBackendCategory(item.name);
                   navigateTo('Products', {
                     petType: selectedPet,
-                    filters: { category: [backendCat] },
+                    filters: { category: [item.slug || getBackendCategory(item.name)] },
                   });
                 }}
               >
@@ -603,6 +637,7 @@ const HomeScreen = () => {
               </TouchableOpacity>
             ))}
           </View>
+          )}
         </View>
 
         {/* Find a New Friend Banner / We Care Banner */}
@@ -894,6 +929,32 @@ const HomeScreen = () => {
               )}
             </View>
           )}
+        </View>
+
+        {/* Why Pet Parents Choose Furrmaa */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Why Pet Parents Choose Furrmaa</Text>
+          {loadingWhyChoose ? (
+            <ActivityIndicator color="#1F2E46" style={{ marginVertical: 16 }} />
+          ) : whyChooseFeatures.length === 0 ? (
+            <Text style={styles.emptyProductsText}>No features available</Text>
+          ) : (
+            <View style={styles.whyChooseGrid}>
+              {whyChooseFeatures.map((item) => (
+                <View key={item.id} style={styles.whyChooseCard}>
+                  {item.image ? (
+                    <Image source={{ uri: item.image }} style={styles.whyChooseIcon} resizeMode="contain" />
+                  ) : (
+                    <View style={styles.whyChooseIconPlaceholder} />
+                  )}
+                  <Text style={styles.whyChooseTitle}>{item.title}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          {whyChooseTagline ? (
+            <Text style={styles.whyChooseTagline}>{whyChooseTagline}</Text>
+          ) : null}
         </View>
 
         {/* Footer Text */}
@@ -1341,6 +1402,44 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#1F2937',
     textAlign: 'center',
+  },
+  whyChooseGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+  },
+  whyChooseCard: {
+    width: '30%',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  whyChooseIcon: {
+    width: 64,
+    height: 64,
+    marginBottom: 8,
+  },
+  whyChooseIconPlaceholder: {
+    width: 64,
+    height: 64,
+    marginBottom: 8,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+  },
+  whyChooseTitle: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#374151',
+    textAlign: 'center',
+  },
+  whyChooseTagline: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#4B5563',
+    textAlign: 'center',
+    marginTop: 8,
+    lineHeight: 20,
+    paddingHorizontal: 12,
   },
   careBanner: {
     marginBottom: 50,

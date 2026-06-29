@@ -10,7 +10,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 import { usePetStore } from "@/store/petStore";
-import { fetchAllCategories } from "@/lib/api";
+import { fetchMainCategories } from "@/lib/api";
 import { AdminImage } from "@/app/admin/components/AdminImage";
 
 function titleToCategory(title) {
@@ -38,7 +38,7 @@ export default function Wellness() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchAllCategories()
+    fetchMainCategories({ section: 'wellness', petType: petType || 'dog' })
       .then((list) => {
         if (!cancelled && Array.isArray(list)) {
           const active = list.filter((c) => c.isActive !== false);
@@ -51,7 +51,7 @@ export default function Wellness() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [petType]);
 
   return (
     <section className="w-full py-10">

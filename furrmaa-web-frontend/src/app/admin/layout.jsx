@@ -133,6 +133,9 @@ export default function AdminLayout({ children }) {
               <Link href="/admin/feedback" className="px-3 py-1 rounded hover:bg-white/10">
                 Feedback
               </Link>
+              <Link href="/admin/why-choose" className="px-3 py-1 rounded hover:bg-white/10">
+                Why Choose
+              </Link>
               <Link href="/admin/support" className="px-3 py-1 rounded hover:bg-white/10">
                 Support
               </Link>

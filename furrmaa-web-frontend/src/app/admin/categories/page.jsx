@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import {
   adminGetCategories,
@@ -11,8 +11,23 @@ import {
 } from '@/lib/api';
 import { AdminImage } from '../components/AdminImage';
 
+const TABS = [
+  { id: 'shop', label: 'Shop (Products)', section: 'all', petType: 'both' },
+  { id: 'everyday-dog', label: 'Everyday — Dog', section: 'everyday', petType: 'dog' },
+  { id: 'everyday-cat', label: 'Everyday — Cat', section: 'everyday', petType: 'cat' },
+  { id: 'wellness-dog', label: 'Wellness — Dog', section: 'wellness', petType: 'dog' },
+  { id: 'wellness-cat', label: 'Wellness — Cat', section: 'wellness', petType: 'cat' },
+];
+
+function matchesTab(category, tab) {
+  const section = category.section || 'all';
+  const scope = category.petScope || (Array.isArray(category.petType) ? category.petType[0] : category.petType) || 'both';
+  return section === tab.section && scope === tab.petType;
+}
+
 export default function AdminCategoriesPage() {
   const fileRef = useRef(null);
+  const [activeTab, setActiveTab] = useState(TABS[0].id);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,7 +35,14 @@ export default function AdminCategoriesPage() {
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ name: '', image: '' });
+  const [form, setForm] = useState({ name: '', image: '', displayOrder: '' });
+
+  const tab = TABS.find((t) => t.id === activeTab) || TABS[0];
+
+  const visibleCategories = useMemo(
+    () => categories.filter((c) => matchesTab(c, tab)),
+    [categories, tab]
+  );
 
   const load = () => {
     setLoading(true);
@@ -35,7 +57,7 @@ export default function AdminCategoriesPage() {
   }, []);
 
   const resetForm = () => {
-    setForm({ name: '', image: '' });
+    setForm({ name: '', image: '', displayOrder: '' });
     setEditingId(null);
     setShowForm(false);
   };
@@ -67,7 +89,12 @@ export default function AdminCategoriesPage() {
       const body = {
         name,
         image: (form.image || '').trim(),
+        section: tab.section,
+        petType: tab.petType,
       };
+      if (form.displayOrder !== '' && Number.isFinite(Number(form.displayOrder))) {
+        body.displayOrder = Number(form.displayOrder);
+      }
       if (editingId) {
         await adminUpdateCategory(editingId, body);
       } else {
@@ -87,6 +114,7 @@ export default function AdminCategoriesPage() {
     setForm({
       name: c.name || '',
       image: c.image || '',
+      displayOrder: c.displayOrder != null ? String(c.displayOrder) : '',
     });
     setShowForm(true);
   };
@@ -111,7 +139,7 @@ export default function AdminCategoriesPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Product Categories</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Create and manage categories with images. Products pick from these on the Add Product page.
+            Manage shop categories and home sections separately for Dog and Cat.
           </p>
         </div>
         <button
@@ -122,15 +150,41 @@ export default function AdminCategoriesPage() {
           }}
           className="bg-[#1F2E46] text-white text-sm font-medium px-4 py-2 rounded-lg hover:opacity-90"
         >
-          + Add Category
+          + Add to {tab.label}
         </button>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => {
+              setActiveTab(t.id);
+              resetForm();
+            }}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+              activeTab === t.id
+                ? 'bg-[#1F2E46] text-white border-[#1F2E46]'
+                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <p className="text-sm text-gray-600 bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
+        Showing <strong>{tab.label}</strong>. Dog and Cat home tiles are managed separately.
+        Shop tab is for product categories when adding items.
+      </p>
+
       {showForm && (
         <div className="bg-white border border-gray-100 rounded-xl p-6 max-w-lg">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">
+          <h2 className="text-lg font-bold text-gray-900 mb-1">
             {editingId ? 'Edit Category' : 'Add Category'}
           </h2>
+          <p className="text-xs text-gray-500 mb-4">{tab.label}</p>
           <form onSubmit={handleSave} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
@@ -139,8 +193,18 @@ export default function AdminCategoriesPage() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                placeholder="e.g. Dog Food, Treats"
+                placeholder="e.g. Food, Treats, Kidney Care"
                 required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Display order</label>
+              <input
+                type="number"
+                value={form.displayOrder}
+                onChange={(e) => setForm({ ...form, displayOrder: e.target.value })}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                placeholder="1, 2, 3…"
               />
             </div>
             <div>
@@ -196,13 +260,13 @@ export default function AdminCategoriesPage() {
         </div>
       )}
 
-      {categories.length === 0 ? (
+      {visibleCategories.length === 0 ? (
         <p className="text-gray-500 bg-white border border-gray-100 rounded-xl p-8 text-center">
-          No categories yet. Add one above, then use them when adding products.
+          No categories in {tab.label} yet. Click &quot;Add to {tab.label}&quot; above.
         </p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {categories.map((c) => (
+          {visibleCategories.map((c) => (
             <div
               key={c._id || c.slug}
               className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm"
@@ -239,7 +303,7 @@ export default function AdminCategoriesPage() {
         <Link href="/admin/products" className="text-[#1F2E46] font-medium hover:underline">
           Go to Products
         </Link>{' '}
-        to assign categories when adding items.
+        to assign shop categories when adding items.
       </p>
     </div>
   );
