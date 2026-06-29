@@ -22,8 +22,12 @@ const hasVal = (v) => v != null && String(v).trim() !== '';
 // Get all products ('' and '/' dono match – Express path normalisation ke liye)
 router.get(['/', ''], async (req, res) => {
   try {
-    const { category, petType, age, search, sortBy, minPrice, maxPrice, minRating, size, dietary, limit: limitParam } = req.query;
+    const { category, petType, age, search, sortBy, minPrice, maxPrice, minRating, size, dietary, limit: limitParam, bestDeals } = req.query;
     const query = { isActive: true };
+
+    if (bestDeals === 'true') {
+      query.isBestDeal = true;
+    }
 
     // Age filter – sirf jab age select ho
     if (hasVal(age)) {

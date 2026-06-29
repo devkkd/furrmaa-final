@@ -64,6 +64,11 @@ export default function AdminProductsPage() {
                     Inactive
                   </span>
                 )}
+                {p.isBestDeal && (
+                  <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-xs font-medium bg-[#1F2E46] text-white">
+                    Best Deal
+                  </span>
+                )}
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 line-clamp-2">{p.name}</h3>

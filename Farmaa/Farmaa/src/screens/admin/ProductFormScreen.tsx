@@ -63,6 +63,7 @@ const ProductFormScreen = () => {
     brand: '',
     images: [] as string[],
     isActive: true,
+    isBestDeal: false,
   });
 
   const fetchCategories = async () => {
@@ -135,6 +136,7 @@ const ProductFormScreen = () => {
         brand: product.brand || '',
         images: normalizeUrlList(product.images),
         isActive: product.isActive !== undefined ? product.isActive : true,
+        isBestDeal: !!product.isBestDeal,
       });
     } catch (err: any) {
       Alert.alert('Error', err.response?.data?.message || 'Failed to load product');
@@ -198,6 +200,7 @@ const ProductFormScreen = () => {
         brand: formData.brand.trim() || undefined,
         images: normalizeUrlList(formData.images),
         isActive: formData.isActive,
+        isBestDeal: formData.isBestDeal,
       };
 
       if (productId) {
@@ -693,6 +696,25 @@ const ProductFormScreen = () => {
                 style={[
                   styles.toggleCircle,
                   formData.isActive && styles.toggleCircleActive,
+                ]}
+              />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.toggleRow}
+            onPress={() => setFormData({ ...formData, isBestDeal: !formData.isBestDeal })}
+          >
+            <Text style={styles.label}>Show on homepage Best Deals</Text>
+            <View
+              style={[
+                styles.toggle,
+                formData.isBestDeal && styles.toggleActive,
+              ]}
+            >
+              <View
+                style={[
+                  styles.toggleCircle,
+                  formData.isBestDeal && styles.toggleCircleActive,
                 ]}
               />
             </View>

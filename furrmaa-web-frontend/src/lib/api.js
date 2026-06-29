@@ -179,6 +179,7 @@ export async function fetchProducts(params = {}) {
   if (params.minPrice != null) q.set('minPrice', params.minPrice);
   if (params.maxPrice != null) q.set('maxPrice', params.maxPrice);
   if (params.limit != null) q.set('limit', String(params.limit));
+  if (params.bestDeals) q.set('bestDeals', 'true');
   const url = `${base}/products${q.toString() ? `?${q}` : ''}`;
   const cacheKey = `products:${url}`;
 
@@ -1345,15 +1346,21 @@ export async function adminGetProductById(id) {
 }
 
 export async function adminCreateProduct(body) {
-  return adminFetch('/admin/products', { method: 'POST', body: JSON.stringify(body) });
+  const res = await adminFetch('/admin/products', { method: 'POST', body: JSON.stringify(body) });
+  clearApiCache('products:');
+  return res;
 }
 
 export async function adminUpdateProduct(id, body) {
-  return adminFetch(`/admin/products/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+  const res = await adminFetch(`/admin/products/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+  clearApiCache('products:');
+  return res;
 }
 
 export async function adminDeleteProduct(id) {
-  return adminFetch(`/admin/products/${id}`, { method: 'DELETE' });
+  const res = await adminFetch(`/admin/products/${id}`, { method: 'DELETE' });
+  clearApiCache('products:');
+  return res;
 }
 
 export async function adminGetOrders(params = {}) {

@@ -41,6 +41,7 @@ export default function AdminProductNewPage() {
     brand: '',
     images: [],
     isActive: true,
+    isBestDeal: false,
   });
   const [modal, setModal] = useState(null);
   const [modalValue, setModalValue] = useState('');
@@ -88,6 +89,7 @@ export default function AdminProductNewPage() {
         brand: form.brand?.trim() || undefined,
         images: Array.isArray(form.images) ? form.images : [],
         isActive: !!form.isActive,
+        isBestDeal: !!form.isBestDeal,
       };
       await adminCreateProduct(payload);
       router.push('/admin/products');
@@ -356,9 +358,15 @@ export default function AdminProductNewPage() {
             <input type="text" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <input type="checkbox" id="isActive" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
-          <label htmlFor="isActive" className="text-sm text-gray-700">Active</label>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <input type="checkbox" id="isActive" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
+            <label htmlFor="isActive" className="text-sm text-gray-700">Active</label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="checkbox" id="isBestDeal" checked={form.isBestDeal} onChange={(e) => setForm({ ...form, isBestDeal: e.target.checked })} />
+            <label htmlFor="isBestDeal" className="text-sm text-gray-700">Show on homepage Best Deals section</label>
+          </div>
         </div>
         <div className="flex gap-3 pt-4">
           <button type="submit" disabled={loading} className="bg-[#1F2E46] text-white font-medium px-5 py-2.5 rounded-lg hover:opacity-90 disabled:opacity-70">

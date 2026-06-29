@@ -355,20 +355,12 @@ const HomeScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.PRODUCTS, {
         params: {
           petType: selectedPet,
+          bestDeals: 'true',
+          limit: 6,
         },
       });
       if (response.data?.products) {
-        // Filter products with discountPrice (on sale)
-        const deals = response.data.products
-          .filter((product: Product) => product.discountPrice && product.discountPrice < product.price)
-          .sort((a: Product, b: Product) => {
-            // Sort by discount percentage (highest discount first)
-            const discountA = ((a.price - (a.discountPrice || a.price)) / a.price) * 100;
-            const discountB = ((b.price - (b.discountPrice || b.price)) / b.price) * 100;
-            return discountB - discountA;
-          })
-          .slice(0, 6);
-        setBestDeals(deals);
+        setBestDeals(response.data.products.slice(0, 6));
       }
     } catch (error: any) {
       console.error('Failed to fetch best deals:', error);

@@ -48,6 +48,7 @@ export default function AdminProductEditPage() {
     brand: '',
     images: [],
     isActive: true,
+    isBestDeal: false,
   });
 
   useEffect(() => {
@@ -79,6 +80,7 @@ export default function AdminProductEditPage() {
             brand: product.brand || '',
             images: Array.isArray(product.images) ? product.images : [],
             isActive: product.isActive !== false,
+            isBestDeal: !!product.isBestDeal,
           });
         }
       })
@@ -109,6 +111,7 @@ export default function AdminProductEditPage() {
         brand: form.brand?.trim() || undefined,
         images: Array.isArray(form.images) ? form.images : [],
         isActive: !!form.isActive,
+        isBestDeal: !!form.isBestDeal,
       };
       await adminUpdateProduct(id, payload);
       router.push('/admin/products');
@@ -415,14 +418,25 @@ export default function AdminProductEditPage() {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="isActive"
-            checked={form.isActive}
-            onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-          />
-          <label htmlFor="isActive" className="text-sm text-gray-700">Active</label>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={form.isActive}
+              onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+            />
+            <label htmlFor="isActive" className="text-sm text-gray-700">Active</label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isBestDeal"
+              checked={form.isBestDeal}
+              onChange={(e) => setForm({ ...form, isBestDeal: e.target.checked })}
+            />
+            <label htmlFor="isBestDeal" className="text-sm text-gray-700">Show on homepage Best Deals section</label>
+          </div>
         </div>
         <div className="flex gap-3 pt-4">
           <button
