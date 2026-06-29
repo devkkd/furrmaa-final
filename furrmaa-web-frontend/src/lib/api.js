@@ -2,9 +2,14 @@
  * Web API client – backend integration
  */
 import { getApiBaseUrl } from '@/lib/apiBase';
-import { withCache, clearApiCache } from '@/lib/apiCache';
+import { withCache, clearApiCache, fetchWithTimeout } from '@/lib/apiCache';
 
 export const getBaseUrl = () => getApiBaseUrl();
+
+let authConfigCache = null;
+let meCache = { user: null, at: 0 };
+const ME_CACHE_MS = 90_000;
+const AUTH_CONFIG_CACHE_MS = 600_000;
 
 export function getToken() {
   if (typeof window === 'undefined') return null;
@@ -13,20 +18,28 @@ export function getToken() {
 
 export function setToken(token) {
   if (typeof window === 'undefined') return;
-  if (token) localStorage.setItem('token', token);
-  else {
+  if (token) {
+    localStorage.setItem('token', token);
+    meCache = { user: null, at: 0 };
+  } else {
     localStorage.removeItem('token');
     localStorage.removeItem('authToken');
+    meCache = { user: null, at: 0 };
   }
 }
 
 /** Backend auth UI flag — Firebase vs Auth0 social login (OTP APIs stay enabled either way). */
 export async function fetchAuthPublicConfig() {
+  if (authConfigCache && Date.now() - authConfigCache.at < AUTH_CONFIG_CACHE_MS) {
+    return authConfigCache.value;
+  }
   const base = getBaseUrl();
   try {
-    const res = await fetch(`${base}/auth/public-config`, { cache: 'no-store' });
+    const res = await fetchWithTimeout(`${base}/auth/public-config`, { cache: 'force-cache' }, 8_000);
     const data = await res.json().catch(() => ({}));
-    return { useFirebaseAuth: data.useFirebaseAuth === true };
+    const value = { useFirebaseAuth: data.useFirebaseAuth === true };
+    authConfigCache = { value, at: Date.now() };
+    return value;
   } catch {
     return {
       useFirebaseAuth: process.env.NEXT_PUBLIC_USE_FIREBASE_AUTH === 'true',
@@ -42,14 +55,21 @@ export async function sendOtp(identifier) {
   const body = isEmail
     ? { email: value.toLowerCase() }
     : { phone: value.replace(/\D/g, '').slice(-10) };
-  const res = await fetch(`${base}/auth/send-otp`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
-  return data;
+  try {
+    const res = await fetchWithTimeout(`${base}/auth/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }, 15_000);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
+    return data;
+  } catch (e) {
+    if (e?.name === 'AbortError') {
+      throw new Error('Request timed out. Backend start karo ya dubara try karo.');
+    }
+    throw e;
+  }
 }
 
 /** Login after Firebase client sign-in (Google / Apple / Phone). Backend verifies ID token and returns JWT. */
@@ -91,12 +111,19 @@ export async function verifyOtp(identifier, otp, name) {
 }
 
 /** Get current user (protected) – for /account and after refresh */
-export async function fetchMe() {
+export async function fetchMe({ fresh = false } = {}) {
+  if (!fresh && meCache.user && Date.now() - meCache.at < ME_CACHE_MS) {
+    return meCache.user;
+  }
   const base = getBaseUrl();
-  const res = await fetch(`${base}/auth/me`, { headers: authHeaders() });
+  const res = await fetchWithTimeout(`${base}/auth/me`, { headers: authHeaders() }, 10_000);
   const data = await res.json().catch(() => ({}));
-  if (res.status === 401) return null;
+  if (res.status === 401) {
+    meCache = { user: null, at: 0 };
+    return null;
+  }
   if (!res.ok) throw new Error(data.message || 'Failed to load user');
+  meCache = { user: data.user, at: Date.now() };
   return data.user;
 }
 
@@ -155,8 +182,8 @@ export async function fetchProducts(params = {}) {
   const url = `${base}/products${q.toString() ? `?${q}` : ''}`;
   const cacheKey = `products:${url}`;
 
-  return withCache(cacheKey, 90_000, async () => {
-    const res = await fetch(url);
+  return withCache(cacheKey, 180_000, async () => {
+    const res = await fetchWithTimeout(url, {}, 12_000);
     if (!res.ok) throw new Error('Products fetch failed');
     const data = await res.json();
     return data.products || [];
@@ -225,7 +252,7 @@ export async function fetchServiceProviders(params = {}) {
   const res = await fetch(url);
   if (!res.ok) throw new Error('Service providers fetch failed');
   const data = await res.json();
-  return data.providers || [];
+  return data.providers || data.serviceProviders || [];
 }
 
 /** Fetch cremation centers from backend */
@@ -987,7 +1014,7 @@ export async function submitSupportRequest(supportData) {
   return res.json();
 }
 
-/** Submit cremation request (protected) */
+/** Submit cremation request (login optional on backend) */
 export async function submitCremationRequest(cremationData) {
   const base = getBaseUrl();
   const res = await fetch(`${base}/cremation/requests`, {
@@ -995,12 +1022,237 @@ export async function submitCremationRequest(cremationData) {
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(cremationData),
   });
-  if (res.status === 401) throw new Error('Please login to submit cremation request');
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.message || 'Failed to submit cremation request');
   }
   return res.json();
+}
+
+/** My cremation requests (auth required) */
+export async function fetchMyCremationRequests() {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/cremation/requests/me`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login to view cremation requests');
+  if (!res.ok) throw new Error('Failed to load cremation requests');
+  const data = await res.json();
+  return data.requests || [];
+}
+
+// ========== PETS ==========
+export async function fetchMyPets() {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/pets`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login');
+  if (!res.ok) throw new Error('Failed to load pets');
+  const data = await res.json();
+  return data.pets || [];
+}
+
+export async function createPet(body) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/pets`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) throw new Error('Please login');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to add pet');
+  return data.pet;
+}
+
+export async function updatePet(id, body) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/pets/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) throw new Error('Please login');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to update pet');
+  return data.pet;
+}
+
+export async function deletePet(id) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/pets/${id}`, { method: 'DELETE', headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login');
+  if (!res.ok) throw new Error('Failed to delete pet');
+  return res.json();
+}
+
+// ========== REMINDERS ==========
+export async function fetchReminders(params = {}) {
+  const base = getBaseUrl();
+  const q = new URLSearchParams(params).toString();
+  const res = await fetch(`${base}/reminders${q ? `?${q}` : ''}`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login');
+  if (!res.ok) throw new Error('Failed to load reminders');
+  const data = await res.json();
+  return data.reminders || [];
+}
+
+export async function createReminder(body) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/reminders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) throw new Error('Please login');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to create reminder');
+  return data.reminder;
+}
+
+export async function updateReminder(id, body) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/reminders/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) throw new Error('Please login');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to update reminder');
+  return data.reminder;
+}
+
+export async function deleteReminder(id) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/reminders/${id}`, { method: 'DELETE', headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login');
+  if (!res.ok) throw new Error('Failed to delete reminder');
+  return res.json();
+}
+
+// ========== BOOKINGS ==========
+export async function fetchMyBookings() {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/bookings/my-bookings`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login');
+  if (!res.ok) throw new Error('Failed to load bookings');
+  const data = await res.json();
+  return data.bookings || [];
+}
+
+export async function createBooking(body) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/bookings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) throw new Error('Please login');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to create booking');
+  return data.booking;
+}
+
+// ========== HEALTHCARE ==========
+export async function fetchMedicalHistory(petId) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/healthcare/pet/${petId}/history`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login');
+  if (!res.ok) throw new Error('Failed to load medical history');
+  const data = await res.json();
+  return data.medicalHistory || [];
+}
+
+export async function addMedicalRecord(petId, body) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/healthcare/pet/${petId}/record`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) throw new Error('Please login');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to add record');
+  return data;
+}
+
+// ========== EMERGENCY ==========
+export async function submitEmergency(body) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/emergency`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) throw new Error('Please login to report emergency');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to submit emergency');
+  return data;
+}
+
+// ========== SETTINGS ==========
+export async function fetchSettings() {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/settings`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login');
+  if (!res.ok) throw new Error('Failed to load settings');
+  const data = await res.json();
+  return data.settings || data;
+}
+
+export async function updateSettings(body) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/settings`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) throw new Error('Please login');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to update settings');
+  return data.settings || data;
+}
+
+// ========== HOPE CHATS ==========
+export async function fetchHopeChats() {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/hope/chats`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login');
+  if (!res.ok) throw new Error('Failed to load chats');
+  const data = await res.json();
+  return data.chats || [];
+}
+
+export async function startHopeChat(postId) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/hope/chats/${postId}/start`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (res.status === 401) throw new Error('Please login to chat');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to start chat');
+  return data.chat;
+}
+
+export async function fetchHopeChat(chatId) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/hope/chats/${chatId}`, { headers: authHeaders() });
+  if (res.status === 401) throw new Error('Please login');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load chat');
+  return data.chat;
+}
+
+export async function sendHopeChatMessage(chatId, content) {
+  const base = getBaseUrl();
+  const res = await fetch(`${base}/hope/chats/${chatId}/message`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ content }),
+  });
+  if (res.status === 401) throw new Error('Please login');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to send message');
+  return data.chat;
 }
 
 /** Submit return order request (protected) */
@@ -1406,6 +1658,106 @@ export async function adminCreateSize(body) {
 
 export async function adminCreateDietary(body) {
   return adminFetch('/admin/dietary', { method: 'POST', body: JSON.stringify(body) });
+}
+
+// --- Cremation Centers ---
+export async function adminGetCremationCenters(params = {}) {
+  const q = new URLSearchParams(params).toString();
+  const d = await adminFetch(`/admin/cremation-centers${q ? `?${q}` : ''}`);
+  return d.centers || [];
+}
+
+export async function adminCreateCremationCenter(body) {
+  const d = await adminFetch('/admin/cremation-centers', { method: 'POST', body: JSON.stringify(body) });
+  return d.center;
+}
+
+export async function adminUpdateCremationCenter(id, body) {
+  const d = await adminFetch(`/admin/cremation-centers/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+  return d.center;
+}
+
+export async function adminDeleteCremationCenter(id) {
+  return adminFetch(`/admin/cremation-centers/${id}`, { method: 'DELETE' });
+}
+
+// --- Cremation Requests ---
+export async function adminGetCremationRequests(params = {}) {
+  const q = new URLSearchParams(params).toString();
+  const d = await adminFetch(`/admin/cremation-requests${q ? `?${q}` : ''}`);
+  return d.requests || [];
+}
+
+export async function adminUpdateCremationRequestStatus(id, status) {
+  const d = await adminFetch(`/admin/cremation-requests/${id}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+  });
+  return d.request;
+}
+
+// --- Explore Content ---
+export async function adminGetExploreContent(params = {}) {
+  const q = new URLSearchParams(params).toString();
+  const d = await adminFetch(`/admin/explore-content${q ? `?${q}` : ''}`);
+  return d.content || [];
+}
+
+export async function adminCreateExploreContent(body) {
+  const d = await adminFetch('/admin/explore-content', { method: 'POST', body: JSON.stringify(body) });
+  return d.content;
+}
+
+export async function adminUpdateExploreContent(id, body) {
+  const d = await adminFetch(`/admin/explore-content/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+  return d.content;
+}
+
+export async function adminDeleteExploreContent(id) {
+  return adminFetch(`/admin/explore-content/${id}`, { method: 'DELETE' });
+}
+
+// --- Service Providers ---
+export async function adminGetServiceProviders() {
+  const d = await adminFetch('/admin/service-providers');
+  return d.providers || [];
+}
+
+export async function adminUpdateServiceProvider(id, body) {
+  const d = await adminFetch(`/admin/service-providers/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+  return d.provider;
+}
+
+// --- Bookings ---
+export async function adminGetBookings(params = {}) {
+  const q = new URLSearchParams(params).toString();
+  const d = await adminFetch(`/admin/bookings${q ? `?${q}` : ''}`);
+  return d.bookings || [];
+}
+
+export async function adminUpdateBookingStatus(id, body) {
+  const d = await adminFetch(`/admin/bookings/${id}/status`, { method: 'PUT', body: JSON.stringify(body) });
+  return d.booking;
+}
+
+// --- Coupons ---
+export async function adminGetCoupons() {
+  const d = await adminFetch('/admin/coupons');
+  return d.coupons || [];
+}
+
+export async function adminCreateCoupon(body) {
+  const d = await adminFetch('/admin/coupons', { method: 'POST', body: JSON.stringify(body) });
+  return d.coupon;
+}
+
+export async function adminUpdateCoupon(id, body) {
+  const d = await adminFetch(`/admin/coupons/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+  return d.coupon;
+}
+
+export async function adminDeleteCoupon(id) {
+  return adminFetch(`/admin/coupons/${id}`, { method: 'DELETE' });
 }
 
 // --- Pet AI Chat (OpenAI via backend /api/ai-chat) ---

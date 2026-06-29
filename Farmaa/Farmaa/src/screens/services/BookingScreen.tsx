@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,11 +17,29 @@ const BookingScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { user } = useAuth();
-  const { provider, serviceType, pet } = (route.params as any) || {};
+  const { provider, serviceType, pet: routePet } = (route.params as any) || {};
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pets, setPets] = useState<any[]>([]);
+  const [selectedPet, setSelectedPet] = useState(routePet?._id || '');
+
+  useEffect(() => {
+    if (routePet?._id) {
+      setSelectedPet(routePet._id);
+      return;
+    }
+    api.CLIENT.get(api.ENDPOINTS.USER_PETS)
+      .then((res) => {
+        const list = res.data?.pets || [];
+        setPets(list);
+        if (list[0]) setSelectedPet(list[0]._id);
+      })
+      .catch(() => setPets([]));
+  }, [routePet]);
+
+  const normalizedServiceType = String(serviceType || 'grooming').toLowerCase();
 
   const confirmBooking = async () => {
     if (!date || !time) {
@@ -34,14 +52,20 @@ const BookingScreen = () => {
       return;
     }
 
+    if (!selectedPet) {
+      Alert.alert('Error', 'Please select a pet for this booking');
+      return;
+    }
+
     try {
       setLoading(true);
       const bookingData = {
         serviceProvider: provider._id,
-        serviceType: serviceType || 'grooming',
+        serviceType: normalizedServiceType,
         date: new Date(`${date}T${time}`),
+        time,
         notes: notes.trim() || undefined,
-        pet: pet?._id || undefined,
+        pet: selectedPet,
         status: 'pending',
         amount: provider.price || 0,
       };
@@ -83,6 +107,27 @@ const BookingScreen = () => {
         </View>
         <Text style={styles.providerName}>{provider?.name}</Text>
         <Text style={styles.providerRating}>⭐ {provider?.rating}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.label}>Select Pet *</Text>
+        {!routePet && pets.length > 0 ? (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {pets.map((p) => (
+              <TouchableOpacity
+                key={p._id}
+                style={[styles.input, { width: 'auto', paddingHorizontal: 14, backgroundColor: selectedPet === p._id ? '#1F2E46' : '#fff' }]}
+                onPress={() => setSelectedPet(p._id)}
+              >
+                <Text style={{ color: selectedPet === p._id ? '#fff' : '#111' }}>{p.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : routePet ? (
+          <Text style={styles.providerRating}>{routePet.name}</Text>
+        ) : (
+          <Text style={styles.providerRating}>Add a pet in My Pets first</Text>
+        )}
       </View>
 
       <View style={styles.section}>

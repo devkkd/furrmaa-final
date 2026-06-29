@@ -9,8 +9,8 @@ import MobileAccountNav from '@/components/MobileAccountNav'
 
 export default function AccountLayout({ children }) {
   const router = useRouter()
-  const { isAuthenticated, user, rehydrateUser, setUser } = useAuthStore()
-  const [checking, setChecking] = useState(true)
+  const { isAuthenticated, user, hydrateFromStorage, setUser } = useAuthStore()
+  const [checking, setChecking] = useState(() => !useAuthStore.getState().user)
 
   useEffect(() => {
     const token = getToken()
@@ -21,21 +21,23 @@ export default function AccountLayout({ children }) {
       setChecking(false)
       return
     }
-    if (user) {
-      setChecking(false)
-      return
-    }
+
+    const cached = hydrateFromStorage()
+    if (cached) setChecking(false)
+
     fetchMe()
       .then((me) => {
         if (me) setUser(me)
       })
       .catch(() => {
-        setToken(null)
-        useAuthStore.getState().logout()
-        router.replace('/login')
+        if (!cached) {
+          setToken(null)
+          useAuthStore.getState().logout()
+          router.replace('/login')
+        }
       })
       .finally(() => setChecking(false))
-  }, [router])
+  }, [router, hydrateFromStorage, setUser])
 
   useEffect(() => {
     if (!checking && !isAuthenticated && !getToken()) router.replace('/login')

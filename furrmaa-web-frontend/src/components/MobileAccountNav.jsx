@@ -19,6 +19,12 @@ export default function MobileBottomBar() {
   ]
 
   const moreTabs = [
+    { label: 'My Pets', href: '/account/pets', icon: HiOutlineUser },
+    { label: 'Reminders', href: '/account/reminders', icon: HiOutlineBell },
+    { label: 'Bookings', href: '/account/bookings', icon: HiOutlineCube },
+    { label: 'Pet Health', href: '/account/pet-health', icon: HiOutlineHeart },
+    { label: 'Hope Chats', href: '/account/hope-chats', icon: HiOutlineChatAlt2 },
+    { label: 'Settings', href: '/account/settings', icon: HiOutlineUser },
     {
       label: 'Notifications',
       href: '/account/notifications',

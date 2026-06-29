@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Container from "@/components/Container";
-import { fetchHopePostById } from "@/lib/api";
+import { fetchHopePostById, startHopeChat, getToken } from "@/lib/api";
 
 export default function HopeDetailPage() {
   const params = useParams();
@@ -12,6 +12,7 @@ export default function HopeDetailPage() {
   const id = params?.id;
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [startingChat, setStartingChat] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -20,6 +21,22 @@ export default function HopeDetailPage() {
       .catch(() => setPost(null))
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handleMessage = async () => {
+    if (!getToken()) {
+      router.push(`/login?redirect=${encodeURIComponent(`/hope/${id}`)}`);
+      return;
+    }
+    setStartingChat(true);
+    try {
+      const chat = await startHopeChat(id);
+      router.push(`/account/hope-chats/${chat._id}`);
+    } catch (err) {
+      alert(err.message || 'Could not start chat');
+    } finally {
+      setStartingChat(false);
+    }
+  };
 
   if (loading) return <Container><p className="py-16 text-gray-500">Loading...</p></Container>;
   if (!post) return <Container><p className="py-16 text-gray-500">Post not found.</p><Link href="/hope" className="text-[#1F2E46] font-bold">← Back to Hope</Link></Container>;
@@ -79,7 +96,17 @@ export default function HopeDetailPage() {
                   </div>
                 </div>
               )}
-              <p className="text-xs text-gray-400 mt-6">To respond, download the Furrmaa app.</p>
+              <button
+                type="button"
+                onClick={handleMessage}
+                disabled={startingChat}
+                className="mt-6 w-full py-3 bg-[#1F2E46] text-white rounded-xl font-bold disabled:opacity-50"
+              >
+                {startingChat ? 'Starting chat...' : 'Message about this post'}
+              </button>
+              <p className="text-xs text-gray-400 mt-3 text-center">
+                Or view all chats in <Link href="/account/hope-chats" className="text-[#1F2E46]">Hope Chats</Link>
+              </p>
             </div>
           </div>
         </div>

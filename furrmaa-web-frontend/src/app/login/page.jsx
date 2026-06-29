@@ -48,7 +48,7 @@ const AuthPage = () => {
     const [useFirebaseAuth, setUseFirebaseAuth] = useState(
         process.env.NEXT_PUBLIC_USE_FIREBASE_AUTH === 'true'
     )
-    const [modeReady, setModeReady] = useState(false)
+    const [modeReady, setModeReady] = useState(true)
     const firebaseRecaptchaRef = useRef(null)
     const firebaseAuthRef = useRef(null)
     const firebaseConfirmationRef = useRef(null)
@@ -70,9 +70,7 @@ const AuthPage = () => {
                 if (envMode === 'false') mode = false
                 if (!cancelled) setUseFirebaseAuth(mode)
             } catch (_) {
-                // keep env mode
-            } finally {
-                if (!cancelled) setModeReady(true)
+                /* keep env mode */
             }
         })()
         return () => {
@@ -103,12 +101,12 @@ const AuthPage = () => {
                 router.replace('/account')
             }
         } else {
-            try {
-                await mergeGuestCartToServer()
-            } catch {
-                /* non-blocking */
-            }
-            router.replace(returnTo || '/account')
+        try {
+            mergeGuestCartToServer().catch(() => {})
+        } catch {
+            /* non-blocking */
+        }
+        router.replace(returnTo || '/account')
         }
     }
 
@@ -153,36 +151,25 @@ const AuthPage = () => {
         }
     }, [isAdminRedirect, login, modeReady, router, useFirebaseAuth])
 
-    useEffect(() => {
-        if (!modeReady || !useFirebaseAuth || step !== 'PHONE') return
-        if (!isFirebaseWebConfigReady()) return
-
-        let cancelled = false
+    const ensureRecaptchaReady = async () => {
+        if (!useFirebaseAuth || !isFirebaseWebConfigReady()) return
+        if (firebaseRecaptchaRef.current && firebaseAuthRef.current) return
         setRecaptchaBooting(true)
-
-        ;(async () => {
-            try {
-                clearPhoneRecaptcha(firebaseRecaptchaRef.current)
-                firebaseRecaptchaRef.current = null
-                firebaseAuthRef.current = null
-
-                const { auth, verifier } = await setupPhoneRecaptcha(RECAPTCHA_CONTAINER_ID)
-                if (cancelled) return
-                firebaseAuthRef.current = auth
-                firebaseRecaptchaRef.current = verifier
-            } catch (e) {
-                if (!cancelled) {
-                    console.warn('reCAPTCHA setup:', e)
-                }
-            } finally {
-                if (!cancelled) setRecaptchaBooting(false)
-            }
-        })()
-
-        return () => {
-            cancelled = true
+        try {
+            clearPhoneRecaptcha(firebaseRecaptchaRef.current)
+            const { auth, verifier } = await setupPhoneRecaptcha(RECAPTCHA_CONTAINER_ID)
+            firebaseAuthRef.current = auth
+            firebaseRecaptchaRef.current = verifier
+        } finally {
+            setRecaptchaBooting(false)
         }
-    }, [modeReady, useFirebaseAuth, step])
+    }
+
+    useEffect(() => {
+        return () => {
+            clearPhoneRecaptcha(firebaseRecaptchaRef.current)
+        }
+    }, [])
 
     const digitsOnly = (v) => v.replace(/\D/g, '').slice(-10)
     const isEmail = (v) => v.includes('@')
@@ -204,7 +191,7 @@ const AuthPage = () => {
             return
         }
         try {
-            await mergeGuestCartToServer()
+            mergeGuestCartToServer().catch(() => {})
         } catch {
             /* non-blocking */
         }
@@ -240,6 +227,7 @@ const AuthPage = () => {
                 if (!isFirebaseWebConfigReady()) {
                     throw new Error('Firebase config missing in .env')
                 }
+                await ensureRecaptchaReady()
                 const fullPhone = `+91${digitsOnly(value)}`
                 const { confirmation, verifier, auth } = await sendFirebasePhoneOtp(
                     fullPhone,
@@ -373,6 +361,11 @@ const AuthPage = () => {
                                     placeholder="99999 99999 or you@example.com"
                                     value={identifier}
                                     onChange={(e) => setIdentifier(e.target.value)}
+                                    onFocus={() => {
+                                        if (useFirebaseAuth && !isEmail(identifier.trim())) {
+                                            ensureRecaptchaReady().catch(() => {})
+                                        }
+                                    }}
                                     className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50 text-sm focus:outline-none"
                                 />
                                 {process.env.NEXT_PUBLIC_FIREBASE_RECAPTCHA_VISIBLE === 'true' ? (

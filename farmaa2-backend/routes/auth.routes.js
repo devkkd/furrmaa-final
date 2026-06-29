@@ -6,6 +6,7 @@ const router = express.Router();
 
 /** Public flags for web/mobile — which social/OTP UI to use (Firebase vs Auth0). Does not disable APIs. */
 router.get('/public-config', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=300');
   res.json({
     success: true,
     useFirebaseAuth: process.env.USE_FIREBASE_AUTH === 'true',

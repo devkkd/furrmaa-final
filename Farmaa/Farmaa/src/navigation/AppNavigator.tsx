@@ -122,6 +122,7 @@ import PetEventsChangeLocationScreen from '../screens/events/PetEventsChangeLoca
 import CremationScreen from '../screens/cremation/CremationScreen';
 import CremationRequestScreen from '../screens/cremation/CremationRequestScreen';
 import CremationChangeLocationScreen from '../screens/cremation/CremationChangeLocationScreen';
+import MyCremationRequestsScreen from '../screens/cremation/MyCremationRequestsScreen';
 
 // Emergency Screen
 import EmergencyScreen from '../screens/emergency/EmergencyScreen';
@@ -484,6 +485,7 @@ const AppNavigator = () => {
             <Stack.Screen name="Cremation" component={CremationScreen} />
             <Stack.Screen name="CremationRequest" component={CremationRequestScreen} />
             <Stack.Screen name="CremationChangeLocation" component={CremationChangeLocationScreen} />
+            <Stack.Screen name="MyCremationRequests" component={MyCremationRequestsScreen} />
             <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
             <Stack.Screen name="AdminProducts" component={AdminProductsScreen} />
             <Stack.Screen name="AdminOrders" component={AdminOrdersScreen} />

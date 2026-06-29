@@ -168,6 +168,24 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
             style={styles.serviceCard}
+            onPress={() => navigation.navigate('MyBookings' as never)}
+          >
+            <Image source={clockIcon} style={styles.serviceIcon} />
+            <Text style={styles.serviceTitle}>My Bookings</Text>
+            <Text style={styles.serviceSubtitle}>Service appointments</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.serviceCard}
+            onPress={() => navigation.navigate('Emergency' as never)}
+          >
+            <Image source={cremationIcon} style={styles.serviceIcon} />
+            <Text style={styles.serviceTitle}>Emergency</Text>
+            <Text style={styles.serviceSubtitle}>Report pet emergency</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.serviceCard}
             onPress={() => navigation.navigate('PetAIChat' as never)}
           >
             <Image source={aiChatIcon} style={styles.serviceIcon} />
@@ -182,6 +200,15 @@ const ProfileScreen = () => {
             <Image source={cremationIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>Cremation</Text>
             <Text style={styles.serviceSubtitle}>Pet Cremation Request</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.serviceCard}
+            onPress={() => navigation.navigate('MyCremationRequests' as never)}
+          >
+            <Image source={cremationIcon} style={styles.serviceIcon} />
+            <Text style={styles.serviceTitle}>Cremation Requests</Text>
+            <Text style={styles.serviceSubtitle}>Track your requests</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

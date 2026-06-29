@@ -1,5 +1,16 @@
 const store = new Map();
 
+/** Abort slow API calls so UI does not hang (e.g. Render cold start). */
+export async function fetchWithTimeout(url, options = {}, timeoutMs = 12_000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export function getCached(key) {
   const entry = store.get(key);
   if (!entry) return null;

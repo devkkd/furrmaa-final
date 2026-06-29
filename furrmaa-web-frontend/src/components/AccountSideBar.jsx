@@ -13,6 +13,10 @@ import {
   HiOutlineHeart,
   HiOutlineCash,
   HiChevronRight,
+  HiOutlineCalendar,
+  HiOutlineClipboardList,
+  HiOutlineCog,
+  HiOutlineBeaker,
 } from 'react-icons/hi'
 
 function Item({ href, icon, label, subLabel }) {
@@ -104,6 +108,22 @@ export default function AccountSideBar() {
           </div>
         </div>
 
+        {/* Pet Care */}
+        <div className="space-y-4">
+          <h3 className="ml-1 text-sm font-semibold text-gray-500">
+            Pet Care
+          </h3>
+          <div className="space-y-3">
+            <Item href="/account/pets" icon={<HiOutlineUser />} label="My Pets" subLabel="Add and manage pets" />
+            <Item href="/account/reminders" icon={<HiOutlineCalendar />} label="Reminders" subLabel="Feeding, vet visits & more" />
+            <Item href="/account/pet-health" icon={<HiOutlineBeaker />} label="Pet Health" subLabel="Medical records" />
+            <Item href="/account/bookings" icon={<HiOutlineClipboardList />} label="My Bookings" subLabel="Service appointments" />
+            <Item href="/account/cremation-requests" icon={<HiOutlineCube />} label="Cremation Requests" subLabel="Track cremation requests" />
+            <Item href="/account/hope-chats" icon={<HiOutlineChatAlt2 />} label="Hope Chats" subLabel="Messages on Hope posts" />
+            <Item href="/account/settings" icon={<HiOutlineCog />} label="Settings" subLabel="Notifications & privacy" />
+          </div>
+        </div>
+
         {/* Notifications */}
         <div className="space-y-4">
           <h3 className="ml-1 text-sm font-semibold text-gray-500">
@@ -129,6 +149,12 @@ export default function AccountSideBar() {
               icon={<HiOutlineChatAlt2 />}
               label="Chat With Us"
               subLabel="If you have any concerns, chat with us"
+            />
+            <Item
+              href="/emergency"
+              icon={<HiOutlineBell />}
+              label="Pet Emergency"
+              subLabel="Report an urgent pet emergency"
             />
             <Item
               href="/account/feedback"

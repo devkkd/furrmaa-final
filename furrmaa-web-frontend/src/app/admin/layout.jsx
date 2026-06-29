@@ -151,6 +151,24 @@ export default function AdminLayout({ children }) {
               <Link href="/admin/hope-posts" className="px-3 py-1 rounded hover:bg-white/10">
                 Hope
               </Link>
+              <Link href="/admin/cremation-centers" className="px-3 py-1 rounded hover:bg-white/10">
+                Cremation
+              </Link>
+              <Link href="/admin/cremation-requests" className="px-3 py-1 rounded hover:bg-white/10">
+                Crem. Req
+              </Link>
+              <Link href="/admin/explore-content" className="px-3 py-1 rounded hover:bg-white/10">
+                Explore
+              </Link>
+              <Link href="/admin/service-providers" className="px-3 py-1 rounded hover:bg-white/10">
+                Providers
+              </Link>
+              <Link href="/admin/bookings" className="px-3 py-1 rounded hover:bg-white/10">
+                Bookings
+              </Link>
+              <Link href="/admin/coupons" className="px-3 py-1 rounded hover:bg-white/10">
+                Coupons
+              </Link>
             </nav>
           </div>
           <Link href="/" className="text-sm text-white/80 hover:text-white shrink-0">

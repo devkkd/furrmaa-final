@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,12 +12,29 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import api from '../../config/api';
 
+interface Pet {
+  _id: string;
+  name: string;
+}
+
 const EmergencyScreen = () => {
   const { user } = useAuth();
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [petId, setPetId] = useState('');
   const [emergencyType, setEmergencyType] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    api.CLIENT.get(api.ENDPOINTS.USER_PETS)
+      .then((res) => {
+        const list = res.data?.pets || [];
+        setPets(list);
+        if (list[0]) setPetId(list[0]._id);
+      })
+      .catch(() => setPets([]));
+  }, []);
 
   const emergencyTypes = [
     { id: 'medical', name: 'Medical Emergency', icon: '🏥' },
@@ -27,17 +44,18 @@ const EmergencyScreen = () => {
   ];
 
   const submitEmergency = async () => {
-    if (!emergencyType || !description.trim()) {
-      Alert.alert('Error', 'Please fill all required fields');
+    if (!emergencyType || !petId || !description.trim()) {
+      Alert.alert('Error', 'Please select pet, type and describe the emergency');
       return;
     }
 
     try {
       setLoading(true);
       const emergencyData = {
+        pet: petId,
         type: emergencyType,
         description: description.trim(),
-        location: location.trim() || undefined,
+        location: location.trim() ? { address: location.trim() } : undefined,
         status: 'active',
         priority: emergencyType === 'medical' ? 'high' : 'medium',
       };
@@ -90,6 +108,25 @@ const EmergencyScreen = () => {
             </TouchableOpacity>
           ))}
         </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.label}>Select Pet *</Text>
+        {pets.length === 0 ? (
+          <Text style={styles.hint}>Add a pet in My Pets first.</Text>
+        ) : (
+          <View style={styles.petRow}>
+            {pets.map((p) => (
+              <TouchableOpacity
+                key={p._id}
+                style={[styles.petChip, petId === p._id && styles.petChipActive]}
+                onPress={() => setPetId(p._id)}
+              >
+                <Text style={[styles.petChipText, petId === p._id && styles.petChipTextActive]}>{p.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
 
       <View style={styles.section}>
@@ -191,6 +228,12 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
   },
+  hint: { color: '#b45309', fontSize: 14 },
+  petRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  petChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: '#f3f4f6' },
+  petChipActive: { backgroundColor: '#1F2E46' },
+  petChipText: { color: '#374151', fontWeight: '600' },
+  petChipTextActive: { color: '#fff' },
   input: {
     borderWidth: 1,
     borderColor: '#E0E0E0',

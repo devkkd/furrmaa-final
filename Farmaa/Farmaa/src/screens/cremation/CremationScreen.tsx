@@ -132,6 +132,9 @@ const CremationScreen = () => {
           <Image source={leftArrow} style={styles.backIcon} />
         </TouchableOpacity>
         <Text style={styles.title}>Cremation</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('MyCremationRequests' as never)}>
+          <Text style={styles.myRequestsLink}>My Requests</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.locationPill} onPress={() => navigation.navigate('CremationChangeLocation' as never)}>
           <Image source={locationIcon} style={styles.locationIcon} />
           <Text style={styles.locationText} numberOfLines={1}>
@@ -257,6 +260,7 @@ const styles = StyleSheet.create({
   },
   backIcon: { width: 30, height: 30},
   title: { fontSize: 18, fontWeight: '800', color: '#111827', flex: 1 },
+  myRequestsLink: { fontSize: 12, fontWeight: '700', color: NAVY, marginRight: 8 },
   locationPill: {
     flexDirection: 'row',
     alignItems: 'center',
