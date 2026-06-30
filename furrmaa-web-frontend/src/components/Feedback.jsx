@@ -15,22 +15,22 @@ function toCard(item) {
 }
 
 const Card = ({ item }) => (
-  <div className="w-[380px] shrink-0 rounded-3xl bg-white p-8 border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
+  <div className="w-[380px] shrink-0 rounded-3xl bg-white p-6 border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
     <div className="flex gap-1 text-yellow-400 text-xl mb-5">
       {Array.from({ length: item.rating }).map((_, i) => (
         <span key={i}>★</span>
       ))}
     </div>
 
-    <h3 className="font-bold text-xl text-gray-900 mb-4">
+    <h3 className="font-bold text-lg text-gray-900 mb-4">
       "{item.title}"
     </h3>
 
-    <p className="text-gray-600 leading-8 mb-8">
+    <p className="text-gray-600 text-md leading-8 mb-8">
       "{item.text}"
     </p>
 
-    <h5 className="font-semibold text-lg text-gray-900">
+    <h5 className="font-semibold text-md text-gray-900">
       {item.name}
       <span className="font-normal text-gray-500">
         {" "}
@@ -74,7 +74,7 @@ export default function Feedback() {
   const marqueeRow2 = [...row2, ...row2, ...row2];
 
   return (
-    <section className="py-24 overflow-hidden bg-[#fafafa]">
+    <section className="py-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-16">
         <p className="font-semibold text-sm mb-3 text-gray-900">
           Happy Customer Feedback
