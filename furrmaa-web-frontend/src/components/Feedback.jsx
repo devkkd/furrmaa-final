@@ -6,7 +6,7 @@ import { fetchFeaturedFeedback } from "@/lib/api";
 function toCard(item) {
   return {
     id: item._id,
-    title: item.subject || "Great Furrmaa experience",
+    title: item.subject || "Great Furrmaa Experience",
     text: item.message || "",
     name: item.name || "Furrmaa Community",
     role: item.role || "Pet Parent",
@@ -14,13 +14,39 @@ function toCard(item) {
   };
 }
 
+const Card = ({ item }) => (
+  <div className="w-[380px] shrink-0 rounded-3xl bg-white p-8 border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
+    <div className="flex gap-1 text-yellow-400 text-xl mb-5">
+      {Array.from({ length: item.rating }).map((_, i) => (
+        <span key={i}>★</span>
+      ))}
+    </div>
+
+    <h3 className="font-bold text-xl text-gray-900 mb-4">
+      "{item.title}"
+    </h3>
+
+    <p className="text-gray-600 leading-8 mb-8">
+      "{item.text}"
+    </p>
+
+    <h5 className="font-semibold text-lg text-gray-900">
+      {item.name}
+      <span className="font-normal text-gray-500">
+        {" "}
+        - {item.role}
+      </span>
+    </h5>
+  </div>
+);
+
 export default function Feedback() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+
     fetchFeaturedFeedback(8)
       .then((list) => {
         if (cancelled) return;
@@ -32,15 +58,25 @@ export default function Feedback() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
     return () => {
       cancelled = true;
     };
   }, []);
 
+  const middle = Math.ceil(feedbacks.length / 2);
+
+  const row1 = feedbacks.slice(0, middle);
+  const row2 = feedbacks.slice(middle);
+
+  // Duplicate multiple times for smooth marquee
+  const marqueeRow1 = [...row1, ...row1, ...row1];
+  const marqueeRow2 = [...row2, ...row2, ...row2];
+
   return (
-    <section className="w-full bg-gray-50 py-20">
-      <div className="max-w-7xl mx-auto px-6">
-        <p className="text-sm font-semibold text-gray-900 mb-3">
+    <section className="py-24 overflow-hidden bg-[#fafafa]">
+      <div className="max-w-7xl mx-auto px-6 mb-16">
+        <p className="font-semibold text-sm mb-3 text-gray-900">
           Happy Customer Feedback
         </p>
 
@@ -48,47 +84,41 @@ export default function Feedback() {
           Trusted by Pet Parents Who Truly Care
         </h2>
 
-        <p className="text-gray-700 max-w-3xl mb-14">
+        <p className="text-gray-600 max-w-3xl text-lg">
           Thousands of pet parents rely on Furrmaa every day to keep their pets
-          healthy, happy, and safe. Here&apos;s what our community has to say.
+          healthy, happy, and safe. Here's what our community has to say.
         </p>
-
-        {loading ? (
-          <p className="text-gray-500">Loading feedback...</p>
-        ) : feedbacks.length === 0 ? (
-          <p className="text-gray-500">No community feedback available right now.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {feedbacks.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition"
-              >
-                <div className="flex gap-1 mb-4 text-yellow-400">
-                  {Array.from({ length: item.rating }).map((_, i) => (
-                    <span key={i}>★</span>
-                  ))}
-                </div>
-
-                <h4 className="font-semibold text-gray-900 mb-3">
-                  &ldquo;{item.title}&rdquo;
-                </h4>
-
-                <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-                  &ldquo;{item.text}&rdquo;
-                </p>
-
-                <div className="text-sm font-semibold text-gray-900">
-                  {item.name}{" "}
-                  <span className="font-normal text-gray-500">
-                    &ndash; {item.role}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+
+      {loading ? (
+        <div className="text-center py-20 text-gray-500 text-lg">
+          Loading feedback...
+        </div>
+      ) : feedbacks.length === 0 ? (
+        <div className="text-center py-20 text-gray-500 text-lg">
+          No community feedback available right now.
+        </div>
+      ) : (
+        <>
+          {/* Row 1 */}
+          <div className="marquee">
+            <div className="marquee-track">
+              {marqueeRow1.map((item, i) => (
+                <Card key={`${item.id}-top-${i}`} item={item} />
+              ))}
+            </div>
+          </div>
+
+          {/* Row 2 */}
+          <div className="marquee reverse mt-8">
+            <div className="marquee-track">
+              {marqueeRow2.map((item, i) => (
+                <Card key={`${item.id}-bottom-${i}`} item={item} />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 }
