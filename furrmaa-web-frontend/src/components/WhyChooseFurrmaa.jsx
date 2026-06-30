@@ -2,7 +2,6 @@
 import { fetchWhyChooseFeatures } from "@/lib/api";
 import { useEffect, useState } from "react";
 import React from "react";
-import { FaApple, FaGooglePlay } from "react-icons/fa";
 import { IoChevronDown } from 'react-icons/io5';
 import { fetchFaqs } from "@/lib/api";
 import { AdminImage } from "@/app/admin/components/AdminImage";
@@ -41,7 +40,8 @@ export default function WhyChooseFurrmaa() {
     <>
       <section className="w-full bg-white py-20">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-14">
+
+          <h2 className="text-4xl md:text-4xl font-bold text-gray-900 mb-14">
             Why Pet Parents Choose Furrmaa
           </h2>
 
@@ -89,36 +89,34 @@ export default function WhyChooseFurrmaa() {
 
 function DownloadApk() {
   return (
-    <section
-      className="w-full py-20 px-6"
-      style={{
-        background: "linear-gradient(180deg, #F3F8FF 0%, #C0DBFF 100%)",
-      }}
-    >
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full py-20 px-6">
+      <div className="max-w-7xl mx-auto p-8 rounded-2xl"
+        style={{
+          background: "linear-gradient(180deg, #F3F8FF 0%, #C0DBFF 100%)",
+        }}>
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-14">
           <div>
-            <p className="text-sm font-semibold text-gray-700 mb-4">
+            <p className="text-xl font-bold text-gray-900 mb-8">
               Download the Furrmaa App
             </p>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+
+            <h2 className="text-4xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
               Care for Your <br />
               Pet Anytime, Anywhere
             </h2>
             <p className="text-gray-700 max-w-xl mb-8 leading-relaxed">
               Everything Furrmaa offers is available right in your pocket.
-              Manage your pet’s needs, track health, shop essentials,
+              Manage your pet&apos;s needs, track health, shop essentials,
               book services, and stay connected with the pet community
               wherever you are.
             </p>
-            <div className="flex gap-4">
-              <button className="flex items-center gap-2 bg-black text-white px-5 py-3 rounded-xl hover:opacity-90">
-                <FaApple className="text-xl" />
-                <span className="text-sm font-medium">App Store</span>
+
+            <div className="flex flex-wrap gap-4">
+              <button className="flex items-center gap-2 rounded-xl hover:scale-105 transition">
+                <img src="/images/buttons/apple-button.png" className="w-32" alt="App Store" />
               </button>
-              <button className="flex items-center gap-2 bg-black text-white px-5 py-3 rounded-xl hover:opacity-90">
-                <FaGooglePlay className="text-xl" />
-                <span className="text-sm font-medium">Google Play</span>
+              <button className="flex items-center gap-2 rounded-xl hover:scale-105 transition">
+                <img src="/images/buttons/play-button.png" className="w-34" alt="Google Play" />
               </button>
             </div>
           </div>
@@ -202,7 +200,7 @@ function FaqSection() {
             ))
           )}
           <button className="mt-10 bg-slate-900 text-white px-8 py-4 rounded-full text-sm font-medium hover:bg-slate-800 transition">
-            See All FAQ’s →
+            See All FAQ&apos;s →
           </button>
         </div>
       </div>

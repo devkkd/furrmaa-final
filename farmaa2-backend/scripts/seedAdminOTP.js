@@ -4,13 +4,16 @@ import OTP from '../models/OTP.model.js';
 
 dotenv.config();
 
+const normalizePhone = (p) => String(p || '').replace(/\D/g, '').slice(-10);
+
 const seedAdminOTP = async () => {
   try {
     // Connect to database
     await connectDB();
 
     // Admin phone number
-    const adminPhone = process.env.ADMIN_PHONE || '8888888888';
+    const adminPhone = normalizePhone(process.env.ADMIN_PHONE || '8888888888');
+    const adminEmail = (process.env.ADMIN_EMAIL || 'admin@farmaa.com').toLowerCase().trim();
     
     // Fixed OTP for admin (easy to remember)
     const adminOTP = process.env.ADMIN_OTP || '123456';
@@ -18,7 +21,7 @@ const seedAdminOTP = async () => {
     // OTP expires in 24 hours (for development)
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    // Create or update OTP
+    // Create or update OTP for phone
     await OTP.findOneAndUpdate(
       { phone: adminPhone },
       {
@@ -31,9 +34,23 @@ const seedAdminOTP = async () => {
       { upsert: true, new: true }
     );
 
+    // Create or update OTP for email
+    await OTP.findOneAndUpdate(
+      { email: adminEmail },
+      {
+        email: adminEmail,
+        otp: adminOTP,
+        type: 'email',
+        expiresAt: expiresAt,
+        verified: false,
+      },
+      { upsert: true, new: true }
+    );
+
     console.log('✅ Admin OTP seeded successfully!');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('📱 Phone:', adminPhone);
+    console.log('📧 Email:', adminEmail);
     console.log('🔑 OTP:', adminOTP);
     console.log('⏰ Expires At:', expiresAt.toLocaleString('en-IN'));
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

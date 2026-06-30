@@ -50,7 +50,7 @@ export default function Feedback() {
 
         <p className="text-gray-700 max-w-3xl mb-14">
           Thousands of pet parents rely on Furrmaa every day to keep their pets
-          healthy, happy, and safe. Here’s what our community has to say.
+          healthy, happy, and safe. Here&apos;s what our community has to say.
         </p>
 
         {loading ? (
@@ -71,17 +71,17 @@ export default function Feedback() {
                 </div>
 
                 <h4 className="font-semibold text-gray-900 mb-3">
-                  “{item.title}”
+                  &ldquo;{item.title}&rdquo;
                 </h4>
 
                 <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-                  “{item.text}”
+                  &ldquo;{item.text}&rdquo;
                 </p>
 
                 <div className="text-sm font-semibold text-gray-900">
                   {item.name}{" "}
                   <span className="font-normal text-gray-500">
-                    – {item.role}
+                    &ndash; {item.role}
                   </span>
                 </div>
               </div>

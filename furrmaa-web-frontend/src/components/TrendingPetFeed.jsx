@@ -62,9 +62,12 @@ export default function TrendingPetFeed() {
   return (
     <section className="w-full bg-white py-20">
       <div className="max-w-7xl mx-auto px-6">
-        <p className="text-sm font-semibold text-gray-900 mb-3">Trending Pet Feed</p>
 
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        <p className="text-xl font-bold text-gray-900 mb-8">
+          Trending Pet Feed
+        </p>
+
+        <h2 className="text-4xl md:text-4xl font-bold text-gray-900 mb-6 flex items-center gap-2">
           Watch What&apos;s Making Pets Famous Today
           <span>🐾</span>
         </h2>
