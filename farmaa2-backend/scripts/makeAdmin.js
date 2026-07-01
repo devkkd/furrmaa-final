@@ -6,23 +6,40 @@ dotenv.config();
 
 console.log('MONGODB_URI:', process.env.MONGODB_URI); // debug
 
+const normalizePhone = (p) => String(p || '').replace(/\D/g, '').slice(-10);
+
 const makeAdmin = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('MongoDB connected');
 
-    const adminEmail = 'admin@farmaa.com';
+    const adminEmail = (process.env.ADMIN_EMAIL || 'admin@farmaa.com').toLowerCase().trim();
+    const adminPhone = normalizePhone(process.env.ADMIN_PHONE || '9999999999');
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminName = process.env.ADMIN_NAME || 'Super Admin';
 
-    const existingAdmin = await User.findOne({ email: adminEmail });
-    if (existingAdmin) {
-      console.log('Admin already exists');
+    let admin = await User.findOne({
+      $or: [{ email: adminEmail }, { phone: adminPhone }]
+    });
+
+    if (admin) {
+      admin.name = adminName;
+      admin.email = adminEmail;
+      admin.phone = adminPhone;
+      admin.password = adminPassword;
+      admin.role = 'admin';
+      admin.isVerified = true;
+      admin.isActive = true;
+      await admin.save();
+      console.log('✅ Admin updated successfully');
       process.exit();
     }
 
     await User.create({
-      name: 'Super Admin',
+      name: adminName,
       email: adminEmail,
-      password: 'admin123',
+      phone: adminPhone,
+      password: adminPassword,
       role: 'admin',
       isVerified: true,
       isActive: true

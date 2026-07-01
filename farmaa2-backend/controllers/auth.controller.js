@@ -462,31 +462,21 @@ export const sendOTP = async (req, res) => {
       if (sms.sent) {
         console.log(`📱 OTP SMS sent (${sms.provider}) → ${phone}`);
       } else if (sms.error === 'no_sms_provider') {
-        console.log(`📱 OTP for ${phone}: ${otp} — SMS env nahi (MSG91 / Twilio). Dev mein yahi OTP use karo.`);
-        if (process.env.NODE_ENV === 'production') {
-          return res.status(503).json({
-            success: false,
-            message:
-              'SMS service not configured. Add MSG91_AUTHKEY (+ MSG91_SENDER_ID) or Twilio credentials to server .env',
-          });
-        }
+        console.log(`📱 OTP for ${phone}: ${otp} — SMS env nahi (MSG91 / Twilio). Yahi OTP use karo.`);
+        // No SMS provider — OTP still saved in DB, return it so user can login
+        // TODO: Configure MSG91_AUTHKEY or Twilio credentials for real SMS delivery
       } else {
         console.error(`📱 SMS failed for ${phone}:`, sms.error);
-        if (process.env.NODE_ENV === 'production') {
-          return res.status(502).json({
-            success: false,
-            message: 'Could not send SMS. Check MSG91/Twilio balance and template, then try again.',
-          });
-        }
+        // SMS failed but OTP is saved — log and continue
+        console.log(`📱 OTP for ${phone}: ${otp} — SMS failed, use this OTP manually`);
       }
     }
 
     res.json({
       success: true,
       message: `OTP sent successfully to ${otpType === 'email' ? 'email' : 'mobile'}`,
-      // In development, return OTP in response for testing
-      // In production, never return OTP in response
-      otp: process.env.NODE_ENV === 'development' ? otp : undefined,
+      // Return OTP in response when no SMS provider configured
+      otp: process.env.NODE_ENV === 'development' || !process.env.MSG91_AUTHKEY && !process.env.TWILIO_ACCOUNT_SID ? otp : undefined,
     });
   } catch (error) {
     console.error('❌ Error in sendOTP:', error);

@@ -8,10 +8,12 @@ import User from '../models/User.model.js';
 
 dotenv.config();
 
+const normalizePhone = (p) => String(p || '').replace(/\D/g, '').slice(-10);
+
 const run = async () => {
   try {
     await connectDB();
-    const phone = process.env.ADMIN_PHONE || '9999999999';
+    const phone = normalizePhone(process.env.ADMIN_PHONE || '9999999999');
     const user = await User.findOne({ phone });
     if (!user) {
       console.log('❌ No user found with phone:', phone);
