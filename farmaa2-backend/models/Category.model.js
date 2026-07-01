@@ -47,13 +47,12 @@ const categorySchema = new mongoose.Schema({
 categorySchema.index({ slug: 1, section: 1, petScope: 1 }, { unique: true });
 categorySchema.index({ section: 1, petScope: 1, isActive: 1, displayOrder: 1 });
 
-categorySchema.pre('save', function setPetScope(next) {
+categorySchema.pre('save', function setPetScope() {
   const types = Array.isArray(this.petType) ? this.petType : [this.petType].filter(Boolean);
   if (types.includes('both') || types.length > 1) this.petScope = 'both';
   else if (types.includes('dog')) this.petScope = 'dog';
   else if (types.includes('cat')) this.petScope = 'cat';
   else this.petScope = 'both';
-  next();
 });
 
 export default mongoose.model('Category', categorySchema);
