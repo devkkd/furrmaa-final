@@ -109,7 +109,7 @@ export default function Banner() {
   }, [petType]);
 
   return (
-    <div className="w-full py-6 bannerWrapper">
+    <div className="w-full py-6 px-3 md:px-0 bannerWrapper">
       <Swiper
         modules={[Autoplay, Pagination]}
         loop={true}
@@ -120,46 +120,46 @@ export default function Banner() {
           disableOnInteraction: false,
           pauseOnMouseEnter: false,
         }}
-        pagination={{ clickable: true }}
-        spaceBetween={0}
-        slidesPerView={1}
-        breakpoints={{
-          640: {
-            slidesPerView: 1.15,
-            spaceBetween: 20,
-          },
-          1024: {
-            slidesPerView: 1.25,
-            spaceBetween: 24,
-          },
-          1280: {
-            slidesPerView: 1.3,
-            spaceBetween: 28,
-          },
-        }}
+       pagination={{ clickable: true }}
+slidesPerView={1}
+spaceBetween={0}
+breakpoints={{
+  768: {
+    slidesPerView: 1.15,
+    spaceBetween: 20,
+  },
+  1024: {
+    slidesPerView: 1.25,
+    spaceBetween: 24,
+  },
+  1280: {
+    slidesPerView: 1.3,
+    spaceBetween: 28,
+  },
+}}
         className="bannerSwiper"
       >
         {banners.map((item, index) => (
           <SwiperSlide key={index}>
             <div
-              className="relative h-[280px] md:h-[450px] rounded-[24px] overflow-hidden bg-cover bg-center flex items-center"
+             className="relative h-[180px] sm:h-[300px] md:h-[450px] rounded-[20px] md:rounded-[24px] overflow-hidden bg-cover bg-center flex rounded-[20px] md:rounded-[24px] overflow-hidden bg-cover bg-center flex items-center"
               style={{ backgroundImage: `url(${item.image})` }}
             >
-              <div className="absolute inset-0 bg-black/10" />
+             <div className="absolute inset-0 bg-black/20 md:bg-black/10" />
 
-              <div className="relative z-10 max-w-xl px-8 md:px-14 text-black">
-                <p className="text-base md:text-lg font-semibold mb-2">
+              <div className="relative z-10 flex flex-col justify-between h-full w-full max-w-[230px] md:max-w-xl px-4 md:px-14 py-4 md:py-10 text-white md:text-black">
+                <p className="text-[10px] md:text-lg font-semibold mb-1">
                   {item.title}
                 </p>
-                <h1 className="text-3xl md:text-5xl font-bold leading-tight">
+                <h1 className="text-[18px] sm:text-2xl md:text-5xl font-bold leading-[1.1]">
                   {item.heading}
                   <br />
                   {item.subHeading}
                 </h1>
-                <p className="mt-4 text-sm md:text-base text-black/70 max-w-md">
+               <p className="hidden md:block mt-4 text-base text-black/70 max-w-md">
                   {item.description}
                 </p>
-                <button className="mt-6 bg-white hover:bg-black hover:text-white transition-all duration-300 px-8 py-3 rounded-full font-semibold shadow">
+                <button className="mt-2 md:mt-auto self-start bg-white text-black hover:bg-white hover:text-black transition-all duration-300 px-3 md:px-8 py-1.5 md:py-3 rounded-full text-[11px] md:text-base font-semibold shadow">
                   {item.button}
                 </button>
               </div>
@@ -217,6 +217,19 @@ export default function Banner() {
           background: #fff;
           opacity: 1;
         }
+          @media (max-width: 767px) {
+  .bannerWrapper .swiper {
+    overflow: hidden;
+  }
+
+  .bannerSwiper .swiper-slide,
+  .bannerSwiper .swiper-slide-prev,
+  .bannerSwiper .swiper-slide-next,
+  .bannerSwiper .swiper-slide-active {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
       `}</style>
     </div>
   );

@@ -15,22 +15,22 @@ function toCard(item) {
 }
 
 const Card = ({ item }) => (
-  <div className="w-[380px] shrink-0 rounded-3xl bg-white p-6 border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
-    <div className="flex gap-1 text-yellow-400 text-xl mb-5">
+  <div className="w-[290px] md:w-[380px] shrink-0 rounded-[20px] md:rounded-3xl bg-white p-4 md:p-6 border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
+    <div className="flex gap-1 text-yellow-400 text-[18px] md:text-xl mb-3 md:mb-5">
       {Array.from({ length: item.rating }).map((_, i) => (
         <span key={i}>★</span>
       ))}
     </div>
 
-    <h3 className="font-bold text-lg text-gray-900 mb-4">
+    <h3 className="font-bold text-[16px] md:text-lg text-gray-900 mb-2 md:mb-4 leading-snug">
       "{item.title}"
     </h3>
 
-    <p className="text-gray-600 text-md leading-8 mb-8">
+    <p className="text-[13px] md:text-md text-gray-600 leading-6 md:leading-8 mb-5 md:mb-8 line-clamp-5">
       "{item.text}"
     </p>
 
-    <h5 className="font-semibold text-md text-gray-900">
+    <h5 className="font-semibold text-[13px] md:text-md text-gray-900">
       {item.name}
       <span className="font-normal text-gray-500">
         {" "}
@@ -74,17 +74,17 @@ export default function Feedback() {
   const marqueeRow2 = [...row2, ...row2, ...row2];
 
   return (
-    <section className="py-24 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 mb-16">
-        <p className="font-semibold text-sm mb-3 text-gray-900">
+    <section className="py-10 md:py-24 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-5 md:px-6 mb-8 md:mb-16">
+        <p className="font-semibold text-[13px] md:text-sm mb-2 md:mb-3 text-gray-900">
           Happy Customer Feedback
         </p>
 
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+        <h2 className="text-[24px] md:text-5xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
           Trusted by Pet Parents Who Truly Care
         </h2>
 
-        <p className="text-gray-600 max-w-3xl text-lg">
+        <p className="text-[14px] md:text-lg leading-6 md:leading-8 text-gray-600 max-w-3xl">
           Thousands of pet parents rely on Furrmaa every day to keep their pets
           healthy, happy, and safe. Here's what our community has to say.
         </p>
@@ -110,7 +110,7 @@ export default function Feedback() {
           </div>
 
           {/* Row 2 */}
-          <div className="marquee reverse mt-8">
+          <div className="marquee reverse mt-4 md:mt-8">
             <div className="marquee-track">
               {marqueeRow2.map((item, i) => (
                 <Card key={`${item.id}-bottom-${i}`} item={item} />

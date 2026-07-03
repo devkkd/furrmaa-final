@@ -60,19 +60,19 @@ export default function TrendingPetFeed() {
   }, []);
 
   return (
-    <section className="w-full bg-white py-20">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="w-full bg-white py-10 md:py-20">
+      <div className="max-w-7xl mx-auto px-5 md:px-6">
 
-        <p className="text-xl font-bold text-gray-900 mb-8">
+        <p className="text-[16px] md:text-xl font-bold text-gray-900 mb-3 md:mb-8">
           Trending Pet Feed
         </p>
 
-        <h2 className="text-4xl md:text-4xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        <h2 className="text-[24px] md:text-4xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight flex items-center gap-2">
           Watch What&apos;s Making Pets Famous Today
           <span>🐾</span>
         </h2>
 
-        <p className="text-gray-900 max-w-3xl mb-10">
+        <p className="text-[14px] md:text-base leading-6 text-gray-900 max-w-3xl mb-6 md:mb-10">
           Explore the most loved pet videos and moments shared by the Furrmaa
           community. From playful pups to curious cats, discover what&apos;s trending
           right now—and get inspired to share your own pet&apos;s story.
@@ -91,7 +91,7 @@ export default function TrendingPetFeed() {
           <div className="flex items-center gap-3 md:gap-5">
             <button
               type="button"
-              className="trending-feed-prev flex shrink-0 w-10 h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-40"
+              className="trending-feed-prev hidden md:flex shrink-0 w-12 h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-40"
               aria-label="Previous"
             >
               <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,25 +102,41 @@ export default function TrendingPetFeed() {
             <div className="flex-1 min-w-0 overflow-hidden">
               <Swiper
                 modules={[Navigation]}
-                spaceBetween={20}
-                slidesPerView={1.15}
+                spaceBetween={12}
+slidesPerView={1.25}
                 slidesPerGroup={1}
                 navigation={{
                   prevEl: ".trending-feed-prev",
                   nextEl: ".trending-feed-next",
                 }}
-                breakpoints={{
-                  480: { slidesPerView: 2, spaceBetween: 20 },
-                  768: { slidesPerView: 3, spaceBetween: 24 },
-                  1024: { slidesPerView: 4, spaceBetween: 28 },
-                  1280: { slidesPerView: 5, spaceBetween: 32 },
-                }}
+               breakpoints={{
+  480: {
+    slidesPerView: 1.45,
+    spaceBetween: 14,
+  },
+  640: {
+    slidesPerView: 2,
+    spaceBetween: 18,
+  },
+  768: {
+    slidesPerView: 3,
+    spaceBetween: 24,
+  },
+  1024: {
+    slidesPerView: 4,
+    spaceBetween: 28,
+  },
+  1280: {
+    slidesPerView: 5,
+    spaceBetween: 32,
+  },
+}}
               >
                 {feedItems.map((item) => (
                   <SwiperSlide key={item.id}>
                     <Link
                       href="/social"
-                      className="relative group block rounded-3xl overflow-hidden shadow-sm h-[380px] md:h-[420px]"
+                      className="relative group block rounded-[20px] md:rounded-3xl overflow-hidden shadow-sm h-[280px] md:h-[420px]"
                     >
                       {item.video && !item.image ? (
                         <video
@@ -142,16 +158,16 @@ export default function TrendingPetFeed() {
 
                       {(item.video || item.image) && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-md opacity-90 group-hover:opacity-100 transition">
+                          <div className="w-10 h-10 md:w-12 md:h-12 bg-white/90 rounded-full flex items-center justify-center shadow-md opacity-90 group-hover:opacity-100 transition">
                             <FaPlay className="ml-0.5" />
                           </div>
                         </div>
                       )}
 
-                      <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-                        <p className="text-xs font-medium text-white/80 mb-1">{item.userName}</p>
-                        <p className="text-sm font-semibold line-clamp-2 mb-3">{item.title}</p>
-                        <span className="inline-flex bg-white text-slate-900 text-sm px-5 py-2 rounded-full font-medium">
+                      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 text-white">
+                        <p className="text-[10px] md:text-xs font-medium text-white/80 mb-1">{item.userName}</p>
+                        <p className="text-[13px] md:text-sm font-semibold line-clamp-2 mb-2 md:mb-3">{item.title}</p>
+                        <span className="inline-flex bg-white text-slate-900 text-[12px] md:text-sm px-4 md:px-5 py-1.5 md:py-2 rounded-full font-medium">
                           See Feed →
                         </span>
                       </div>
@@ -163,7 +179,7 @@ export default function TrendingPetFeed() {
 
             <button
               type="button"
-              className="trending-feed-next flex shrink-0 w-10 h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-40"
+              className="trending-feed-next hidden md:flex shrink-0 w-12 h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-40"
               aria-label="Next"
             >
               <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">

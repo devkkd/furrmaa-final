@@ -6,17 +6,16 @@ import {
   FaUser,
   FaShoppingCart,
   FaDownload,
-  FaBars,
-  FaTimes,
   FaUsers,
 } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 import { usePetStore } from "@/store/petStore";
+import ToggleDogCat from "@/components/ToggleDogCat";
 
 export default function Header() {
-  const [open, setOpen] = useState(false);
+
 
   const { isAuthenticated, user } = useAuthStore();
   const cartCount = useCartStore((s) =>
@@ -126,38 +125,38 @@ export default function Header() {
             </div>
 
             {/* MOBILE + TABLET ICONS */}
-            <div className="flex lg:hidden items-center gap-4">
-              
-              <button className="text-xl hidden md:block">
-                <FaSearch />
-              </button>
+           <div className="flex lg:hidden items-center gap-5 ml-auto">
 
-              {!isAuthenticated ? (
-                <Link href="/login" className="text-xl">
-                  <FaUser />
-                </Link>
-              ) : (
-                <Link href="/account" className="text-xl">
-                  <FaUser />
-                </Link>
-              )}
+  {!isAuthenticated ? (
+    <Link href="/login" className="text-[22px]">
+      <FaUser />
+    </Link>
+  ) : (
+    <Link href="/account" className="text-[22px]">
+      <FaUser />
+    </Link>
+  )}
 
-              <Link href="/cart" className="relative text-xl">
-                <FaShoppingCart />
-                <span className="absolute -top-2 -right-2 bg-black text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
-                  {cartCount}
-                </span>
-              </Link>
+  <Link href="/cart" className="relative text-[22px]">
+    <FaShoppingCart />
+    {cartCount > 0 && (
+      <span className="absolute -top-2 -right-2 bg-black text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+        {cartCount}
+      </span>
+    )}
+  </Link>
 
-              <button className="text-xl" onClick={() => setOpen(!open)}>
-                {open ? <FaTimes /> : <FaBars />}
-              </button>
-            </div>
+</div>
 
           </div>
+          
+          {/* MOBILE PET TOGGLE */}
+<div className="lg:hidden mt-4 w-full">
+  <ToggleDogCat />
+</div>
 
           {/* MOBILE SEARCH */}
-          <div className="lg:hidden mt-3 flex items-center bg-gray-50 border border-gray-300 rounded-xl px-4 py-2">
+          <div className="lg:hidden mt-3 w-full flex items-center bg-gray-50 border border-gray-300 rounded-xl px-4 py-2">
             <FaSearch className="text-gray-400 mr-2 text-sm" />
             <input
               type="text"
@@ -169,25 +168,37 @@ export default function Header() {
         </div>
       </header>
 
-      {/* MOBILE MENU */}
-      <div
-        className={`lg:hidden absolute left-0 right-0 bg-white border-b border-gray-300 transition-all duration-300 overflow-hidden ${
-          open ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
-        }`}
+     
+      {/* MOBILE CATEGORY SLIDER */}
+<div className="lg:hidden bg-white border-t border-gray-200">
+  <div className="flex overflow-x-auto no-scrollbar whitespace-nowrap px-2 py-2 gap-4">
+
+    {navItems.map((item, index) => (
+      <Link
+        key={index}
+        href={item.href}
+        className="flex flex-col items-center min-w-[70px] text-[#1F2E46]"
       >
-        <div className="px-6 py-6 space-y-6">
-          {navItems.map((item, index) => (
-            <Link key={index} href={item.href} className="flex items-center gap-4 text-sm font-medium">
-              {item.icon ? (
-                <img src={item.icon} alt={item.label} className="w-5 h-5 object-contain" />
-              ) : (
-                item.fallbackIcon
-              )}
-              {item.label}
-            </Link>
-          ))}
+        <div className="w-10 h-10 flex items-center justify-center">
+          {item.icon ? (
+            <img
+              src={item.icon}
+              alt={item.label}
+              className="w-7 h-7 object-contain"
+            />
+          ) : (
+            item.fallbackIcon
+          )}
         </div>
-      </div>
+
+        <span className="text-[12px] mt-1 text-center leading-tight">
+          {item.label}
+        </span>
+      </Link>
+    ))}
+
+  </div>
+</div>
 
       {/* DESKTOP NAV */}
       <nav className="w-full bg-white border-b border-gray-300 hidden lg:block">

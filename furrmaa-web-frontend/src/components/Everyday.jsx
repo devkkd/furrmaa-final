@@ -35,7 +35,19 @@ const isOther = (name, slug) => {
 export default function Everyday() {
   const petType = usePetStore((state) => state.petType);
   const [data, setData] = useState([]);
+const [isMobile, setIsMobile] = useState(false);
 
+useEffect(() => {
+  const checkMobile = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  checkMobile();
+
+  window.addEventListener("resize", checkMobile);
+
+  return () => window.removeEventListener("resize", checkMobile);
+}, []);
   useEffect(() => {
     let cancelled = false;
     fetchMainCategories({ section: 'everyday', petType: petType || 'dog' })
@@ -53,9 +65,13 @@ export default function Everyday() {
     };
   }, [petType]);
 
-  return (
+const displayData = isMobile
+  ? data.slice(0, 6)
+  : data;
+
+return (
     <section className="w-full py-10">
-      <h2 className="text-[28px] md:text-3xl font-bold text-center mb-10 text-gray-900">
+     <h2 className="text-[26px] md:text-3xl font-bold text-left md:text-center mb-6 md:mb-10 text-gray-900 px-4 md:px-0">
         Everyday Essentials
       </h2>
 
@@ -64,7 +80,7 @@ export default function Everyday() {
           <>
             {/* Custom Previous Button - Now visible on mobile */}
             <button
-              className="everyday-prev flex shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="everyday-prev hidden md:flex shrink-0 w-12 h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10"
               aria-label="Previous slide"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,20 +93,31 @@ export default function Everyday() {
               <Swiper
                 modules={[Navigation]}
                 spaceBetween={16}
-                slidesPerView={2}
+                slidesPerView={4}
                 navigation={{
                   prevEl: '.everyday-prev',
                   nextEl: '.everyday-next',
                 }}
-                breakpoints={{
-                  480: { slidesPerView: 3 },
-                  640: { slidesPerView: 4 },
-                  768: { slidesPerView: 5 },
-                  1024: { slidesPerView: 6 },
-                  1280: { slidesPerView: 8 },
-                }}
+              breakpoints={{
+  640: {
+    slidesPerView: 4,
+    spaceBetween: 12,
+  },
+  768: {
+    slidesPerView: 5,
+    spaceBetween: 16,
+  },
+  1024: {
+    slidesPerView: 6,
+    spaceBetween: 16,
+  },
+  1280: {
+    slidesPerView: 8,
+    spaceBetween: 16,
+  },
+}}
               >
-                {data.map((item, index) => {
+                {displayData.map((item, index) => {
                   const title = item.title || item.name;
                   const image = item.img || item.image;
                   const categorySlug = item.slug || titleToCategory(title);
@@ -105,15 +132,17 @@ export default function Everyday() {
                         className="group flex flex-col items-center block w-full h-full"
                       >
                         {/* Image Box with Dynamic Background */}
-                        <div className={`w-full ${cardBgColor} rounded-2xl p-4 flex items-center justify-center cursor-pointer transition-shadow duration-300 group-hover:shadow-md aspect-square md:aspect-auto md:h-[160px]`}>
+                        <div
+  className={`w-full ${cardBgColor} rounded-2xl p-2 md:p-4 flex items-center justify-center transition-shadow duration-300 group-hover:shadow-md aspect-square md:h-[160px]`}
+>
                           <AdminImage
                             src={image}
                             alt={title || ""}
-                            className="h-full max-h-[120px] object-contain w-full transition-transform duration-300 group-hover:scale-105"
+                            className="h-full max-h-[70px] md:max-h-[120px] object-contain w-full transition-transform duration-300 group-hover:scale-105"
                           />
                         </div>
                         {/* Title */}
-                        <p className="text-[13px] md:text-sm font-medium text-gray-800 text-center mt-3">
+                       <p className="text-[11px] md:text-sm font-medium text-gray-800 text-center mt-2 md:mt-3 leading-tight">
                           {title}
                         </p>
                       </Link>
@@ -125,7 +154,7 @@ export default function Everyday() {
 
             {/* Custom Next Button - Now visible on mobile */}
             <button
-              className="everyday-next flex shrink-0 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="everyday-next hidden md:flex shrink-0 w-12 h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10"
               aria-label="Next slide"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">

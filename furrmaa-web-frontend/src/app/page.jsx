@@ -1,4 +1,6 @@
 "use client"
+
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Banner from "@/components/Banner";
 import ToggleDogCat from "@/components/ToggleDogCat";
@@ -17,13 +19,40 @@ const Feedback = dynamic(() => import("@/components/Feedback"), { loading: () =>
 const WhyChooseFurrmaa = dynamic(() => import("@/components/WhyChooseFurrmaa"), { loading: () => null });
 
 export default function Home() {
+  const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  const checkMobile = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  checkMobile();
+
+  window.addEventListener("resize", checkMobile);
+
+  return () => window.removeEventListener("resize", checkMobile);
+}, []);
   return (
     <div className="bg-white text-black">
       <Banner />
-      <ToggleDogCat />
-      <Everyday />
-      <Wellness />
-      <Card />
+      <div className="hidden lg:block">
+   <ToggleDogCat />
+</div>
+     <Everyday />
+
+<div className="md:hidden">
+  <Card show="first" />
+</div>
+
+<Wellness />
+
+<div className="md:hidden">
+  <Card show="second" />
+</div>
+
+<div className="hidden md:block">
+  <Card />
+</div>
       <TopSelling />
       <PetCard />
       <NewArrivals />

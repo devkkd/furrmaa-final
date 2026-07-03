@@ -91,9 +91,9 @@ export default function ProductCard({ product }) {
 
   return (
     <Link href={`/shop/product_details/${productId}`} className="block group">
-      <div className="bg-white text-black rounded-2xl p-2 flex flex-col w-full hover:shadow-lg border border-transparent hover:border-gray-100 transition-all duration-300">
+      <div className="bg-white text-black rounded-xl md:rounded-2xl p-1 md:p-2 flex flex-col w-full hover:shadow-lg border border-transparent hover:border-gray-100 transition-all duration-300">
 
-        <div className="relative flex items-center justify-center h-[220px] mb-3 rounded-xl p-4">
+        <div className="relative flex items-center justify-center h-[150px] md:h-[220px] mb-2 md:mb-3 rounded-[16px] overflow-hidden">
           <img
             src={productImage}
             alt={product.name}
@@ -104,44 +104,74 @@ export default function ProductCard({ product }) {
           <button
             type="button"
             disabled={wishBusy}
-            className="absolute top-3 right-3 p-1.5 rounded-full transition-colors disabled:opacity-50"
+            className="absolute top-1 md:top-3 right-1 md:right-3 p-1 rounded-full transition-colors disabled:opacity-50"
             onClick={toggleWishlist}
             aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             {inWishlist ? (
-              <FaHeart className="text-red-500 text-xl" />
+              <FaHeart className="text-red-500 text-lg md:text-xl" />
             ) : (
-              <FaRegHeart className="text-gray-600 text-xl hover:text-red-500 transition-colors" />
+              <FaRegHeart className="text-gray-600 text-lg md:text-xl hover:text-red-500 transition-colors" />
             )}
           </button>
+          <button
+  type="button"
+  onClick={handleAdd}
+  className="
+md:hidden
+absolute
+bottom-0
+right-0
+w-[72px]
+h-[44px]
+bg-white
+border
+border-[#2C3E50]
+rounded-tl-[18px]
+rounded-br-[16px]
+text-[#2C3E50]
+text-[12px]
+font-medium
+flex
+items-center
+justify-center
+hover:bg-[#2C3E50]
+hover:text-white
+transition-all
+"
+>
+  ADD
+</button>
         </div>
 
         <div className="flex flex-col flex-grow px-1">
-          <h3 className="text-[16px] font-normal text-gray-900 leading-snug line-clamp-2 mb-2">
+          <h3 className="text-[12px] md:text-[16px] font-normal text-gray-900 leading-tight md:leading-snug line-clamp-2 mb-1 md:mb-2 min-h-[34px] md:min-h-[48px]">
             {product.name}
           </h3>
 
-          <div className="flex items-center gap-1.5 mb-4">
+          <div className="flex items-center gap-1 mb-2 md:mb-4">
             <div className="flex items-center gap-0.5">
               {[...Array(5)].map((_, i) => (
                 <FaStar
                   key={i}
-                  className={`text-[15px] ${i < rating || i < 5 ? 'text-[#FFB800]' : 'text-gray-300'}`}
+                  className={`text-[11px] md:text-[15px] ${
+  i < rating ? "text-[#FFB800]" : "text-gray-300"
+}`}
                 />
               ))}
             </div>
-            <span className="text-[14px] font-medium text-gray-800 ml-1">
+            <span className="text-[11px] md:text-[14px] font-medium text-gray-800 ml-1">
               {reviewCount > 0 ? reviewCount : '265'}
             </span>
           </div>
 
-          <div className="flex items-center justify-between mt-2">
+          <div className="flex items-end justify-between mt-auto">
             <div className="flex items-center gap-2">
-              <span className="text-[14px] font-bold text-gray-900 tracking-tight">
+             <span className="text-[11px] md:text-[14px] font-bold text-gray-900 tracking-tight">
                 ₹{formatPrice(currentPrice)}
               </span>
               {hasDiscount && (
-                <span className="text-[11px] font-medium text-gray-400 line-through">
+               <span className="text-[9px] md:text-[11px] font-medium text-gray-400 line-through">
                   ₹{formatPrice(originalPrice)}
                 </span>
               )}
@@ -150,7 +180,21 @@ export default function ProductCard({ product }) {
             <button
               type="button"
               onClick={handleAdd}
-              className="border-[1.5px] border-[#2C3E50] text-[#2C3E50] rounded-[10px] px-6 py-1.5 text-[13px] font-semibold hover:bg-[#2C3E50] hover:text-white transition-colors duration-300"
+         className="
+hidden md:flex
+border border-[#2C3E50]
+text-[#2C3E50]
+rounded-[10px]
+min-w-[88px]
+py-1.5
+text-[13px]
+font-semibold
+items-center
+justify-center
+hover:bg-[#2C3E50]
+hover:text-white
+transition-all
+"
             >
               ADD
             </button>

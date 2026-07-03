@@ -16,7 +16,7 @@ export default function ToggleDogCat({ onShopPage, currentPetType, onPetTypeChan
   }
 
   return (
-    <div className="mx-auto mt-8 md:w-[400px] w-[350px] md:h-[60px] h-[50px] bg-white border border-gray-300 rounded-full p-2 flex items-center">
+  <div className="mx-auto mt-0 lg:mt-8 w-full lg:w-[400px] lg:max-w-[400px] h-[50px] lg:h-[60px] bg-white border border-gray-300 rounded-full p-2 flex items-center">
 
       <button
         onClick={() => handleClick('dog')}
