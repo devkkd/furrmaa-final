@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { usePetStore } from "@/store/petStore";
 
 export default function Card({ show = "both" }) {
@@ -17,8 +17,10 @@ export default function Card({ show = "both" }) {
 
         {/* CARD 1 — changes with pet toggle */}
    
-         <div
+         <Link
+  href="/contactus"
   className={`
+    block
     h-[180px] md:h-[300px]
     rounded-[20px] md:rounded-2xl
     overflow-hidden
@@ -30,12 +32,13 @@ export default function Card({ show = "both" }) {
         : ""
     }
   `}
-          style={{ backgroundImage: `url(${images.card1})` }}
-        />
-
+  style={{ backgroundImage: `url(${images.card1})` }}
+/>
         {/* CARD 2 — changes with pet toggle */}
-        <div
+       <Link
+  href="/contactus"
   className={`
+    block
     h-[180px] md:h-[300px]
     rounded-[20px] md:rounded-2xl
     overflow-hidden
@@ -47,8 +50,8 @@ export default function Card({ show = "both" }) {
         : ""
     }
   `}
-          style={{ backgroundImage: `url(${images.card2})` }}
-        />
+  style={{ backgroundImage: `url(${images.card2})` }}
+/>
 
       </div>
     </section>

@@ -159,7 +159,7 @@ function FaqSection() {
   }, []);
 
   return (
-    <section className="w-full bg-gray-50 py-10 md:py-24">
+    <section className="hidden md:block w-full bg-gray-50 py-10 md:py-24">
       <div className="max-w-7xl mx-auto px-5 md:px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
         <div>
           <h2 className="text-[24px] md:text-4xl font-bold text-gray-900 leading-tight md:leading-[52px]">

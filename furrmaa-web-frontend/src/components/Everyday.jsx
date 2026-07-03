@@ -65,9 +65,9 @@ useEffect(() => {
     };
   }, [petType]);
 
-const displayData = isMobile
-  ? data.slice(0, 6)
-  : data;
+const displayData = data;
+ 
+  
 
 return (
     <section className="w-full py-10">
@@ -89,68 +89,134 @@ return (
             </button>
 
             {/* Swiper Container */}
-            <div className="w-full overflow-hidden">
-              <Swiper
-                modules={[Navigation]}
-                spaceBetween={16}
-                slidesPerView={4}
-                navigation={{
-                  prevEl: '.everyday-prev',
-                  nextEl: '.everyday-next',
-                }}
-              breakpoints={{
-  640: {
-    slidesPerView: 4,
-    spaceBetween: 12,
-  },
-  768: {
-    slidesPerView: 5,
-    spaceBetween: 16,
-  },
-  1024: {
-    slidesPerView: 6,
-    spaceBetween: 16,
-  },
-  1280: {
-    slidesPerView: 8,
-    spaceBetween: 16,
-  },
-}}
-              >
-                {displayData.map((item, index) => {
-                  const title = item.title || item.name;
-                  const image = item.img || item.image;
-                  const categorySlug = item.slug || titleToCategory(title);
-                  
-                  // Dynamically determine background color based on petType
-                  const cardBgColor = petType === "cat" ? "bg-[#E6F9D9]" : "bg-[#F2F6FC]";
+       {isMobile ? (
 
-                  return (
-                    <SwiperSlide key={item._id || item.id || index}>
-                      <Link
-                        href={`/shop?category=${categorySlug}${petType ? `&petType=${petType}` : ""}`}
-                        className="group flex flex-col items-center block w-full h-full"
-                      >
-                        {/* Image Box with Dynamic Background */}
-                        <div
-  className={`w-full ${cardBgColor} rounded-2xl p-2 md:p-4 flex items-center justify-center transition-shadow duration-300 group-hover:shadow-md aspect-square md:h-[160px]`}
+<div className="w-full grid grid-cols-4 gap-3">
+
+  {data.slice(0,8).map((item,index)=>{
+
+    const title=item.title || item.name;
+    const image=item.img || item.image;
+    const categorySlug=item.slug || titleToCategory(title);
+
+    const cardBgColor =
+      petType==="cat"
+      ? "bg-[#E6F9D9]"
+      : "bg-[#F2F6FC]";
+
+    return(
+
+      <Link
+        key={item._id || item.id || index}
+        href={`/shop?category=${categorySlug}${petType ? `&petType=${petType}` : ""}`}
+        className="group flex flex-col items-center"
+      >
+
+        <div
+          className={`w-full ${cardBgColor} rounded-2xl p-2 aspect-square flex items-center justify-center`}
+        >
+
+          <AdminImage
+            src={image}
+            alt={title}
+            className="w-full h-full max-h-[55px] object-contain"
+          />
+
+        </div>
+
+        <p className="text-[11px] text-center mt-2 leading-tight font-medium">
+          {title}
+        </p>
+
+      </Link>
+
+    )
+
+  })}
+
+</div>
+
+) : (
+
+<div className="w-full overflow-hidden">
+
+<Swiper
+modules={[Navigation]}
+spaceBetween={16}
+slidesPerView={4}
+navigation={{
+prevEl:'.everyday-prev',
+nextEl:'.everyday-next',
+}}
+breakpoints={{
+640:{
+slidesPerView:4,
+spaceBetween:12,
+},
+768:{
+slidesPerView:5,
+spaceBetween:16,
+},
+1024:{
+slidesPerView:6,
+spaceBetween:16,
+},
+1280:{
+slidesPerView:8,
+spaceBetween:16,
+},
+}}
 >
-                          <AdminImage
-                            src={image}
-                            alt={title || ""}
-                            className="h-full max-h-[70px] md:max-h-[120px] object-contain w-full transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-                        {/* Title */}
-                       <p className="text-[11px] md:text-sm font-medium text-gray-800 text-center mt-2 md:mt-3 leading-tight">
-                          {title}
-                        </p>
-                      </Link>
-                    </SwiperSlide>
-                  );
-                })}
-              </Swiper>
-            </div>
+
+{displayData.map((item,index)=>{
+
+const title=item.title || item.name;
+const image=item.img || item.image;
+const categorySlug=item.slug || titleToCategory(title);
+
+const cardBgColor=
+petType==="cat"
+? "bg-[#E6F9D9]"
+: "bg-[#F2F6FC]";
+
+return(
+
+<SwiperSlide key={item._id || item.id || index}>
+
+<Link
+href={`/shop?category=${categorySlug}${petType ? `&petType=${petType}` : ""}`}
+className="group flex flex-col items-center block w-full h-full"
+>
+
+<div
+className={`w-full ${cardBgColor} rounded-2xl p-2 md:p-4 flex items-center justify-center transition-shadow duration-300 group-hover:shadow-md aspect-square md:h-[160px]`}
+>
+
+<AdminImage
+src={image}
+alt={title}
+className="h-full max-h-[70px] md:max-h-[120px] object-contain w-full transition-transform duration-300 group-hover:scale-105"
+/>
+
+</div>
+
+<p className="text-[11px] md:text-sm font-medium text-gray-800 text-center mt-2 md:mt-3 leading-tight">
+{title}
+</p>
+
+</Link>
+
+</SwiperSlide>
+
+)
+
+})}
+
+</Swiper>
+
+</div>
+
+)}
 
             {/* Custom Next Button - Now visible on mobile */}
             <button
