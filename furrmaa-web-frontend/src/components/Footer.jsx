@@ -20,7 +20,7 @@ export default function Footer() {
           <div className="flex items-center flex-wrap justify-center gap-3 md:gap-10">
             <div className="flex items-center gap-1.5 md:gap-2">
               <FaPhoneAlt className="text-[10px] md:text-xs" />
-              <span className="text-[11px] md:text-sm font-semibold tracking-wide">+91-1234567890</span>
+              <span className="text-[11px] md:text-sm font-semibold tracking-wide">+91-8829026003</span>
             </div>
 
             <div className="flex items-center gap-1.5 md:gap-2">
@@ -123,17 +123,17 @@ export default function Footer() {
 
             <div className="py-1.5 md:py-4 md:border-r border-[#0E0E0E]">
               <p className="font-semibold text-gray-900">Address</p>
-              <p className="text-gray-700">100, ABCD Street, Jaipur, Rajasthan - INDIA</p>
+              <p className="text-gray-700">Plot No. 91-92 Rimsha Enclave, Kasturba Nagar, Nirman Nagar, Jaipur, Rajasthan - 302019</p>
             </div>
 
             <div className="py-1.5 md:py-4 md:border-r border-[#0E0E0E] md:justify-center md:grid">
               <p className="font-semibold text-gray-900">Call</p>
-              <p className="text-gray-700">+91-1234567890</p>
+              <p className="text-gray-700">+91-8829026003</p>
             </div>
 
             <div className="py-1.5 md:py-4 md:border-r border-[#0E0E0E] md:justify-center md:grid">
               <p className="font-semibold text-gray-900">Email</p>
-              <p className="text-gray-700">Support@furrmaa.in</p>
+              <p className="text-gray-700">Support@furrmaa.com</p>
             </div>
 
             <div className="py-1.5 md:py-4 md:justify-center md:grid">
@@ -151,7 +151,7 @@ export default function Footer() {
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-5">
               <span className="font-bold text-gray-900 text-[11px] md:text-sm">Follow us</span>
 
-              <a href="#" className="flex items-center gap-1 group">
+              <a href="https://www.instagram.com/furrmaaa?igsh=cWc0a3huN2JrZHJk" className="flex items-center gap-1 group">
                 <div className="w-5 h-5 md:w-8 md:h-8 rounded-full flex items-center justify-center">
                   <img src="/images/icons/insta-logo.png" alt="Instagram" className="w-5 h-5 md:w-7 md:h-7 object-contain" />
                 </div>
@@ -172,7 +172,7 @@ export default function Footer() {
                 <span className="text-[10px] md:text-[12px] text-gray-600 group-hover:text-black transition-colors font-medium">@Furrmaa</span>
               </a>
 
-              <a href="#" className="flex items-center gap-1 group">
+              <a href="https://www.linkedin.com/company/furrmaa" className="flex items-center gap-1 group">
                 <div className="w-5 h-5 md:w-8 md:h-8 rounded-full flex items-center justify-center">
                   <img src="/images/icons/linkdin-logo.png" alt="LinkedIn" className="w-4 h-4 md:w-6 md:h-6 object-contain" />
                 </div>
@@ -181,9 +181,9 @@ export default function Footer() {
             </div>
 
             <div className="flex items-center gap-1.5 md:gap-2">
-              <span>
+              {/* <span>
                 <img src="/images/icons/Vector.png" className="w-2.5 h-4 md:w-4 md:h-6" alt="" />
-              </span>
+              </span> */}
               <span className="text-gray-500 text-[10px] md:text-[12px]">
                 Crafted by <strong className="text-gray-900 font-bold">
                   <Link href="https://www.kontentkraftdigital.com/" target="_blank">Kontent Kraft Digital</Link>
