@@ -230,6 +230,7 @@ breakpoints={{
     opacity: 1 !important;
   }
 }
+
       `}</style>
     </div>
   );
