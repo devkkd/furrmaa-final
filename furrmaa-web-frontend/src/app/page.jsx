@@ -56,9 +56,10 @@ useEffect(() => {
       <TopSelling />
       <PetCard />
       <NewArrivals />
-      <AboutFurrmaa />
+      
       <FurrmaaPetAI />
       <BestDeal />
+      <AboutFurrmaa />
       <TrendingPetFeed />
       <Feedback />
       <WhyChooseFurrmaa />

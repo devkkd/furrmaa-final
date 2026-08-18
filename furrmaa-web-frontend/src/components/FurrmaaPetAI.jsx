@@ -62,7 +62,7 @@ export default function FurrmaaPetAI() {
 
                <div className="flex justify-center md:justify-end relative w-[180px] md:w-[320px] mt-2 md:mt-0">
                     <img
-                        src="/images/FurrmaChatBot/Pet AI Chat - 6.png"
+                        src="/images/FurrmaChatBot/chatui1.png"
                         alt="Chat UI"
                         className="absolute top-[4%] left-[7%] w-[86%] h-[94%] object-cover rounded-[18px] md:rounded-[28px] z-0"
                     />
