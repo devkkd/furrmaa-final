@@ -56,4 +56,5 @@ export default function Card({ show = "both" }) {
       </div>
     </section>
   );
+  
 }
