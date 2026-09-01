@@ -248,7 +248,9 @@ export async function fetchVeterinarians(params = {}) {
 export async function fetchServiceProviders(params = {}) {
   const base = getBaseUrl();
   const q = new URLSearchParams();
-  if (params.serviceType) q.set('serviceType', params.serviceType);
+  if (params.serviceType && params.serviceType !== 'All') q.set('serviceType', params.serviceType);
+  if (params.location) q.set('location', params.location);
+  if (params.city) q.set('city', params.city);
   const url = `${base}/service-providers${q.toString() ? `?${q}` : ''}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Service providers fetch failed');

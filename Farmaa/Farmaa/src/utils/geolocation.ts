@@ -155,7 +155,14 @@ export async function getCurrentLocationWithCoords(): Promise<{
 /** First segment of a location string — used to match event city from GPS/search */
 export function locationSearchToken(location: string): string {
   if (!location?.trim()) return '';
-  return location.split(',')[0].trim();
+  const coordPattern = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/;
+  if (coordPattern.test(location.trim())) return '';
+  const parts = location.split(',').map((s) => s.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    const cityLike = parts.find((p) => !/municipal|corporation|district|division|tehsil|taluka/i.test(p));
+    return cityLike || parts[1] || parts[0];
+  }
+  return parts[0] || '';
 }
 
 /** Short label for header pills */

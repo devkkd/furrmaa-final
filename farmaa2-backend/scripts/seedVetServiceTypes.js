@@ -18,14 +18,17 @@ const DEFAULT_TYPES = [
 async function seed() {
   try {
     await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
-    const count = await VetServiceType.countDocuments();
-    if (count > 0) {
-      console.log('Vet service types already exist. Skipping seed.');
-      process.exit(0);
-      return;
+    let added = 0;
+    for (const type of DEFAULT_TYPES) {
+      const exists = await VetServiceType.findOne({
+        $or: [{ slug: type.slug }, { name: type.name }],
+      });
+      if (!exists) {
+        await VetServiceType.create(type);
+        added += 1;
+      }
     }
-    await VetServiceType.insertMany(DEFAULT_TYPES);
-    console.log('Seeded', DEFAULT_TYPES.length, 'vet service types.');
+    console.log(added > 0 ? `Added ${added} missing vet service types.` : 'All default vet service types already exist.');
   } catch (err) {
     console.error(err);
     process.exit(1);

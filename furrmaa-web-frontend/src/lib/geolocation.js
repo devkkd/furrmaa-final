@@ -52,3 +52,21 @@ export async function getCurrentLocationString() {
     return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
 }
+
+const COORD_PATTERN = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/;
+
+/** True when location is a raw "lat, lng" fallback (not useful for API filters). */
+export function isCoordinateLocation(location) {
+  return COORD_PATTERN.test(String(location || '').trim());
+}
+
+/** City/locality token for list APIs — avoids over-filtering on full geocoded strings. */
+export function locationSearchToken(location) {
+  if (!location?.trim() || isCoordinateLocation(location)) return '';
+  const parts = location.split(',').map((s) => s.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    const cityLike = parts.find((p) => !/municipal|corporation|district|division|tehsil|taluka/i.test(p));
+    return cityLike || parts[1] || parts[0];
+  }
+  return parts[0] || '';
+}

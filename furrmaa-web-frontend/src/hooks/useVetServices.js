@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { fetchVetServiceTypes, fetchVeterinarians, fetchServiceProviders, fetchCremationCenters } from '@/lib/api';
+import { locationSearchToken } from '@/lib/geolocation';
 
 /** Fallback when API has no types */
 export const VET_SERVICE_CATEGORIES = [
@@ -15,6 +16,12 @@ export const VET_SERVICE_CATEGORIES = [
   'Rescue Centers',
   'Pet Cremation',
 ];
+
+const DEFAULT_TYPES = VET_SERVICE_CATEGORIES.slice(1).map((name) => ({
+  name,
+  slug: name,
+  source: name === 'Veterinarians' ? 'veterinarian' : name === 'Pet Cremation' ? 'cremation' : 'service_provider',
+}));
 
 /** Normalize vet/service; typeName = admin type name (filter tab) */
 function toServiceItem(item, typeName, index) {
@@ -37,9 +44,34 @@ function toServiceItem(item, typeName, index) {
   };
 }
 
+function mergeTypeLists(apiTypes) {
+  const byName = new Map();
+  DEFAULT_TYPES.forEach((t) => byName.set(t.name.toLowerCase(), t));
+  (apiTypes || []).forEach((t) => {
+    byName.set(t.name.toLowerCase(), {
+      name: t.name,
+      slug: t.slug || t.name,
+      source: t.source,
+    });
+  });
+  return [...byName.values()].sort((a, b) => {
+    const ai = DEFAULT_TYPES.findIndex((d) => d.name === a.name);
+    const bi = DEFAULT_TYPES.findIndex((d) => d.name === b.name);
+    if (ai === -1 && bi === -1) return a.name.localeCompare(b.name);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+}
+
+function resolveTypeName(record, fallback = 'Veterinarians') {
+  const raw = record.serviceType || record.services?.[0];
+  return raw && String(raw).trim() ? String(raw).trim() : fallback;
+}
+
 export function useVetServices(options = {}) {
   const { category, city, location, search } = options;
-  const locationQuery = location?.trim() || city?.trim() || undefined;
+  const locationQuery = locationSearchToken(location) || locationSearchToken(city) || undefined;
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeList, setTypeList] = useState([]);
@@ -49,10 +81,12 @@ export function useVetServices(options = {}) {
     let cancelled = false;
     fetchVetServiceTypes()
       .then((list) => {
-        if (cancelled || !list || !list.length) return;
-        setTypeList(list.map((t) => ({ name: t.name, slug: t.slug || t.name, source: t.source })));
+        if (cancelled) return;
+        setTypeList(mergeTypeLists(list));
       })
-      .catch(() => setTypeList([]));
+      .catch(() => {
+        if (!cancelled) setTypeList(DEFAULT_TYPES);
+      });
     return () => { cancelled = true; };
   }, []);
 
@@ -61,45 +95,75 @@ export function useVetServices(options = {}) {
     setLoading(true);
 
     const selected = category && category !== 'All' ? category : null;
-    const typesToUse = typeList.length
-      ? typeList
-      : VET_SERVICE_CATEGORIES.slice(1).map((name) => ({
-          name,
-          slug: name,
-          source: name === 'Veterinarians' ? 'veterinarian' : name === 'Pet Cremation' ? 'cremation' : 'service_provider',
-        }));
+    const typesToUse = typeList.length ? typeList : DEFAULT_TYPES;
 
     const load = async () => {
       try {
         const all = [];
-        const listToFetch = selected ? typesToUse.filter((t) => t.name === selected) : typesToUse;
+        const seen = new Set();
 
-        for (const t of listToFetch) {
-          if (t.source === 'cremation') {
-            const centers = await fetchCremationCenters({ location: locationQuery });
-            centers.forEach((c, i) =>
-              all.push(toServiceItem({
-                _id: c._id,
-                name: c.name,
-                phone: c.phone,
-                address: [c.address, c.city, c.state].filter(Boolean).join(', '),
-              }, t.name, all.length + i))
-            );
-          } else {
-            // Har type ke liye dono: veterinarians (serviceType) + service providers (serviceType)
-            const vets = await fetchVeterinarians({
-              location: locationQuery,
-              serviceType: t.slug && t.slug !== 'All' ? t.slug : undefined,
-            });
-            vets.forEach((v, i) => all.push(toServiceItem(v, t.name, all.length + i)));
-            const providers = await fetchServiceProviders({
-              serviceType: t.slug && t.slug !== 'All' ? t.slug : undefined,
-            });
-            providers.forEach((p, i) => all.push(toServiceItem(p, t.name, all.length + i)));
+        const pushUnique = (item, typeName, index) => {
+          const key = String(item._id || item.id || '');
+          if (key && seen.has(key)) return;
+          if (key) seen.add(key);
+          all.push(toServiceItem(item, typeName, index));
+        };
+
+        if (!selected) {
+          const [vets, providers, centers] = await Promise.all([
+            fetchVeterinarians({ location: locationQuery }),
+            fetchServiceProviders({ location: locationQuery }),
+            fetchCremationCenters({ location: locationQuery }),
+          ]);
+
+          vets.forEach((v, i) => pushUnique(v, resolveTypeName(v, 'Veterinarians'), i));
+          providers.forEach((p, i) => pushUnique(p, resolveTypeName(p, 'Service'), vets.length + i));
+          centers.forEach((c, i) =>
+            pushUnique({
+              _id: c._id,
+              name: c.name,
+              phone: c.phone,
+              address: [c.address, c.city, c.state].filter(Boolean).join(', '),
+            }, 'Pet Cremation', vets.length + providers.length + i)
+          );
+        } else {
+          const listToFetch = typesToUse.filter((t) => t.name === selected);
+
+          for (const t of listToFetch) {
+            if (t.source === 'cremation') {
+              const centers = await fetchCremationCenters({ location: locationQuery });
+              centers.forEach((c, i) =>
+                pushUnique({
+                  _id: c._id,
+                  name: c.name,
+                  phone: c.phone,
+                  address: [c.address, c.city, c.state].filter(Boolean).join(', '),
+                }, t.name, all.length + i)
+              );
+            } else {
+              const slug = t.slug && t.slug !== 'All' ? t.slug : undefined;
+              const [vets, providers] = await Promise.all([
+                fetchVeterinarians({ location: locationQuery, serviceType: slug }),
+                fetchServiceProviders({ location: locationQuery, serviceType: slug }),
+              ]);
+              vets.forEach((v, i) => pushUnique(v, t.name, all.length + i));
+              providers.forEach((p, i) => pushUnique(p, t.name, all.length + i));
+            }
           }
         }
 
-        if (!cancelled) setServices(all);
+        let result = all;
+        if (search?.trim()) {
+          const q = search.trim().toLowerCase();
+          result = all.filter(
+            (s) =>
+              s.name.toLowerCase().includes(q) ||
+              (s.address && s.address.toLowerCase().includes(q)) ||
+              (s.type && s.type.toLowerCase().includes(q))
+          );
+        }
+
+        if (!cancelled) setServices(result);
       } catch (e) {
         if (!cancelled) setServices([]);
       } finally {
@@ -109,7 +173,7 @@ export function useVetServices(options = {}) {
 
     load();
     return () => { cancelled = true; };
-  }, [category, city, location, search, typeList]);
+  }, [category, city, location, search, typeList, locationQuery]);
 
   return { services, loading, categories };
 }

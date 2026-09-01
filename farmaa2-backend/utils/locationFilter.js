@@ -73,7 +73,9 @@ export function buildLocationMatchClause(locationOrCity, fieldPaths) {
 
 /** Cremation centers: city, state, address */
 export function cremationLocationClause(locationOrCity) {
-  return buildLocationMatchClause(locationOrCity, ['city', 'state', 'address']);
+  const raw = String(locationOrCity || '').trim();
+  if (!raw || isCoordinateLocation(raw)) return null;
+  return buildLocationMatchClause(raw, ['city', 'state', 'address']);
 }
 
 /** Pet events: city, venue, full address */
@@ -91,7 +93,20 @@ export function hopeLocationClause(locationOrCity) {
   return buildLocationMatchClause(locationOrCity, ['locationText']);
 }
 
-/** Veterinarians: street + city */
+const COORD_PATTERN = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/;
+
+/** Skip raw "lat, lng" strings — they never match stored addresses */
+export function isCoordinateLocation(locationOrCity) {
+  return COORD_PATTERN.test(String(locationOrCity || '').trim());
+}
+
+/** Veterinarians & service providers: street, city, state */
 export function vetLocationClause(locationOrCity) {
-  return buildLocationMatchClause(locationOrCity, ['address.city', 'address.street']);
+  const raw = String(locationOrCity || '').trim();
+  if (!raw || isCoordinateLocation(raw)) return null;
+  return buildLocationMatchClause(raw, [
+    'address.city',
+    'address.street',
+    'address.state',
+  ]);
 }

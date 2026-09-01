@@ -21,6 +21,7 @@ import {
   getCurrentLocationWithCoords,
   forwardGeocode,
   distanceKm,
+  locationSearchToken,
 } from '../../utils/geolocation';
 import { VET_SERVICE_TYPES } from '../../constants/vetServiceTypes';
 import locationIcon from '../../assets/images/location.png';
@@ -68,35 +69,41 @@ const VeterinariansScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [typeList, setTypeList] = useState<{ name: string; slug: string; source: string }[]>([]);
 
-  const locationFilter = currentLocation?.trim() || undefined;
+  const locationFilter = locationSearchToken(currentLocation) || undefined;
+
+  const defaultTypeList = VET_SERVICE_TYPES.slice(1).map((name) => ({
+    name,
+    slug: name,
+    source: name === 'Veterinarians' ? 'veterinarian' : name === 'Pet Cremation' ? 'cremation' : 'service_provider',
+  }));
+
+  const mergeTypeLists = (apiTypes: { name: string; slug: string; source: string }[]) => {
+    const byName = new Map<string, { name: string; slug: string; source: string }>();
+    defaultTypeList.forEach((t) => byName.set(t.name.toLowerCase(), t));
+    apiTypes.forEach((t) => {
+      byName.set(t.name.toLowerCase(), {
+        name: t.name,
+        slug: t.slug || t.name,
+        source: t.source,
+      });
+    });
+    return [...byName.values()];
+  };
+
   const categoryList = typeList.length
     ? ['All', ...typeList.map((t) => t.name)]
-    : ['All', ...VET_SERVICE_TYPES];
+    : ['All', ...VET_SERVICE_TYPES.slice(1)];
 
   useEffect(() => {
     api.CLIENT.get(api.ENDPOINTS.VET_SERVICE_TYPES)
       .then((res) => {
         const types = res.data?.types || [];
         if (types.length)
-          setTypeList(types.map((t: any) => ({ name: t.name, slug: t.slug || t.name, source: t.source })));
+          setTypeList(mergeTypeLists(types.map((t: any) => ({ name: t.name, slug: t.slug || t.name, source: t.source }))));
         else
-          setTypeList(
-            VET_SERVICE_TYPES.slice(1).map((name) => ({
-              name,
-              slug: name,
-              source: name === 'Veterinarians' ? 'veterinarian' : name === 'Pet Cremation' ? 'cremation' : 'service_provider',
-            }))
-          );
+          setTypeList(defaultTypeList);
       })
-      .catch(() =>
-        setTypeList(
-          VET_SERVICE_TYPES.slice(1).map((name) => ({
-            name,
-            slug: name,
-            source: name === 'Veterinarians' ? 'veterinarian' : name === 'Pet Cremation' ? 'cremation' : 'service_provider',
-          }))
-        )
-      );
+      .catch(() => setTypeList(defaultTypeList));
   }, []);
 
   useFocusEffect(
@@ -154,116 +161,173 @@ const VeterinariansScreen = () => {
     return { distance: '— km', distanceKm: 9999 };
   };
 
+  const resolveTypeName = (record: any, fallback: string) => {
+    const raw = record.serviceType || record.services?.[0];
+    return raw && String(raw).trim() ? String(raw).trim() : fallback;
+  };
+
   const fetchAllVetServices = async () => {
-    const typesToUse = typeList.length
-      ? typeList
-      : VET_SERVICE_TYPES.slice(1).map((name) => ({
-          name,
-          slug: name,
-          source: name === 'Veterinarians' ? 'veterinarian' : name === 'Pet Cremation' ? 'cremation' : 'service_provider',
-        }));
-    // Specific tab = sirf us type ki list; All = saari types alag-alag fetch karke merge
-    const listToFetch =
-      selectedCategory === 'All'
-        ? typesToUse
-        : typesToUse.filter((t) => t.name === selectedCategory);
+    const typesToUse = typeList.length ? typeList : defaultTypeList;
 
     try {
       setLoading(true);
       const all: VetServiceItem[] = [];
-      let index = 0;
+      const seen = new Set<string>();
 
-      for (const t of listToFetch) {
-        const slug = (t.slug || t.name || '').trim();
-        if (t.source === 'cremation') {
-          try {
-            const params = locationFilter ? { location: locationFilter } : {};
-            const res = await api.CLIENT.get(api.ENDPOINTS.CREMATION_CENTERS, { params });
-            const centers = res.data?.centers || [];
-            centers.forEach((c: any) => {
-              const addressStr =
-                [c.address, c.city, c.state].filter(Boolean).join(', ') || 'Address not available';
-              const { distance, distanceKm: dKm } = getDistanceForItem(
-                c.latitude,
-                c.longitude
-              );
-              all.push({
-                id: c._id,
-                name: c.name || 'Cremation Center',
-                address: addressStr,
-                phone: c.phone,
-                serviceType: t.name,
-                distance,
-                distanceKm: dKm,
-              });
-              index++;
+      const pushUnique = (item: VetServiceItem) => {
+        if (seen.has(item.id)) return;
+        seen.add(item.id);
+        all.push(item);
+      };
+
+      if (selectedCategory === 'All') {
+        const locParams = locationFilter ? { location: locationFilter } : {};
+
+        try {
+          const vetRes = await api.CLIENT.get(api.ENDPOINTS.VETERINARIANS, { params: locParams });
+          (vetRes.data?.veterinarians || []).forEach((v: any) => {
+            const addr = v.address;
+            const addressStr = addr
+              ? [addr.street, addr.city, addr.state].filter(Boolean).join(', ')
+              : 'Address not available';
+            const { distance, distanceKm: dKm } = getDistanceForItem(addr?.latitude, addr?.longitude);
+            pushUnique({
+              id: v._id,
+              name: v.name || v.clinicName || 'Veterinarian',
+              address: addressStr,
+              phone: v.phone,
+              email: v.email,
+              serviceType: resolveTypeName(v, 'Veterinarians'),
+              image: v.profileImage,
+              distance,
+              distanceKm: dKm,
+              specialization: v.specialization,
+              clinicName: v.clinicName,
+              qualification: v.qualification,
+              experience: v.experience,
+              rating: v.rating || 0,
+              totalReviews: v.totalReviews || 0,
             });
-          } catch (_) {}
-        } else {
-          // Har type ke liye dono: veterinarians (serviceType) + service providers (serviceType) – filter type ke hisaab se
-          try {
-            const vetParams: Record<string, string> = locationFilter ? { location: locationFilter } : {};
-            if (slug && slug !== 'All') vetParams.serviceType = slug;
-            const vetRes = await api.CLIENT.get(api.ENDPOINTS.VETERINARIANS, { params: vetParams });
-            const vets = vetRes.data?.veterinarians || [];
-            vets.forEach((v: any) => {
-              const addr = v.address;
-              const addressStr = addr
-                ? [addr.street, addr.city, addr.state].filter(Boolean).join(', ')
-                : 'Address not available';
-              const { distance, distanceKm: dKm } = getDistanceForItem(
-                addr?.latitude,
-                addr?.longitude
-              );
-              all.push({
-                id: v._id,
-                name: v.name || v.clinicName || 'Veterinarian',
-                address: addressStr,
-                phone: v.phone,
-                email: v.email,
-                serviceType: t.name,
-                image: v.profileImage,
-                distance,
-                distanceKm: dKm,
-                specialization: v.specialization,
-                clinicName: v.clinicName,
-                qualification: v.qualification,
-                experience: v.experience,
-                rating: v.rating || 0,
-                totalReviews: v.totalReviews || 0,
-              });
-              index++;
+          });
+        } catch (_) {}
+
+        try {
+          const provRes = await api.CLIENT.get(api.ENDPOINTS.SERVICE_PROVIDERS, { params: locParams });
+          (provRes.data?.providers || []).forEach((p: any) => {
+            const addr = typeof p.address === 'object' ? p.address : null;
+            const addressStr = addr
+              ? [addr?.street, addr?.city, addr?.state].filter(Boolean).join(', ')
+              : (typeof p.address === 'string' ? p.address : null) || 'Address not available';
+            const { distance, distanceKm: dKm } = getDistanceForItem(addr?.latitude, addr?.longitude);
+            pushUnique({
+              id: p._id,
+              name: p.name || 'Service',
+              address: addressStr,
+              phone: p.phone,
+              serviceType: resolveTypeName(p, 'Service'),
+              image: p.profileImage,
+              distance,
+              distanceKm: dKm,
+              rating: p.rating || 0,
+              totalReviews: p.totalReviews || 0,
             });
-          } catch (_) {}
-          try {
-            const provParams = slug && slug !== 'All' ? { serviceType: slug } : {};
-            const provRes = await api.CLIENT.get(api.ENDPOINTS.SERVICE_PROVIDERS, { params: provParams });
-            const providers = provRes.data?.providers || [];
-            providers.forEach((p: any) => {
-              const addr = typeof p.address === 'object' ? p.address : null;
-              const addressStr =
-                addr
+          });
+        } catch (_) {}
+
+        try {
+          const res = await api.CLIENT.get(api.ENDPOINTS.CREMATION_CENTERS, { params: locParams });
+          (res.data?.centers || []).forEach((c: any) => {
+            const addressStr = [c.address, c.city, c.state].filter(Boolean).join(', ') || 'Address not available';
+            const { distance, distanceKm: dKm } = getDistanceForItem(c.latitude, c.longitude);
+            pushUnique({
+              id: c._id,
+              name: c.name || 'Cremation Center',
+              address: addressStr,
+              phone: c.phone,
+              serviceType: 'Pet Cremation',
+              distance,
+              distanceKm: dKm,
+            });
+          });
+        } catch (_) {}
+      } else {
+        const listToFetch = typesToUse.filter((t) => t.name === selectedCategory);
+
+        for (const t of listToFetch) {
+          const slug = (t.slug || t.name || '').trim();
+          if (t.source === 'cremation') {
+            try {
+              const params = locationFilter ? { location: locationFilter } : {};
+              const res = await api.CLIENT.get(api.ENDPOINTS.CREMATION_CENTERS, { params });
+              (res.data?.centers || []).forEach((c: any) => {
+                const addressStr = [c.address, c.city, c.state].filter(Boolean).join(', ') || 'Address not available';
+                const { distance, distanceKm: dKm } = getDistanceForItem(c.latitude, c.longitude);
+                pushUnique({
+                  id: c._id,
+                  name: c.name || 'Cremation Center',
+                  address: addressStr,
+                  phone: c.phone,
+                  serviceType: t.name,
+                  distance,
+                  distanceKm: dKm,
+                });
+              });
+            } catch (_) {}
+          } else {
+            try {
+              const vetParams: Record<string, string> = locationFilter ? { location: locationFilter } : {};
+              if (slug && slug !== 'All') vetParams.serviceType = slug;
+              const vetRes = await api.CLIENT.get(api.ENDPOINTS.VETERINARIANS, { params: vetParams });
+              (vetRes.data?.veterinarians || []).forEach((v: any) => {
+                const addr = v.address;
+                const addressStr = addr
+                  ? [addr.street, addr.city, addr.state].filter(Boolean).join(', ')
+                  : 'Address not available';
+                const { distance, distanceKm: dKm } = getDistanceForItem(addr?.latitude, addr?.longitude);
+                pushUnique({
+                  id: v._id,
+                  name: v.name || v.clinicName || 'Veterinarian',
+                  address: addressStr,
+                  phone: v.phone,
+                  email: v.email,
+                  serviceType: t.name,
+                  image: v.profileImage,
+                  distance,
+                  distanceKm: dKm,
+                  specialization: v.specialization,
+                  clinicName: v.clinicName,
+                  qualification: v.qualification,
+                  experience: v.experience,
+                  rating: v.rating || 0,
+                  totalReviews: v.totalReviews || 0,
+                });
+              });
+            } catch (_) {}
+            try {
+              const provParams: Record<string, string> = locationFilter ? { location: locationFilter } : {};
+              if (slug && slug !== 'All') provParams.serviceType = slug;
+              const provRes = await api.CLIENT.get(api.ENDPOINTS.SERVICE_PROVIDERS, { params: provParams });
+              (provRes.data?.providers || []).forEach((p: any) => {
+                const addr = typeof p.address === 'object' ? p.address : null;
+                const addressStr = addr
                   ? [addr?.street, addr?.city, addr?.state].filter(Boolean).join(', ')
                   : (typeof p.address === 'string' ? p.address : null) || 'Address not available';
-              const { distance, distanceKm: dKm } = getDistanceForItem(
-                addr?.latitude,
-                addr?.longitude
-              );
-              all.push({
-                id: p._id,
-                name: p.name || 'Service',
-                address: addressStr,
-                phone: p.phone,
-                serviceType: t.name,
-                image: p.profileImage,
-                distance,
-                distanceKm: dKm,
-                rating: p.rating || 0,
-                totalReviews: p.totalReviews || 0,
+                const { distance, distanceKm: dKm } = getDistanceForItem(addr?.latitude, addr?.longitude);
+                pushUnique({
+                  id: p._id,
+                  name: p.name || 'Service',
+                  address: addressStr,
+                  phone: p.phone,
+                  serviceType: t.name,
+                  image: p.profileImage,
+                  distance,
+                  distanceKm: dKm,
+                  rating: p.rating || 0,
+                  totalReviews: p.totalReviews || 0,
+                });
               });
-              index++;
-            });
-          } catch (_) {}
+            } catch (_) {}
+          }
         }
       }
 
