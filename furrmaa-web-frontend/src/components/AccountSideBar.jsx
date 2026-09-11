@@ -136,8 +136,6 @@ export default function AccountSideBar() {
             subLabel="See all notifications"
           />
         </div>
-
-        {/* Support */}
         <div className="space-y-4">
           <h3 className="ml-1 text-sm font-semibold text-gray-500">
             Support
