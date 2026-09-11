@@ -34,13 +34,14 @@ export default function Header() {
     { label: "Medicine", href: shopCat("medicine"), icon: "/images/icons/medicine.svg" },
     { label: "Toys", href: shopCat("toys"), icon: "/images/icons/toys.svg" },
     { label: "Accessories", href: shopCat("accessories"), icon: "/images/icons/Accessories.svg" },
+     { label: "Supplements", href: shopCat("supplements"), icon: "/images/icons/Supplements.svg" },
     { label: "Grooming", href: shopCat("grooming"), icon: "/images/icons/Grooming.svg" },
-    { label: "Supplements", href: shopCat("supplements"), icon: "/images/icons/Supplements.svg" },
+   
     { label: "Pet Training", href: "/training", icon: "/images/icons/Pet Training.svg" },
-    { label: "Near By", href: "/vet", icon: "/images/icons/vet services.svg" },
+    { label: "Near By", href: "/vet", icon: "/images/icons/search.png" },
     { label: "Hope", href: "/hope", icon: "/images/icons/hope.svg" },
     { label: "Pet Events", href: "/events", icon: "/images/icons/pet events.svg" },
-    { label: "Pet Social", href: "/social", fallbackIcon: <FaUsers className="w-4 h-4 text-gray-700" /> },
+    // { label: "Pet Social", href: "/social", fallbackIcon: <FaUsers className="w-4 h-4 text-gray-700" /> },
   ];
 
   return (

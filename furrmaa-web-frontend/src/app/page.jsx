@@ -60,7 +60,7 @@ useEffect(() => {
       <FurrmaaPetAI />
       <BestDeal />
       <AboutFurrmaa />
-      <TrendingPetFeed />
+      {/* <TrendingPetFeed /> */}
       <Feedback />
       <WhyChooseFurrmaa />
     </div>
