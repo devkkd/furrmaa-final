@@ -58,7 +58,8 @@ const HopeScreen = () => {
   const route = useRoute();
   const { user } = useAuth();
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<'Dog' | 'Cat' | 'Lost & Found' | 'Adoption'>('Dog');
+  const [mainType, setMainType] = useState<'lostFound' | 'adoption'>('lostFound');
+  const [petSub, setPetSub] = useState<'all' | 'dog' | 'cat'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showSortModal, setShowSortModal] = useState(false);
@@ -67,8 +68,6 @@ const HopeScreen = () => {
   const [posts, setPosts] = useState<HopePost[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [filterPostType, setFilterPostType] = useState<'all' | 'adoption' | 'lostFound'>('all');
-  const [filterPetType, setFilterPetType] = useState<'all' | 'dog' | 'cat'>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   useFocusEffect(
@@ -96,19 +95,9 @@ const HopeScreen = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const params: any = { status: 'active' };
-      
-      // Map category to backend filters
-      if (activeCategory === 'Dog') {
-        params.petType = 'dog';
-        params.postType = 'adoption';
-      } else if (activeCategory === 'Cat') {
-        params.petType = 'cat';
-        params.postType = 'adoption';
-      } else if (activeCategory === 'Lost & Found') {
-        params.postType = 'lostFound';
-      } else if (activeCategory === 'Adoption') {
-        params.postType = 'adoption';
+      const params: any = { status: 'active', postType: mainType };
+      if (petSub === 'dog' || petSub === 'cat') {
+        params.petType = petSub;
       }
 
       if (currentLocation) {
@@ -161,7 +150,7 @@ const HopeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       if (!locLoading) fetchPosts();
-    }, [activeCategory, currentLocation, searchQuery, locLoading, filterPostType, filterPetType, sortOrder])
+    }, [mainType, petSub, currentLocation, searchQuery, locLoading, sortOrder])
   );
 
   const onRefresh = () => {
@@ -169,7 +158,15 @@ const HopeScreen = () => {
     fetchPosts();
   };
 
-  const categories = ['Dog', 'Cat', 'Lost & Found', 'Adoption'];
+  const mainTypes: { key: 'lostFound' | 'adoption'; label: string }[] = [
+    { key: 'lostFound', label: 'Lost & Found' },
+    { key: 'adoption', label: 'Adoption' },
+  ];
+  const petSubs: { key: 'all' | 'dog' | 'cat'; label: string }[] = [
+    { key: 'all', label: 'All' },
+    { key: 'dog', label: 'Dog' },
+    { key: 'cat', label: 'Cat' },
+  ];
 
   const filteredPets = useMemo(() => {
     if (!searchQuery.trim()) return posts;
@@ -264,32 +261,63 @@ const HopeScreen = () => {
         </TouchableOpacity>
     </View>
 
-      {/* Category Tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoriesContainer}
-      >
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category}
-            style={[
-              styles.categoryTab,
-              activeCategory === category && styles.categoryTabActive,
-            ]}
-            onPress={() => setActiveCategory(category as any)}
-          >
-            <Text
+      {/* Category Tabs — main then sub */}
+      <View style={styles.categoryBlock}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesContainer}
+        >
+          {mainTypes.map((item) => (
+            <TouchableOpacity
+              key={item.key}
               style={[
-                styles.categoryTabText,
-                activeCategory === category && styles.categoryTabTextActive,
+                styles.categoryTab,
+                mainType === item.key && styles.categoryTabActive,
               ]}
+              onPress={() => {
+                setMainType(item.key);
+                setPetSub('all');
+              }}
             >
-              {category}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text
+                style={[
+                  styles.categoryTabText,
+                  mainType === item.key && styles.categoryTabTextActive,
+                ]}
+              >
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={[styles.categoriesContainer, { paddingTop: 0 }]}
+        >
+          {petSubs.map((item) => (
+            <TouchableOpacity
+              key={item.key}
+              style={[
+                styles.categoryTab,
+                styles.categoryTabSub,
+                petSub === item.key && styles.categoryTabActive,
+              ]}
+              onPress={() => setPetSub(item.key)}
+            >
+              <Text
+                style={[
+                  styles.categoryTabText,
+                  petSub === item.key && styles.categoryTabTextActive,
+                ]}
+              >
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* Pet Listings Grid / Empty */}
       {filteredPets.length === 0 ? (
@@ -399,26 +427,27 @@ const HopeScreen = () => {
                 <Text style={styles.modalCloseButton}>✕</Text>
               </TouchableOpacity>
             </View>
+            <Text style={styles.filterSubheading}>Post type</Text>
             {[
-              { label: 'All post types', value: 'all' as const },
-              { label: 'Adoption', value: 'adoption' as const },
               { label: 'Lost & Found', value: 'lostFound' as const },
+              { label: 'Adoption', value: 'adoption' as const },
             ].map((opt) => (
               <TouchableOpacity
                 key={opt.value}
                 style={[
                   styles.filterOption,
-                  filterPostType === opt.value && styles.filterOptionOn,
+                  mainType === opt.value && styles.filterOptionOn,
                 ]}
                 onPress={() => {
-                  setFilterPostType(opt.value);
+                  setMainType(opt.value);
+                  setPetSub('all');
                   setShowFilterModal(false);
                 }}
               >
                 <Text
                   style={[
                     styles.filterOptionText,
-                    filterPostType === opt.value && styles.filterOptionTextOn,
+                    mainType === opt.value && styles.filterOptionTextOn,
                   ]}
                 >
                   {opt.label}
@@ -427,25 +456,25 @@ const HopeScreen = () => {
             ))}
             <Text style={styles.filterSubheading}>Pet type</Text>
             {[
-              { label: 'All pets', value: 'all' as const },
-              { label: 'Dogs', value: 'dog' as const },
-              { label: 'Cats', value: 'cat' as const },
+              { label: 'All', value: 'all' as const },
+              { label: 'Dog', value: 'dog' as const },
+              { label: 'Cat', value: 'cat' as const },
             ].map((opt) => (
               <TouchableOpacity
                 key={opt.value}
                 style={[
                   styles.filterOption,
-                  filterPetType === opt.value && styles.filterOptionOn,
+                  petSub === opt.value && styles.filterOptionOn,
                 ]}
                 onPress={() => {
-                  setFilterPetType(opt.value);
+                  setPetSub(opt.value);
                   setShowFilterModal(false);
                 }}
               >
                 <Text
                   style={[
                     styles.filterOptionText,
-                    filterPetType === opt.value && styles.filterOptionTextOn,
+                    petSub === opt.value && styles.filterOptionTextOn,
                   ]}
                 >
                   {opt.label}
@@ -608,9 +637,11 @@ const styles = StyleSheet.create({
 
   categoriesContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 8,
     gap: 10,
-    height: 60,
+  },
+  categoryBlock: {
+    paddingBottom: 4,
   },
   categoryTab: {
     paddingHorizontal: 20,
@@ -618,6 +649,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#D9DCE2',
     marginRight: 10,
+  },
+  categoryTabSub: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
   },
   categoryTabActive: {
     backgroundColor: '#1F2E46',

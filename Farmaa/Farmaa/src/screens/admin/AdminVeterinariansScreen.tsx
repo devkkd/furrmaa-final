@@ -61,8 +61,47 @@ const AdminVeterinariansScreen = () => {
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [placeCity, setPlaceCity] = useState('');
   const [typeList, setTypeList] = useState<{ name: string; slug: string }[]>([]);
   const [showTypePicker, setShowTypePicker] = useState(false);
+
+  const parseCityFromLabel = (label: string, hintCity?: string) => {
+    if (hintCity?.trim()) return hintCity.trim();
+    const parts = String(label || '')
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
+    const skip = /municipal|corporation|district|division|tehsil|taluka|india/i;
+    const cityPart = parts.find((p) => !skip.test(p)) || parts[0] || '';
+    return cityPart.split(/\s+/).find((w) => w.length >= 3 && !skip.test(w)) || cityPart;
+  };
+
+  const buildAddressPayload = async (loc: string) => {
+    const city = parseCityFromLabel(loc, placeCity);
+    const address: {
+      street: string;
+      city: string;
+      state?: string;
+      latitude?: number;
+      longitude?: number;
+    } = {
+      street: loc,
+      city: city || loc.split(',')[0]?.trim() || loc,
+    };
+    if (locationCoords) {
+      address.latitude = locationCoords.lat;
+      address.longitude = locationCoords.lng;
+    } else {
+      try {
+        const coords = await forwardGeocode(loc);
+        if (coords) {
+          address.latitude = coords.lat;
+          address.longitude = coords.lng;
+        }
+      } catch (_) {}
+    }
+    return address;
+  };
 
   useEffect(() => {
     if (activeTab === 'list' || activeTab === 'update' || activeTab === 'delete') {
@@ -98,15 +137,17 @@ const AdminVeterinariansScreen = () => {
       phone: '',
       location: '',
       profileImage: '',
-      serviceType: '',
+      serviceType: 'Veterinarians',
     });
     setEditingId(null);
     setLocationCoords(null);
+    setPlaceCity('');
   };
 
   const applyLocationSuggestion = (p: LocationSuggestion) => {
     setFormData((f) => ({ ...f, location: p.displayName }));
     setLocationCoords({ lat: p.lat, lng: p.lng });
+    setPlaceCity(p.city || parseCityFromLabel(p.displayName));
   };
 
   const handleAdd = async () => {
@@ -114,33 +155,25 @@ const AdminVeterinariansScreen = () => {
       Alert.alert('Error', 'Name is required');
       return;
     }
+    if (!formData.location?.trim()) {
+      Alert.alert('Error', 'Location is required for Nearby listing');
+      return;
+    }
+    if (!formData.serviceType?.trim()) {
+      Alert.alert('Error', 'Category / Service Type is required');
+      return;
+    }
 
     try {
       setLoading(true);
-      const loc = formData.location.trim();
-      let address: { street: string; city: string; latitude?: number; longitude?: number } | undefined;
-      if (loc) {
-        address = { street: loc, city: loc };
-        if (locationCoords) {
-          address.latitude = locationCoords.lat;
-          address.longitude = locationCoords.lng;
-        } else {
-          try {
-            const coords = await forwardGeocode(loc);
-            if (coords) {
-              address.latitude = coords.lat;
-              address.longitude = coords.lng;
-            }
-          } catch (_) {}
-        }
-      }
+      const address = await buildAddressPayload(formData.location.trim());
       const payload = {
         name: formData.name.trim(),
         email: `vet_${formData.phone?.trim() || Date.now()}@farmaa.local`,
         phone: formData.phone.trim() || undefined,
         address,
         profileImage: formData.profileImage || undefined,
-        serviceType: formData.serviceType.trim() || undefined,
+        serviceType: formData.serviceType.trim(),
       };
 
       await api.CLIENT.post(api.ENDPOINTS.ADMIN.VETERINARIANS, payload);
@@ -165,10 +198,14 @@ const AdminVeterinariansScreen = () => {
       phone: vet.phone || '',
       location: loc,
       profileImage: vet.profileImage || '',
-      serviceType: vet.serviceType || '',
+      serviceType: vet.serviceType || 'Veterinarians',
     });
-    if (vet.address?.latitude != null && vet.address?.longitude != null) {
-      setLocationCoords({ lat: vet.address.latitude, lng: vet.address.longitude });
+    setPlaceCity(vet.address?.city || '');
+    if ((vet.address as any)?.latitude != null && (vet.address as any)?.longitude != null) {
+      setLocationCoords({
+        lat: (vet.address as any).latitude,
+        lng: (vet.address as any).longitude,
+      });
     } else {
       setLocationCoords(null);
     }
@@ -181,32 +218,24 @@ const AdminVeterinariansScreen = () => {
       Alert.alert('Error', 'Name is required');
       return;
     }
+    if (!formData.location?.trim()) {
+      Alert.alert('Error', 'Location is required for Nearby listing');
+      return;
+    }
+    if (!formData.serviceType?.trim()) {
+      Alert.alert('Error', 'Category / Service Type is required');
+      return;
+    }
 
     try {
       setLoading(true);
-      const loc = formData.location.trim();
-      let address: { street: string; city: string; latitude?: number; longitude?: number } | undefined;
-      if (loc) {
-        address = { street: loc, city: loc };
-        if (locationCoords) {
-          address.latitude = locationCoords.lat;
-          address.longitude = locationCoords.lng;
-        } else {
-          try {
-            const coords = await forwardGeocode(loc);
-            if (coords) {
-              address.latitude = coords.lat;
-              address.longitude = coords.lng;
-            }
-          } catch (_) {}
-        }
-      }
+      const address = await buildAddressPayload(formData.location.trim());
       const payload: any = {
         name: formData.name.trim(),
         phone: formData.phone.trim() || undefined,
         address,
         profileImage: formData.profileImage || undefined,
-        serviceType: formData.serviceType.trim() || undefined,
+        serviceType: formData.serviceType.trim(),
       };
 
       await api.CLIENT.put(`${api.ENDPOINTS.ADMIN.VETERINARIANS}/${editingId}`, payload);

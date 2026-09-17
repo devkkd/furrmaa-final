@@ -158,11 +158,12 @@ export function locationSearchToken(location: string): string {
   const coordPattern = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/;
   if (coordPattern.test(location.trim())) return '';
   const parts = location.split(',').map((s) => s.trim()).filter(Boolean);
-  if (parts.length >= 2) {
-    const cityLike = parts.find((p) => !/municipal|corporation|district|division|tehsil|taluka/i.test(p));
-    return cityLike || parts[1] || parts[0];
-  }
-  return parts[0] || '';
+  if (!parts.length) return '';
+  const skipPart = /municipal|corporation|district|division|tehsil|taluka/i;
+  const skipWord = /^(municipal|corporation|district|division|tehsil|taluka|nagar|area|near|the|and|of)$/i;
+  const cityLike = parts.find((p) => !skipPart.test(p)) || parts[1] || parts[0];
+  const word = cityLike.split(/\s+/).find((w) => w.length >= 3 && !skipWord.test(w));
+  return word || cityLike || parts[0] || '';
 }
 
 /** Short label for header pills */

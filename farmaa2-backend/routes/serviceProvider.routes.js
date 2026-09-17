@@ -1,6 +1,6 @@
 import express from 'express';
 import User from '../models/User.model.js';
-import { vetLocationClause } from '../utils/locationFilter.js';
+import { vetLocationClause, preferredCityToken } from '../utils/locationFilter.js';
 
 const router = express.Router();
 
@@ -28,7 +28,8 @@ router.get('/', async (req, res) => {
     const typeClause = serviceTypeFilter(serviceType);
     if (typeClause) andClauses.push(typeClause);
 
-    const locClause = vetLocationClause(location || city);
+    const locRaw = location || city;
+    const locClause = vetLocationClause(preferredCityToken(locRaw) || locRaw);
     if (locClause) andClauses.push(locClause);
 
     if (andClauses.length) query.$and = andClauses;

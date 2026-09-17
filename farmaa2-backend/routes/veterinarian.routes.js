@@ -1,7 +1,6 @@
 import express from 'express';
-import { protect } from '../middleware/auth.middleware.js';
 import User from '../models/User.model.js';
-import { vetLocationClause } from '../utils/locationFilter.js';
+import { vetLocationClause, preferredCityToken } from '../utils/locationFilter.js';
 
 const router = express.Router();
 
@@ -9,27 +8,27 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const { category, city, location, specialization, serviceType: serviceTypeRaw } = req.query;
-    // Normalize: query params can be string or array (e.g. ?serviceType=X)
     const serviceType = Array.isArray(serviceTypeRaw) ? serviceTypeRaw[0] : serviceTypeRaw;
-    const query = { 
+    const query = {
       role: 'veterinarian',
-      isActive: true 
+      isActive: true,
     };
-    
+
     if (category && category !== 'All') {
       query.specialization = category;
     }
     const andClauses = [];
-    const vetLoc = vetLocationClause(location || city);
+    // Prefer city token so "Jaipur Municipal..." matches address.city "Jaipur"
+    const locRaw = location || city;
+    const locForFilter = preferredCityToken(locRaw) || locRaw;
+    const vetLoc = vetLocationClause(locForFilter);
     if (vetLoc) andClauses.push(vetLoc);
     if (specialization) {
       query.specialization = { $regex: specialization, $options: 'i' };
     }
-    // Filter by vet service type – jo type select hai sirf wahi vets
     if (serviceType && String(serviceType).trim() !== '' && String(serviceType).trim() !== 'All') {
       const typeStr = String(serviceType).trim();
       const typeRegex = new RegExp(`^${typeStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
-      // Purane vets (serviceType null/empty) sirf "Veterinarians" tab me dikhen
       if (typeRegex.test('Veterinarians')) {
         andClauses.push({
           $or: [
@@ -42,11 +41,11 @@ router.get('/', async (req, res) => {
       }
     }
     if (andClauses.length) query.$and = andClauses;
-    
+
     const veterinarians = await User.find(query).select(
       'name email phone address profileImage specialization qualification clinicName experience licenseNumber rating totalReviews serviceType'
     ).sort({ rating: -1, createdAt: -1 });
-    
+
     res.json({ success: true, veterinarians });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -54,5 +53,3 @@ router.get('/', async (req, res) => {
 });
 
 export default router;
-
-

@@ -32,7 +32,7 @@ export default function PostScreen({ }) {
   const [locationLoading, setLocationLoading] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [petType, setPetType] = useState<'dog' | 'cat'>('dog');
-  const [postType, setPostType] = useState<'adoption' | 'lostFound'>('adoption');
+  const [postType, setPostType] = useState<'adoption' | 'lostFound'>('lostFound');
   const [petName, setPetName] = useState('');
   const [petAge, setPetAge] = useState('');
   const initialLoc = (route.params as any)?.selectedLocation || user?.address?.city || '';
@@ -144,18 +144,18 @@ export default function PostScreen({ }) {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        {/* Select Pet Type */}
-        <Text style={styles.sectionTitle}>Select Pet Type</Text>
+        {/* Select Post Type first */}
+        <Text style={styles.sectionTitle}>1. Select Post Type</Text>
+        <View style={styles.row}>
+          <AgePill label="Lost & Found" active={postType === 'lostFound'} onPress={() => setPostType('lostFound')} />
+          <AgePill label="Adoption" active={postType === 'adoption'} onPress={() => setPostType('adoption')} />
+        </View>
+
+        {/* Then Pet Type */}
+        <Text style={styles.sectionTitle}>2. Select Pet Type</Text>
         <View style={styles.row}>
           <Pill label="Dog" icon={petImage} active={petType === 'dog'} onPress={() => setPetType('dog')} />
           <Pill label="Cat" icon={petImage} active={petType === 'cat'} onPress={() => setPetType('cat')} />
-        </View>
-
-        {/* Select Post Type */}
-        <Text style={styles.sectionTitle}>Select Post Type</Text>
-        <View style={styles.row}>
-          <AgePill label="Adoption" active={postType === 'adoption'} onPress={() => setPostType('adoption')} />
-          <AgePill label="Lost & Found" active={postType === 'lostFound'} onPress={() => setPostType('lostFound')} />
         </View>
 
         {/* Upload Images - user se pick karke upload */}

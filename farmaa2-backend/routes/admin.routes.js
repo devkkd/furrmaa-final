@@ -31,6 +31,7 @@ import AIChat from '../models/AIChat.model.js';
 import Wishlist from '../models/Wishlist.model.js';
 import Wallet from '../models/Wallet.model.js';
 import { creditWalletForOrderRefund } from '../utils/walletRefund.js';
+import { normalizeVetAddress } from '../utils/locationFilter.js';
 import VetServiceType from '../models/VetServiceType.model.js';
 import Category from '../models/Category.model.js';
 import ProductSize from '../models/ProductSize.model.js';
@@ -1747,7 +1748,7 @@ router.post('/veterinarians', async (req, res) => {
       email,
       phone,
       password: password || 'default123', // Default password if not provided
-      address,
+      address: address ? normalizeVetAddress(address) : address,
       role: 'veterinarian',
       specialization,
       qualification,
@@ -1786,6 +1787,12 @@ router.put('/veterinarians/:id', async (req, res) => {
     }
     
     // Update other fields
+    if (updateData.address) {
+      updateData.address = normalizeVetAddress(updateData.address);
+    }
+    if (updateData.serviceType != null) {
+      updateData.serviceType = String(updateData.serviceType).trim();
+    }
     Object.assign(vet, updateData);
     await vet.save();
     
@@ -2232,9 +2239,10 @@ router.delete('/coupons/:id', async (req, res) => {
 // Get all hope posts
 router.get('/hope-posts', async (req, res) => {
   try {
-    const { postType, status, page = 1, limit = 20 } = req.query;
+    const { postType, petType, status, page = 1, limit = 20 } = req.query;
     const query = {};
     if (postType) query.postType = postType;
+    if (petType) query.petType = petType;
     if (status) query.status = status;
     
     const posts = await HopePost.find(query)
@@ -2260,10 +2268,57 @@ router.get('/hope-posts', async (req, res) => {
   }
 });
 
+// Create hope post (admin)
+router.post('/hope-posts', async (req, res) => {
+  try {
+    const {
+      postType,
+      petType,
+      petName,
+      petAgeText,
+      locationText,
+      latitude,
+      longitude,
+      description,
+      images,
+      status = 'active',
+    } = req.body;
+
+    if (!postType || !['adoption', 'lostFound'].includes(postType)) {
+      return res.status(400).json({ success: false, message: 'postType must be adoption or lostFound' });
+    }
+    if (!petType || !['dog', 'cat'].includes(petType)) {
+      return res.status(400).json({ success: false, message: 'petType must be dog or cat' });
+    }
+    if (!petName?.trim() || !locationText?.trim()) {
+      return res.status(400).json({ success: false, message: 'petName and locationText are required' });
+    }
+
+    const post = await HopePost.create({
+      user: req.user.id,
+      postType,
+      petType,
+      petName: String(petName).trim(),
+      petAgeText: petAgeText ? String(petAgeText).trim() : undefined,
+      locationText: String(locationText).trim(),
+      latitude,
+      longitude,
+      description: description ? String(description).trim() : undefined,
+      images: Array.isArray(images) ? images.filter(Boolean) : undefined,
+      status: status === 'closed' ? 'closed' : 'active',
+    });
+
+    await post.populate('user', 'name email phone');
+    res.status(201).json({ success: true, post });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 // Update hope post (admin can edit location, status, etc.)
 router.put('/hope-posts/:id', async (req, res) => {
   try {
-    const { status, locationText, latitude, longitude, description, postType, petType } = req.body;
+    const { status, locationText, latitude, longitude, description, postType, petType, petName, petAgeText } = req.body;
     const post = await HopePost.findById(req.params.id);
     if (!post) {
       return res.status(404).json({ success: false, message: 'Post not found' });
@@ -2276,6 +2331,8 @@ router.put('/hope-posts/:id', async (req, res) => {
     if (description !== undefined) post.description = description;
     if (postType) post.postType = postType;
     if (petType) post.petType = petType;
+    if (petName) post.petName = String(petName).trim();
+    if (petAgeText !== undefined) post.petAgeText = petAgeText ? String(petAgeText).trim() : '';
 
     await post.save();
     await post.populate('user', 'name email phone');

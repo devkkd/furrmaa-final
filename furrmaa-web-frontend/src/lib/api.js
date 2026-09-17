@@ -1657,6 +1657,10 @@ export async function adminGetHopePosts(params = {}) {
   return d.posts || [];
 }
 
+export async function adminCreateHopePost(body) {
+  return adminFetch('/admin/hope-posts', { method: 'POST', body: JSON.stringify(body) });
+}
+
 export async function adminUpdateHopePostStatus(id, status) {
   return adminFetch(`/admin/hope-posts/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
 }

@@ -43,15 +43,20 @@ function HopePageContent() {
   const searchParams = useSearchParams();
 
   const filterFromUrl = searchParams?.get("filter");
+  const petFromUrl = searchParams?.get("pet");
 
-  const initialCat =
+  const initialPostType =
     filterFromUrl === "lostFound"
-      ? "Lost & Found"
+      ? "lostFound"
       : filterFromUrl === "adoption"
-      ? "Adoption"
-      : "All";
+      ? "adoption"
+      : "lostFound";
 
-  const [activeCategory, setActiveCategory] = useState(initialCat);
+  const initialPetSub =
+    petFromUrl === "dog" || petFromUrl === "cat" ? petFromUrl : "all";
+
+  const [mainType, setMainType] = useState(initialPostType); // lostFound | adoption
+  const [petSub, setPetSub] = useState(initialPetSub); // all | dog | cat
   const [searchQuery, setSearchQuery] = useState("");
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,14 +64,12 @@ function HopePageContent() {
   const [showLocationModal, setShowLocationModal] = useState(false);
 
   useEffect(() => {
-    if (filterFromUrl === "lostFound") {
-      setActiveCategory("Lost & Found");
-    } else if (filterFromUrl === "adoption") {
-      setActiveCategory("Adoption");
-    } else {
-      setActiveCategory("All");
+    if (filterFromUrl === "lostFound") setMainType("lostFound");
+    else if (filterFromUrl === "adoption") setMainType("adoption");
+    if (petFromUrl === "dog" || petFromUrl === "cat" || petFromUrl === "all") {
+      setPetSub(petFromUrl === "all" ? "all" : petFromUrl);
     }
-  }, [filterFromUrl]);
+  }, [filterFromUrl, petFromUrl]);
 
   const {
     location,
@@ -94,30 +97,18 @@ function HopePageContent() {
   };
 
   const params = useMemo(() => {
-    const p = {};
-
-    if (activeCategory === "Dog") {
-      p.petType = "dog";
-      p.postType = "adoption";
-    } else if (activeCategory === "Cat") {
-      p.petType = "cat";
-      p.postType = "adoption";
-    } else if (activeCategory === "Lost & Found") {
-      p.postType = "lostFound";
-    } else if (activeCategory === "Adoption") {
-      p.postType = "adoption";
+    const p = { postType: mainType };
+    if (petSub === "dog" || petSub === "cat") {
+      p.petType = petSub;
     }
-
     if (location && location.trim()) {
       p.location = location.trim();
     }
-
     if (searchQuery && searchQuery.trim()) {
       p.search = searchQuery.trim();
     }
-
     return p;
-  }, [activeCategory, location, searchQuery]);
+  }, [mainType, petSub, location, searchQuery]);
 
   useEffect(() => {
     let cancelled = false;
@@ -169,14 +160,6 @@ function HopePageContent() {
       cancelled = true;
     };
   }, [params]);
-
-  const categories = [
-    "All",
-    "Dog",
-    "Cat",
-    "Lost & Found",
-    "Adoption",
-  ];
 
   return (
     <div className="bg-white overflow-x-hidden">
@@ -408,47 +391,60 @@ function HopePageContent() {
     </div>
 
     {/* ================= CATEGORIES ================= */}
-    <div className="w-full mb-5 sm:mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
-      <div
-        className="
-          flex
-          gap-2
-          overflow-x-auto
-          overscroll-x-contain
-          pb-1
-          scrollbar-hide
-          snap-x
-          snap-mandatory
-          sm:flex-wrap
-          sm:overflow-visible
-          sm:pb-0
-          sm:snap-none
-        "
-      >
-        {categories.map((cat) => (
+    <div className="w-full mb-5 sm:mb-6 space-y-3">
+      {/* Main: Lost & Found | Adoption */}
+      <div className="flex gap-2 flex-wrap">
+        {[
+          { key: "lostFound", label: "Lost & Found" },
+          { key: "adoption", label: "Adoption" },
+        ].map((item) => (
           <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
+            key={item.key}
+            type="button"
+            onClick={() => {
+              setMainType(item.key);
+              setPetSub("all");
+            }}
             className={`
-              shrink-0
-              snap-start
-              whitespace-nowrap
-              px-3.5
-              sm:px-4
-              py-2
-              rounded-full
-              text-xs
-              sm:text-sm
-              font-medium
-              transition-all
+              shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 rounded-full
+              text-xs sm:text-sm font-semibold transition-all
               ${
-                activeCategory === cat
-                  ? "bg-[#1F2E46] text-white"
-                  : "bg-gray-100 text-gray-600 active:bg-gray-300 hover:bg-gray-200"
+                mainType === item.key
+                  ? "bg-[#1F2E46] text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }
             `}
           >
-            {cat}
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Sub: All | Dog | Cat */}
+      <div className="flex gap-2 flex-wrap -mx-4 px-4 sm:mx-0 sm:px-0">
+        <p className="w-full text-[11px] sm:text-xs text-gray-400 font-medium uppercase tracking-wide mb-0.5">
+          {mainType === "lostFound" ? "Lost & Found" : "Adoption"} · Pet type
+        </p>
+        {[
+          { key: "all", label: "All" },
+          { key: "dog", label: "Dog" },
+          { key: "cat", label: "Cat" },
+        ].map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            onClick={() => setPetSub(item.key)}
+            className={`
+              shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-full
+              text-xs sm:text-sm font-medium transition-all
+              ${
+                petSub === item.key
+                  ? "bg-[#1F2E46] text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }
+            `}
+          >
+            {item.label}
           </button>
         ))}
       </div>
@@ -503,9 +499,7 @@ function HopePageContent() {
         </p>
 
         <p className="text-xs sm:text-sm text-gray-400 leading-5 max-w-md mx-auto">
-          {activeCategory !== "All" ||
-          location ||
-          searchQuery
+          {location || searchQuery || petSub !== "all"
             ? "Try adjusting filters or check back later."
             : "Be the first to add a Hope post via the Furrmaa mobile app."}
         </p>

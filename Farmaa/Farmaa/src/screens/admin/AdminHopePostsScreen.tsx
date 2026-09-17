@@ -36,15 +36,18 @@ interface HopePost {
 
 const AdminHopePostsScreen = () => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState<'list' | 'edit' | 'delete'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'add' | 'edit' | 'delete'>('list');
   const [posts, setPosts] = useState<HopePost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPostType, setFilterPostType] = useState<'all' | 'lostFound' | 'adoption'>('all');
+  const [filterPetType, setFilterPetType] = useState<'all' | 'dog' | 'cat'>('all');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'closed'>('all');
 
   const [formData, setFormData] = useState({
+    petName: '',
+    petAgeText: '',
     locationText: '',
     description: '',
     status: 'active' as 'active' | 'closed',
@@ -57,7 +60,7 @@ const AdminHopePostsScreen = () => {
     if (activeTab === 'list' || activeTab === 'edit' || activeTab === 'delete') {
       fetchPosts();
     }
-  }, [activeTab]);
+  }, [activeTab, filterPostType, filterPetType, filterStatus]);
 
   const fetchPosts = async () => {
     try {
@@ -65,6 +68,7 @@ const AdminHopePostsScreen = () => {
       setError(null);
       const params: Record<string, string> = {};
       if (filterPostType !== 'all') params.postType = filterPostType;
+      if (filterPetType !== 'all') params.petType = filterPetType;
       if (filterStatus !== 'all') params.status = filterStatus;
       const qs = new URLSearchParams(params).toString();
       const url = `${api.ENDPOINTS.ADMIN.HOPE_POSTS}${qs ? `?${qs}` : ''}`;
@@ -80,6 +84,8 @@ const AdminHopePostsScreen = () => {
 
   const resetForm = () => {
     setFormData({
+      petName: '',
+      petAgeText: '',
       locationText: '',
       description: '',
       status: 'active',
@@ -92,6 +98,8 @@ const AdminHopePostsScreen = () => {
   const handleEdit = (post: HopePost) => {
     setEditingId(post._id);
     setFormData({
+      petName: post.petName || '',
+      petAgeText: post.petAgeText || '',
       locationText: post.locationText || '',
       description: post.description || '',
       status: post.status || 'active',
@@ -101,12 +109,41 @@ const AdminHopePostsScreen = () => {
     setActiveTab('edit');
   };
 
+  const handleCreate = async () => {
+    if (!formData.petName.trim() || !formData.locationText.trim()) {
+      Alert.alert('Error', 'Pet name and location are required');
+      return;
+    }
+    try {
+      setLoading(true);
+      await api.CLIENT.post(api.ENDPOINTS.ADMIN.HOPE_POSTS, {
+        postType: formData.postType,
+        petType: formData.petType,
+        petName: formData.petName.trim(),
+        petAgeText: formData.petAgeText.trim() || undefined,
+        locationText: formData.locationText.trim(),
+        description: formData.description.trim() || undefined,
+        status: formData.status,
+      });
+      Alert.alert('Success', 'Hope post created');
+      resetForm();
+      setActiveTab('list');
+      fetchPosts();
+    } catch (err: any) {
+      Alert.alert('Error', err.response?.data?.message || 'Failed to create post');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUpdate = async () => {
     if (!editingId) return;
 
     try {
       setLoading(true);
       const payload = {
+        petName: formData.petName.trim() || undefined,
+        petAgeText: formData.petAgeText.trim() || undefined,
         locationText: formData.locationText.trim(),
         description: formData.description.trim(),
         status: formData.status,
@@ -186,9 +223,9 @@ const AdminHopePostsScreen = () => {
 
   const renderForm = () => (
     <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
-      <Text style={styles.formTitle}>Edit Hope Post</Text>
+      <Text style={styles.formTitle}>{editingId ? 'Edit Hope Post' : 'Add Hope Post'}</Text>
 
-      <Text style={styles.label}>Post Type</Text>
+      <Text style={styles.label}>1. Post Type *</Text>
       <View style={styles.radioRow}>
         <TouchableOpacity
           style={[styles.radioOption, formData.postType === 'lostFound' && styles.radioSelected]}
@@ -208,7 +245,7 @@ const AdminHopePostsScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.label}>Pet Type</Text>
+      <Text style={styles.label}>2. Pet Type *</Text>
       <View style={styles.radioRow}>
         <TouchableOpacity
           style={[styles.radioOption, formData.petType === 'dog' && styles.radioSelected]}
@@ -223,6 +260,22 @@ const AdminHopePostsScreen = () => {
           <Text style={formData.petType === 'cat' ? styles.radioTextSelected : styles.radioText}>Cat</Text>
         </TouchableOpacity>
       </View>
+
+      <Text style={styles.label}>Pet Name *</Text>
+      <AdminTextInput
+        style={styles.input}
+        placeholder="e.g. Bruno"
+        value={formData.petName}
+        onChangeText={(text) => setFormData({ ...formData, petName: text })}
+      />
+
+      <Text style={styles.label}>Age</Text>
+      <AdminTextInput
+        style={styles.input}
+        placeholder="e.g. 2 years"
+        value={formData.petAgeText}
+        onChangeText={(text) => setFormData({ ...formData, petAgeText: text })}
+      />
 
       <Text style={styles.label}>Location *</Text>
       <AdminTextInput
@@ -242,24 +295,32 @@ const AdminHopePostsScreen = () => {
         numberOfLines={4}
       />
 
-      <Text style={styles.label}>Status</Text>
-      <View style={styles.radioRow}>
-        <TouchableOpacity
-          style={[styles.radioOption, formData.status === 'active' && styles.radioSelected]}
-          onPress={() => setFormData({ ...formData, status: 'active' })}
-        >
-          <Text style={formData.status === 'active' ? styles.radioTextSelected : styles.radioText}>Active</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.radioOption, formData.status === 'closed' && styles.radioSelected]}
-          onPress={() => setFormData({ ...formData, status: 'closed' })}
-        >
-          <Text style={formData.status === 'closed' ? styles.radioTextSelected : styles.radioText}>Closed</Text>
-        </TouchableOpacity>
-      </View>
+      {editingId ? (
+        <>
+          <Text style={styles.label}>Status</Text>
+          <View style={styles.radioRow}>
+            <TouchableOpacity
+              style={[styles.radioOption, formData.status === 'active' && styles.radioSelected]}
+              onPress={() => setFormData({ ...formData, status: 'active' })}
+            >
+              <Text style={formData.status === 'active' ? styles.radioTextSelected : styles.radioText}>Active</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.radioOption, formData.status === 'closed' && styles.radioSelected]}
+              onPress={() => setFormData({ ...formData, status: 'closed' })}
+            >
+              <Text style={formData.status === 'closed' ? styles.radioTextSelected : styles.radioText}>Closed</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      ) : null}
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleUpdate} disabled={loading}>
-        <Text style={styles.submitButtonText}>Update Post</Text>
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={editingId ? handleUpdate : handleCreate}
+        disabled={loading}
+      >
+        <Text style={styles.submitButtonText}>{editingId ? 'Update Post' : 'Publish Post'}</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.cancelButton} onPress={() => { resetForm(); setActiveTab('list'); }}>
         <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -353,23 +414,27 @@ const AdminHopePostsScreen = () => {
       </View>
 
       <View style={styles.tabsContainer}>
-        {['list', 'edit', 'delete'].map((tab) => (
+        {(['list', 'add', 'edit', 'delete'] as const).map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[styles.tab, activeTab === tab && styles.tabActive]}
             onPress={() => {
-              setActiveTab(tab as any);
-              if (tab !== 'edit') resetForm();
+              setActiveTab(tab);
+              if (tab === 'add') {
+                resetForm();
+              } else if (tab !== 'edit') {
+                resetForm();
+              }
             }}
           >
             <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
-              {tab === 'list' ? 'List' : tab === 'edit' ? 'Edit' : 'Delete'}
+              {tab === 'list' ? 'List' : tab === 'add' ? 'Add' : tab === 'edit' ? 'Edit' : 'Delete'}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {activeTab === 'edit' && editingId ? (
+      {activeTab === 'add' || (activeTab === 'edit' && editingId) ? (
         renderForm()
       ) : (
         <View style={styles.listContainer}>
@@ -386,10 +451,21 @@ const AdminHopePostsScreen = () => {
                 <TouchableOpacity
                   key={pt}
                   style={[styles.chip, filterPostType === pt && styles.chipActive]}
-                  onPress={() => { setFilterPostType(pt); fetchPosts(); }}
+                  onPress={() => setFilterPostType(pt)}
                 >
                   <Text style={[styles.chipText, filterPostType === pt && styles.chipTextActive]}>
                     {pt === 'all' ? 'All Types' : pt === 'lostFound' ? 'Lost & Found' : 'Adoption'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+              {(['all', 'dog', 'cat'] as const).map((pt) => (
+                <TouchableOpacity
+                  key={`pet-${pt}`}
+                  style={[styles.chip, filterPetType === pt && styles.chipActive]}
+                  onPress={() => setFilterPetType(pt)}
+                >
+                  <Text style={[styles.chipText, filterPetType === pt && styles.chipTextActive]}>
+                    {pt === 'all' ? 'All Pets' : pt === 'dog' ? 'Dog' : 'Cat'}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -397,7 +473,7 @@ const AdminHopePostsScreen = () => {
                 <TouchableOpacity
                   key={st}
                   style={[styles.chip, filterStatus === st && styles.chipActive]}
-                  onPress={() => { setFilterStatus(st); fetchPosts(); }}
+                  onPress={() => setFilterStatus(st)}
                 >
                   <Text style={[styles.chipText, filterStatus === st && styles.chipTextActive]}>
                     {st === 'all' ? 'All Status' : st}
