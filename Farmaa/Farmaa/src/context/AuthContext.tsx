@@ -76,6 +76,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [useFirebaseAuth, setUseFirebaseAuth] = useState(false);
+  const [seedAdmin, setSeedAdmin] = useState<{ emails: string[]; phone: string }>({
+    emails: ['admin@furmaa.com', 'admin@furrmaa.com'],
+    phone: '9999999999',
+  });
+
+  const isSeedAdminIdentifier = useCallback(
+    (identifier: string) => {
+      const v = String(identifier || '').trim();
+      if (!v) return false;
+      if (v.includes('@')) {
+        return (seedAdmin.emails || []).some((e) => e.toLowerCase() === v.toLowerCase());
+      }
+      const phone = v.replace(/\D/g, '').slice(-10);
+      return phone === String(seedAdmin.phone || '').replace(/\D/g, '').slice(-10);
+    },
+    [seedAdmin]
+  );
 
   useEffect(() => {
     loadStoredAuth();
@@ -90,6 +107,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await api.CLIENT.get(api.ENDPOINTS.AUTH.PUBLIC_CONFIG);
         if (res.data?.useFirebaseAuth === true) {
           setUseFirebaseAuth(true);
+        }
+        if (res.data?.seedAdmin) {
+          setSeedAdmin({
+            emails: res.data.seedAdmin.emails || ['admin@furmaa.com', 'admin@furrmaa.com'],
+            phone: res.data.seedAdmin.phone || '9999999999',
+          });
         }
       } catch (_) {
         // backend offline — Firebase OTP off until config loads
@@ -367,6 +390,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendOTP = async (phone: string) => {
+    // Seeded admin: never Firebase / SMS
+    if (isSeedAdminIdentifier(phone)) {
+      console.log('🔑 Seed admin phone — skipping Firebase/SMS');
+      try {
+        const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.SEND_OTP, { phone });
+        return response.data?.otp || '';
+      } catch {
+        return '';
+      }
+    }
+
     if (useFirebaseAuth) {
       await sendOTPWithFirebase(phone);
       return '';
@@ -392,8 +426,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendEmailOTP = async (email: string) => {
+    const trimmed = email.trim().toLowerCase();
+
+    // Seeded admin: never SMTP / Firebase
+    if (isSeedAdminIdentifier(trimmed)) {
+      console.log('🔑 Seed admin email — skipping SMTP/Firebase');
+      try {
+        const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.SEND_OTP, { email: trimmed });
+        return response.data?.otp || '';
+      } catch {
+        return '';
+      }
+    }
+
     try {
-      const trimmed = email.trim().toLowerCase();
       console.log('📧 Sending OTP to email:', trimmed);
 
       const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.SEND_OTP, {
@@ -577,6 +623,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const verifyOTP = async (identifier: string, otp: string, type: 'phone' | 'email' = 'phone') => {
+    // Seeded admin: direct login — no Firebase / SMTP
+    if (isSeedAdminIdentifier(identifier)) {
+      try {
+        console.log('🔑 Seed admin verify — skipping Firebase/SMTP');
+        const isEmail = identifier.includes('@');
+        const body = isEmail
+          ? {
+              email: identifier.trim().toLowerCase(),
+              password: otp,
+              otp,
+            }
+          : {
+              phone: identifier.replace(/\D/g, '').slice(-10),
+              password: otp,
+              otp,
+            };
+        const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.SEED_LOGIN, body);
+        const { token: newToken, user: userData } = response.data || {};
+        if (!newToken || !userData) throw new Error('Invalid seed login response');
+        const userWithRole = {
+          ...userData,
+          role: userData.role || 'admin',
+        };
+        setToken(newToken);
+        setUser(userWithRole);
+        await AsyncStorage.setItem('token', newToken);
+        await AsyncStorage.setItem('user', JSON.stringify(userWithRole));
+        api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
+        return;
+      } catch (error: any) {
+        const errorMessage =
+          error.response?.data?.message || error.message || 'Seed admin login failed';
+        throw new Error(errorMessage);
+      }
+    }
+
     if (useFirebaseAuth && type === 'phone') {
       return verifyOTPWithFirebase(identifier, otp);
     }

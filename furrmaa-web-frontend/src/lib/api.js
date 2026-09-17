@@ -35,16 +35,45 @@ export async function fetchAuthPublicConfig() {
   }
   const base = getBaseUrl();
   try {
-    const res = await fetchWithTimeout(`${base}/auth/public-config`, { cache: 'force-cache' }, 8_000);
+    const res = await fetchWithTimeout(`${base}/auth/public-config`, { cache: 'no-store' }, 8_000);
     const data = await res.json().catch(() => ({}));
-    const value = { useFirebaseAuth: data.useFirebaseAuth === true };
+    const value = {
+      useFirebaseAuth: data.useFirebaseAuth === true,
+      seedAdmin: data.seedAdmin || null,
+    };
     authConfigCache = { value, at: Date.now() };
     return value;
   } catch {
     return {
       useFirebaseAuth: process.env.NEXT_PUBLIC_USE_FIREBASE_AUTH === 'true',
+      seedAdmin: {
+        emails: ['admin@furmaa.com', 'admin@furrmaa.com'],
+        phone: '9999999999',
+      },
     };
   }
+}
+
+/** Seeded admin login — skips SMTP + Firebase */
+export async function seedAdminLogin(identifier, secret) {
+  const base = getBaseUrl();
+  const value = String(identifier || '').trim();
+  const isEmail = value.includes('@');
+  const body = {
+    password: String(secret || '').trim(),
+    otp: String(secret || '').trim(),
+    ...(isEmail
+      ? { email: value.toLowerCase() }
+      : { phone: value.replace(/\D/g, '').slice(-10) }),
+  };
+  const res = await fetchWithTimeout(`${base}/auth/seed-login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }, 15_000);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Seed admin login failed');
+  return data;
 }
 
 /** Send OTP to phone/email – backend (Mongo) OTP */

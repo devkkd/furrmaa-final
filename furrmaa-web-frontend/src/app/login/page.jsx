@@ -13,6 +13,7 @@ import {
     loginWithFirebaseIdToken,
     fetchMe,
     fetchAuthPublicConfig,
+    seedAdminLogin,
 } from '@/lib/api'
 import { mergeGuestCartToServer } from '@/lib/cartActions'
 import {
@@ -48,7 +49,12 @@ const AuthPage = () => {
     const [useFirebaseAuth, setUseFirebaseAuth] = useState(
         process.env.NEXT_PUBLIC_USE_FIREBASE_AUTH === 'true'
     )
+    const [seedAdmin, setSeedAdmin] = useState({
+        emails: ['admin@furmaa.com', 'admin@furrmaa.com'],
+        phone: '9999999999',
+    })
     const [modeReady, setModeReady] = useState(true)
+    const [isSeedAdminFlow, setIsSeedAdminFlow] = useState(false)
     const firebaseRecaptchaRef = useRef(null)
     const firebaseAuthRef = useRef(null)
     const firebaseConfirmationRef = useRef(null)
@@ -68,7 +74,15 @@ const AuthPage = () => {
                 let mode = cfg.useFirebaseAuth === true
                 if (envMode === 'true') mode = true
                 if (envMode === 'false') mode = false
-                if (!cancelled) setUseFirebaseAuth(mode)
+                if (!cancelled) {
+                    setUseFirebaseAuth(mode)
+                    if (cfg.seedAdmin?.emails || cfg.seedAdmin?.phone) {
+                        setSeedAdmin({
+                            emails: cfg.seedAdmin.emails || ['admin@furmaa.com', 'admin@furrmaa.com'],
+                            phone: cfg.seedAdmin.phone || '9999999999',
+                        })
+                    }
+                }
             } catch (_) {
                 /* keep env mode */
             }
@@ -174,6 +188,15 @@ const AuthPage = () => {
     const digitsOnly = (v) => v.replace(/\D/g, '').slice(-10)
     const isEmail = (v) => v.includes('@')
 
+    const matchesSeedAdmin = (value) => {
+        const v = String(value || '').trim()
+        if (!v) return false
+        if (isEmail(v)) {
+            return (seedAdmin.emails || []).some((e) => e.toLowerCase() === v.toLowerCase())
+        }
+        return digitsOnly(v) === String(seedAdmin.phone || '').replace(/\D/g, '').slice(-10)
+    }
+
     const completeJwtLogin = async (token, userObj) => {
         if (token) setToken(token)
         login({
@@ -223,6 +246,16 @@ const AuthPage = () => {
         setLoading(true)
 
         try {
+            // Seeded admin: skip Firebase + SMTP entirely
+            if (matchesSeedAdmin(value)) {
+                setIsSeedAdminFlow(true)
+                setStep('OTP')
+                setLoading(false)
+                return
+            }
+
+            setIsSeedAdminFlow(false)
+
             if (useFirebaseAuth && !isEmail(value)) {
                 if (!isFirebaseWebConfigReady()) {
                     throw new Error('Firebase config missing in .env')
@@ -249,21 +282,28 @@ const AuthPage = () => {
     }
 
     const verifyOtp = async () => {
-        if (otp.length < 6) {
-            setError('Enter 6-digit OTP')
+        if (otp.length < 4) {
+            setError(isSeedAdminFlow ? 'Enter admin password or OTP' : 'Enter 6-digit OTP')
             return
         }
         setError('')
         setLoading(true)
 
         try {
+            const value = identifier.trim()
+
+            if (isSeedAdminFlow || matchesSeedAdmin(value)) {
+                const data = await seedAdminLogin(value, otp.trim())
+                await completeJwtLogin(data.token, data.user)
+                return
+            }
+
             if (firebaseConfirmationRef.current) {
                 const cred = await firebaseConfirmationRef.current.confirm(otp.trim())
                 const idToken = await cred.user.getIdToken()
                 firebaseConfirmationRef.current = null
                 await completeFirebaseTokenLogin(idToken)
             } else {
-                const value = identifier.trim()
                 const { token, user } = await verifyOtpApi(value, otp.trim(), 'Furrmaa User')
                 await completeJwtLogin(token, user)
             }
@@ -362,7 +402,11 @@ const AuthPage = () => {
                                     value={identifier}
                                     onChange={(e) => setIdentifier(e.target.value)}
                                     onFocus={() => {
-                                        if (useFirebaseAuth && !isEmail(identifier.trim())) {
+                                        if (
+                                            useFirebaseAuth &&
+                                            !isEmail(identifier.trim()) &&
+                                            !matchesSeedAdmin(identifier.trim())
+                                        ) {
                                             ensureRecaptchaReady().catch(() => {})
                                         }
                                     }}
@@ -401,9 +445,15 @@ const AuthPage = () => {
 
                         {step === 'OTP' && (
                             <>
+                                {isSeedAdminFlow && (
+                                    <p className="text-[12px] text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+                                        Seeded admin — SMTP / Firebase skip. Password ya OTP daalo:
+                                        <strong> admin123</strong> / <strong>787878</strong>
+                                    </p>
+                                )}
                                 <input
                                     type="text"
-                                    placeholder="Enter 6-digit OTP"
+                                    placeholder={isSeedAdminFlow ? 'Admin password or OTP' : 'Enter 6-digit OTP'}
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
                                     className="w-full px-4 py-3.5 border border-gray-200 rounded-xl bg-gray-50 text-sm"
@@ -416,7 +466,7 @@ const AuthPage = () => {
                                     disabled={loading}
                                     className="w-full bg-[#1F2E46] text-white font-bold py-3.5 rounded-full mt-2 disabled:opacity-70"
                                 >
-                                    {loading ? 'Verifying...' : 'Verify & Login →'}
+                                    {loading ? 'Verifying...' : isSeedAdminFlow ? 'Admin Login →' : 'Verify & Login →'}
                                 </button>
                             </>
                         )}

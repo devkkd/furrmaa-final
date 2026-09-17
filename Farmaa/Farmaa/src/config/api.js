@@ -155,6 +155,7 @@ export default {
     AUTH: {
       REGISTER: '/auth/register',
       LOGIN: '/auth/login',
+      SEED_LOGIN: '/auth/seed-login',
       SEND_OTP: '/auth/send-otp',
       VERIFY_OTP: '/auth/verify-otp',
       PUBLIC_CONFIG: '/auth/public-config',

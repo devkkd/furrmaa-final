@@ -11,8 +11,8 @@ const seedAdmin = async () => {
   try {
     await connectDB();
 
+    const adminPhone = normalizePhone(process.env.ADMIN_PHONE || '9999999999');
     const adminEmail = (process.env.ADMIN_EMAIL || 'admin@furmaa.com').toLowerCase().trim();
-    const adminPhone = normalizePhone(process.env.ADMIN_PHONE || '8888888888');
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
     const adminName = process.env.ADMIN_NAME || 'Admin User';
     const adminOTP = process.env.ADMIN_OTP || '787878';

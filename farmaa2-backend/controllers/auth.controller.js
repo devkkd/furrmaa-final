@@ -27,6 +27,84 @@ const generateToken = (id) => {
   });
 };
 
+const normalizePhone = (p) => (p ? String(p).replace(/\D/g, '').slice(-10) : '');
+
+/** Seeded admin identifiers from env (+ common brand spellings). */
+export const getSeedAdminConfig = () => {
+  const phone = normalizePhone(process.env.ADMIN_PHONE || '9999999999');
+  const email = (process.env.ADMIN_EMAIL || 'admin@furmaa.com').toLowerCase().trim();
+  const emails = Array.from(
+    new Set([email, 'admin@furmaa.com', 'admin@furrmaa.com'].filter(Boolean))
+  );
+  return {
+    phone,
+    emails,
+    password: process.env.ADMIN_PASSWORD || 'admin123',
+    otp: process.env.ADMIN_OTP || '787878',
+    name: process.env.ADMIN_NAME || 'Admin User',
+  };
+};
+
+export const isSeedAdminIdentifier = (email, phone) => {
+  const cfg = getSeedAdminConfig();
+  const emailNorm = email ? String(email).toLowerCase().trim() : '';
+  const phoneNorm = phone ? normalizePhone(phone) : '';
+  return (
+    (emailNorm && cfg.emails.includes(emailNorm)) ||
+    (phoneNorm && phoneNorm === cfg.phone)
+  );
+};
+
+const formatAuthUser = (user, phoneFallback, emailFallback) => ({
+  id: user._id.toString(),
+  _id: user._id.toString(),
+  name: user.name,
+  email: user.email,
+  phone: user.phone || phoneFallback || null,
+  role: user.role || 'user',
+  isVerified: user.isVerified,
+  firebaseUid: user.firebaseUid || null,
+});
+
+/** Find or create seeded admin user (no Firebase / SMTP). */
+const ensureSeedAdminUser = async ({ email, phone }) => {
+  const cfg = getSeedAdminConfig();
+  const emailNorm = email ? String(email).toLowerCase().trim() : cfg.emails[0];
+  const phoneNorm = phone ? normalizePhone(phone) : cfg.phone;
+
+  let user = await User.findOne({
+    $or: [
+      { email: { $in: cfg.emails } },
+      { phone: cfg.phone },
+      ...(emailNorm ? [{ email: emailNorm }] : []),
+      ...(phoneNorm ? [{ phone: phoneNorm }] : []),
+    ],
+  }).select('+password');
+
+  if (!user) {
+    user = await User.create({
+      name: cfg.name,
+      email: emailNorm || cfg.emails[0],
+      phone: phoneNorm || cfg.phone,
+      password: cfg.password,
+      role: 'admin',
+      isVerified: true,
+      isActive: true,
+    });
+  } else {
+    user.name = cfg.name;
+    user.role = 'admin';
+    user.isVerified = true;
+    user.isActive = true;
+    if (!user.email) user.email = emailNorm || cfg.emails[0];
+    if (!user.phone) user.phone = phoneNorm || cfg.phone;
+    user.password = cfg.password;
+    await user.save();
+  }
+
+  return user;
+};
+
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
@@ -285,6 +363,58 @@ export const login = async (req, res) => {
   }
 };
 
+// @desc    Seeded admin login — no SMTP, no Firebase
+// @route   POST /api/auth/seed-login
+// @access  Public
+export const seedAdminLogin = async (req, res) => {
+  try {
+    let { email, phone, password, otp } = req.body || {};
+    if (phone) phone = normalizePhone(phone);
+    if (email) email = String(email).toLowerCase().trim();
+
+    if (!email && !phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Provide seed admin email or phone',
+      });
+    }
+
+    if (!isSeedAdminIdentifier(email, phone)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not a seeded admin account',
+      });
+    }
+
+    const cfg = getSeedAdminConfig();
+    const secret = String(password || otp || '').trim();
+    if (!secret || (secret !== cfg.password && secret !== cfg.otp)) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid admin password or OTP',
+      });
+    }
+
+    const user = await ensureSeedAdminUser({ email, phone });
+    const token = generateToken(user._id);
+
+    console.log('🔑 Seed admin login (no SMTP/Firebase):', user.email || user.phone);
+
+    return res.json({
+      success: true,
+      message: 'Seed admin login successful',
+      token,
+      user: formatAuthUser(user, phone, email),
+    });
+  } catch (error) {
+    console.error('❌ seedAdminLogin error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Seed admin login failed',
+    });
+  }
+};
+
 // @desc    Get current logged in user
 // @route   GET /api/auth/me
 // @access  Private
@@ -363,15 +493,11 @@ export const updateMe = async (req, res) => {
 // @desc    Send OTP to mobile number or email
 // @route   POST /api/auth/send-otp
 // @access  Public
-// Normalize phone to 10-digit string (same format for save & lookup)
-const normalizePhone = (p) => (p ? String(p).replace(/\D/g, '').slice(-10) : '');
-
 export const sendOTP = async (req, res) => {
   try {
     let { phone, email } = req.body;
     if (phone) phone = normalizePhone(phone);
 
-    // Validate input - either phone or email must be provided
     if (!phone && !email) {
       return res.status(400).json({
         success: false,
@@ -397,34 +523,33 @@ export const sendOTP = async (req, res) => {
     let expiresAt;
     const otpType = email ? 'email' : 'phone';
     const identifier = email || phone;
-    const adminPhone = normalizePhone(process.env.ADMIN_PHONE || '8888888888');
-    const adminEmail = (process.env.ADMIN_EMAIL || 'admin@furmaa.com').toLowerCase().trim();
-    const devOtp = process.env.ADMIN_OTP || '787878';
+    const cfg = getSeedAdminConfig();
+    const emailNorm = email ? email.toLowerCase().trim() : '';
+    const isAdminRequest = isSeedAdminIdentifier(emailNorm, phone);
+    const devOtp = cfg.otp;
 
-    // Development: sabhi phone ke liye fixed OTP 787878 (login + naya register dono)
     if (process.env.NODE_ENV === 'development' && phone) {
       otp = devOtp;
-      expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
       console.log(`🔑 Dev OTP for ${phone}: ${otp}`);
-    } else if ((phone === adminPhone) || (email === adminEmail)) {
-      // Admin / seeded OTP
-      const query = email ? { email: adminEmail, verified: false } : { phone: adminPhone, verified: false };
+    } else if (isAdminRequest) {
+      const query = emailNorm
+        ? { email: emailNorm, verified: false }
+        : { phone: cfg.phone, verified: false };
       const existingOTP = await OTP.findOne(query);
       if (existingOTP && new Date() < existingOTP.expiresAt) {
         otp = existingOTP.otp;
         expiresAt = existingOTP.expiresAt;
-        console.log(`🔑 Using seeded OTP for ${identifier}: ${otp}`);
       } else {
         otp = devOtp;
         expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        console.log(`🔑 Creating OTP for ${identifier}: ${otp}`);
       }
+      console.log(`🔑 Seed admin OTP for ${identifier}: ${otp}`);
     } else {
       otp = Math.floor(100000 + Math.random() * 900000).toString();
-      expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+      expiresAt = new Date(Date.now() + 5 * 60 * 1000);
     }
 
-    // Prepare OTP data
     const otpData = {
       otp,
       expiresAt,
@@ -432,25 +557,25 @@ export const sendOTP = async (req, res) => {
       type: otpType,
     };
 
-    if (email) {
-      otpData.email = email.toLowerCase().trim();
-    } else {
-      otpData.phone = phone;
+    if (email) otpData.email = emailNorm;
+    else otpData.phone = phone;
+
+    const query = email ? { email: emailNorm } : { phone };
+    await OTP.findOneAndUpdate(query, { $set: otpData }, { upsert: true, new: true });
+
+    // Seeded admin: never touch SMTP / SMS / Firebase
+    if (isAdminRequest) {
+      return res.json({
+        success: true,
+        message: 'Admin OTP ready (seed). SMTP/Firebase skipped.',
+        seedAdmin: true,
+        otp,
+      });
     }
 
-    // Save OTP to database (explicit $set so verified is always reset to false)
-    const query = email ? { email: email.toLowerCase().trim() } : { phone };
-    await OTP.findOneAndUpdate(
-      query,
-      { $set: otpData },
-      { upsert: true, new: true }
-    );
-
-    // Send OTP via email if email is provided
     if (email) {
       const emailSent = await sendOTPEmail(email, otp);
       if (!emailSent && process.env.NODE_ENV === 'production') {
-        // In production, if email fails, return error
         return res.status(500).json({
           success: false,
           message: 'Failed to send OTP email. Please check email configuration.'
@@ -462,21 +587,21 @@ export const sendOTP = async (req, res) => {
       if (sms.sent) {
         console.log(`📱 OTP SMS sent (${sms.provider}) → ${phone}`);
       } else if (sms.error === 'no_sms_provider') {
-        console.log(`📱 OTP for ${phone}: ${otp} — SMS env nahi (MSG91 / Twilio). Yahi OTP use karo.`);
-        // No SMS provider — OTP still saved in DB, return it so user can login
-        // TODO: Configure MSG91_AUTHKEY or Twilio credentials for real SMS delivery
+        console.log(`📱 OTP for ${phone}: ${otp} — SMS env nahi. Yahi OTP use karo.`);
       } else {
         console.error(`📱 SMS failed for ${phone}:`, sms.error);
-        // SMS failed but OTP is saved — log and continue
-        console.log(`📱 OTP for ${phone}: ${otp} — SMS failed, use this OTP manually`);
+        console.log(`📱 OTP for ${phone}: ${otp} — SMS failed, use manually`);
       }
     }
 
     res.json({
       success: true,
       message: `OTP sent successfully to ${otpType === 'email' ? 'email' : 'mobile'}`,
-      // Return OTP in response when no SMS provider configured
-      otp: process.env.NODE_ENV === 'development' || !process.env.MSG91_AUTHKEY && !process.env.TWILIO_ACCOUNT_SID ? otp : undefined,
+      otp:
+        process.env.NODE_ENV === 'development' ||
+        (!process.env.MSG91_AUTHKEY && !process.env.TWILIO_ACCOUNT_SID)
+          ? otp
+          : undefined,
     });
   } catch (error) {
     console.error('❌ Error in sendOTP:', error);
@@ -527,6 +652,24 @@ export const verifyOTP = async (req, res) => {
       }
     }
 
+    const cfg = getSeedAdminConfig();
+    const emailNorm = email ? email.toLowerCase().trim() : '';
+    const isAdminLogin = isSeedAdminIdentifier(emailNorm, phone);
+    const secret = String(otp || '').trim();
+
+    // Seeded admin: allow fixed ADMIN_OTP or ADMIN_PASSWORD without SMTP/Firebase OTP record
+    if (isAdminLogin && (secret === cfg.otp || secret === cfg.password)) {
+      const user = await ensureSeedAdminUser({ email: emailNorm, phone });
+      const token = generateToken(user._id);
+      console.log('🔑 Seed admin verify (no SMTP/Firebase):', user.email || user.phone);
+      return res.json({
+        success: true,
+        message: 'OTP verified successfully',
+        token,
+        user: formatAuthUser(user, phone, emailNorm),
+      });
+    }
+
     if (!otpRecord) {
       if (phone) {
         const anyOtp = await OTP.findOne({ phone }).sort({ createdAt: -1 });
@@ -566,12 +709,6 @@ export const verifyOTP = async (req, res) => {
     const identifier = email ? email.toLowerCase().trim() : phone;
     const userQuery = email ? { email: identifier } : { phone: identifier };
     let user = await User.findOne(userQuery);
-
-    const adminPhone = normalizePhone(process.env.ADMIN_PHONE || '8888888888');
-    const adminEmail = (process.env.ADMIN_EMAIL || 'admin@furmaa.com').toLowerCase().trim();
-    const isAdminLogin =
-      (phone && phone === adminPhone) ||
-      (email && email.toLowerCase().trim() === adminEmail);
 
     if (!user) {
       // Create new user — do not set firebaseUid: null (MongoDB unique sparse still conflicts on null)
