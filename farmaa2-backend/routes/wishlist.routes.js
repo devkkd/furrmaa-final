@@ -9,8 +9,9 @@ const router = express.Router();
 router.get('/', protect, async (req, res) => {
   try {
     const wishlist = await Wishlist.find({ user: req.user.id })
-      .populate('product')
-      .sort({ createdAt: -1 });
+      .populate('product', 'name images price discountPrice rating isActive')
+      .sort({ createdAt: -1 })
+      .lean();
     
     res.json({ success: true, wishlist });
   } catch (error) {

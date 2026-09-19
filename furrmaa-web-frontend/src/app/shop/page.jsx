@@ -114,6 +114,7 @@ function StorePageContent() {
     size: effectiveSize || undefined,
     dietary: effectiveDietary || undefined,
     minRating: minRatingNum ?? undefined,
+    limit: 48,
   });
 
   // Normalize category for comparison (case-insensitive, handle slugs)

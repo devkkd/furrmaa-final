@@ -8,15 +8,21 @@ import Everyday from "@/components/Everyday";
 import Wellness from "@/components/Wellness";
 import Card from "@/components/Card";
 import TopSelling from "@/components/TopSelling";
+import { getToken } from "@/lib/api";
+import { useWishlistStore } from "@/store/wishlistStore";
 
-const PetCard = dynamic(() => import("@/components/PetCard"), { loading: () => null });
-const NewArrivals = dynamic(() => import("@/components/NewArrivals"), { loading: () => null });
-const AboutFurrmaa = dynamic(() => import("@/components/AboutFurrmaa"), { loading: () => null });
-const FurrmaaPetAI = dynamic(() => import("@/components/FurrmaaPetAI"), { loading: () => null });
-const BestDeal = dynamic(() => import("@/components/BestDeal"), { loading: () => null });
-const TrendingPetFeed = dynamic(() => import("@/components/TrendingPetFeed"), { loading: () => null });
-const Feedback = dynamic(() => import("@/components/Feedback"), { loading: () => null });
-const WhyChooseFurrmaa = dynamic(() => import("@/components/WhyChooseFurrmaa"), { loading: () => null });
+const SectionLoader = () => (
+  <div className="w-full py-10 text-center text-sm text-gray-400">Loading...</div>
+);
+
+const PetCard = dynamic(() => import("@/components/PetCard"), { loading: SectionLoader });
+const NewArrivals = dynamic(() => import("@/components/NewArrivals"), { loading: SectionLoader });
+const AboutFurrmaa = dynamic(() => import("@/components/AboutFurrmaa"), { loading: SectionLoader });
+const FurrmaaPetAI = dynamic(() => import("@/components/FurrmaaPetAI"), { loading: SectionLoader });
+const BestDeal = dynamic(() => import("@/components/BestDeal"), { loading: SectionLoader });
+const TrendingPetFeed = dynamic(() => import("@/components/TrendingPetFeed"), { loading: SectionLoader });
+const Feedback = dynamic(() => import("@/components/Feedback"), { loading: SectionLoader });
+const WhyChooseFurrmaa = dynamic(() => import("@/components/WhyChooseFurrmaa"), { loading: SectionLoader });
 
 export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
@@ -32,6 +38,12 @@ useEffect(() => {
 
   return () => window.removeEventListener("resize", checkMobile);
 }, []);
+
+  // One wishlist bootstrap for all ProductCards on the page
+  useEffect(() => {
+    if (getToken()) useWishlistStore.getState().ensureLoaded();
+  }, []);
+
   return (
     <div className="bg-white text-black">
       <Banner />

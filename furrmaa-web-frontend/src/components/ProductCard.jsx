@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaStar, FaRegHeart, FaHeart } from 'react-icons/fa'
 import { addProductToCart } from '@/lib/cartActions'
-import { getToken, addToWishlist, removeFromWishlist, fetchWishlist } from '@/lib/api'
+import { getToken, addToWishlist, removeFromWishlist } from '@/lib/api'
 import { useWishlistStore } from '@/store/wishlistStore'
 
 export default function ProductCard({ product }) {
@@ -20,12 +20,7 @@ export default function ProductCard({ product }) {
 
   useEffect(() => {
     if (!getToken() || !productId) return
-    if (useWishlistStore.getState().loaded) return
-    fetchWishlist()
-      .then((list) => {
-        useWishlistStore.getState().setIds(list.map((w) => w.product?._id).filter(Boolean))
-      })
-      .catch(() => {})
+    useWishlistStore.getState().ensureLoaded()
   }, [productId])
 
   const productImage = product.images?.[0] || product.image || '/placeholder.png'

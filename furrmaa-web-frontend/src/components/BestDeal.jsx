@@ -30,14 +30,11 @@ useEffect(() => {
 
     const load = async () => {
       try {
-        let list = await fetchProducts({
+        const list = await fetchProducts({
           petType: petType || undefined,
           bestDeals: true,
           limit: 12,
         })
-        if ((!list || list.length === 0) && petType) {
-          list = await fetchProducts({ bestDeals: true, limit: 12 })
-        }
         if (!cancelled) {
           setBestDeals((list || []).map(normalizeProduct).filter(Boolean))
         }

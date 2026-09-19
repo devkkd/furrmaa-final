@@ -35,6 +35,7 @@ const isOther = (name, slug) => {
 export default function Wellness() {
   const petType = usePetStore((state) => state.petType);
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
 useEffect(() => {
@@ -51,6 +52,7 @@ useEffect(() => {
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     fetchMainCategories({ section: 'wellness', petType: petType || 'dog' })
       .then((list) => {
         if (!cancelled && Array.isArray(list)) {
@@ -60,6 +62,9 @@ useEffect(() => {
       })
       .catch(() => {
         if (!cancelled) setData([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;
@@ -75,6 +80,9 @@ return (
         All Round Wellness
       </h2>
 
+      {loading ? (
+        <p className="text-center text-gray-500 text-sm py-8">Loading categories...</p>
+      ) : (
       <div className="max-w-[1400px] mx-auto px-4 flex items-center justify-center gap-2 md:gap-6">
         {data.length > 0 ? (
           <>
@@ -194,6 +202,7 @@ return (
           <div className="text-center text-gray-500 w-full">No categories available</div>
         )}
       </div>
+      )}
     </section>
   );
 }

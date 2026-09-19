@@ -162,10 +162,10 @@ router.get(['/', ''], async (req, res) => {
       }
     }
 
-    const limit = Math.min(Math.max(parseInt(limitParam, 10) || 0, 0), 100);
+    const limit = Math.min(Math.max(parseInt(limitParam, 10) || 48, 1), 100);
 
     let queryBuilder = Product.find(query).select(LIST_FIELDS).sort(sort).lean();
-    if (limit > 0) queryBuilder = queryBuilder.limit(limit);
+    queryBuilder = queryBuilder.limit(limit);
 
     const products = await queryBuilder;
     setPublicCache(res, 120);

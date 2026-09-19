@@ -521,7 +521,7 @@ export async function fetchMainCategories(params = {}) {
   const url = `${base}/categories/main${q.toString() ? `?${q}` : ''}`;
   return withCache(`categories:main:${url}`, 300_000, async () => {
     try {
-      const res = await fetch(url);
+      const res = await fetchWithTimeout(url, {}, 10_000);
       if (!res.ok) return [];
       const data = await res.json();
       return data.categories || [];
@@ -1535,7 +1535,7 @@ export async function fetchWhyChooseFeatures() {
   if (cached != null && Array.isArray(cached.features) && cached.features.length > 0) {
     return cached;
   }
-  const res = await fetchWithTimeout(`${base}/why-choose`, { cache: 'no-store' }, 12_000);
+  const res = await fetchWithTimeout(`${base}/why-choose`, {}, 12_000);
   if (!res.ok) throw new Error('Failed to load why-choose section');
   const data = await res.json();
   const result = {

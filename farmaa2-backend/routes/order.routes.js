@@ -207,9 +207,12 @@ router.post('/verify-payment', protect, async (req, res) => {
 // Get user orders
 router.get('/my-orders', protect, async (req, res) => {
   try {
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 100);
     const orders = await Order.find({ user: req.user.id })
-      .populate('items.product')
-      .sort({ createdAt: -1 });
+      .populate('items.product', 'name images price discountPrice')
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
     res.json({ success: true, orders });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
