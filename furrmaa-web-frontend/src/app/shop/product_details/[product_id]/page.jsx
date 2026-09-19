@@ -9,6 +9,7 @@ import { addProductToCart } from '@/lib/cartActions';
 // IMPORT THE NEW COMPONENT
 import SimilarProducts from '@/components/SimilarProducts';
 import WhyChooseFurrmaa from '@/components/WhyChooseFurrmaa';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -34,7 +35,7 @@ export default function ProductDetailPage() {
     return (
       <div className="bg-white min-h-screen py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <p className="text-gray-500">Loading...</p>
+          <LogoLoader />
         </div>
       </div>
     );

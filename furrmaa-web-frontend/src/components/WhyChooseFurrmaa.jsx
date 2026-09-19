@@ -6,6 +6,7 @@ import React from "react";
 import { IoChevronDown } from "react-icons/io5";
 import { AdminImage } from "@/app/admin/components/AdminImage";
 import { usePathname } from "next/navigation";
+import LogoLoader from "@/components/LogoLoader";
 
 export default function WhyChooseFurrmaa() {
   const pathname = usePathname();
@@ -51,7 +52,7 @@ export default function WhyChooseFurrmaa() {
           </h2>
 
           {loading ? (
-            <p className="text-gray-500 mb-14">Loading...</p>
+            <LogoLoader />
           ) : features.length === 0 ? (
             <p className="text-gray-500 mb-14">No features added yet.</p>
           ) : (
@@ -201,7 +202,7 @@ function FaqSection() {
 
         <div className="space-y-4 md:space-y-6">
           {loading ? (
-            <p className="text-gray-500">Loading FAQs...</p>
+            <LogoLoader size="sm" className="py-4" />
           ) : faqs.length === 0 ? (
             <p className="text-gray-500">No FAQs available right now.</p>
           ) : (

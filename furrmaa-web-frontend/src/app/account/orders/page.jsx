@@ -4,6 +4,7 @@ import Link from 'next/link'
 import React, { useState, useEffect } from 'react'
 import { HiOutlineSearch, HiOutlineAdjustments } from 'react-icons/hi'
 import { fetchOrders } from '@/lib/api'
+import LogoLoader from '@/components/LogoLoader'
 
 const statusMap = {
   pending: 'Pending',
@@ -115,7 +116,7 @@ const MyOrders = () => {
 
       {/* Orders List */}
       {loading ? (
-        <div className="py-12 text-center text-gray-500">Loading orders...</div>
+        <LogoLoader />
 
       ) : error ? (
         <div className="py-12 text-center">

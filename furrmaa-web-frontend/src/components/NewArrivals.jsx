@@ -5,6 +5,7 @@ import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
 import { usePetStore } from '@/store/petStore'
 import { fetchProducts, normalizeProduct } from '@/lib/api'
+import LogoLoader from '@/components/LogoLoader'
 
 export default function NewArrivals() {
   const petType = usePetStore((state) => state.petType)
@@ -70,7 +71,7 @@ const displayProducts = isMobile
 
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-5 md:gap-4">
         {loading ? (
-          <p className="text-gray-500 col-span-full">Loading...</p>
+          <LogoLoader />
         ) : arrivals.length === 0 ? (
           <p className="text-gray-500 col-span-full">No new products yet. Add products from Admin → Products.</p>
         ) : (

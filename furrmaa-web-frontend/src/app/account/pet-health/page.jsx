@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { fetchMyPets, fetchMedicalHistory, addMedicalRecord } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function PetHealthPage() {
   const [pets, setPets] = useState([]);
@@ -55,7 +56,7 @@ export default function PetHealthPage() {
     <div className="bg-white border border-gray-100 md:rounded-[32px] p-4 md:p-10 shadow-sm min-h-[600px]">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-8">Pet Health</h1>
 
-      {loading ? <p className="text-gray-500">Loading...</p> : pets.length === 0 ? (
+      {loading ? <LogoLoader /> : pets.length === 0 ? (
         <p className="text-gray-500">Add a pet in <Link href="/account/pets" className="text-[#1F2E46] font-semibold">My Pets</Link> first.</p>
       ) : (
         <>

@@ -267,10 +267,12 @@ export async function fetchVeterinarians(params = {}) {
   if (params.specialization) q.set('specialization', params.specialization);
   if (params.serviceType && params.serviceType !== 'All') q.set('serviceType', params.serviceType);
   const url = `${base}/veterinarians${q.toString() ? `?${q}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Veterinarians fetch failed');
-  const data = await res.json();
-  return data.veterinarians || [];
+  return withCache(`vets:${url}`, 120_000, async () => {
+    const res = await fetchWithTimeout(url, {}, 12_000);
+    if (!res.ok) throw new Error('Veterinarians fetch failed');
+    const data = await res.json();
+    return data.veterinarians || [];
+  });
 }
 
 /** Fetch service providers from backend */
@@ -296,10 +298,12 @@ export async function fetchCremationCenters(params = {}) {
   if (params.state) q.set('state', params.state);
   if (params.search) q.set('search', params.search);
   const url = `${base}/cremation/centers${q.toString() ? `?${q}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Cremation centers fetch failed');
-  const data = await res.json();
-  return data.centers || [];
+  return withCache(`cremation:${url}`, 120_000, async () => {
+    const res = await fetchWithTimeout(url, {}, 12_000);
+    if (!res.ok) throw new Error('Cremation centers fetch failed');
+    const data = await res.json();
+    return data.centers || [];
+  });
 }
 
 /** Fetch training videos from backend */
@@ -310,10 +314,12 @@ export async function fetchTrainingVideos(params = {}) {
   if (params.petType) q.set('petType', params.petType);
   if (params.level) q.set('level', params.level);
   const url = `${base}/training-videos${q.toString() ? `?${q}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Training videos fetch failed');
-  const data = await res.json();
-  return data.videos || [];
+  return withCache(`training:${url}`, 180_000, async () => {
+    const res = await fetchWithTimeout(url, {}, 12_000);
+    if (!res.ok) throw new Error('Training videos fetch failed');
+    const data = await res.json();
+    return data.videos || [];
+  });
 }
 
 /** Get user's training progress (completed video IDs). Requires auth. */
@@ -369,10 +375,12 @@ export async function fetchHopePosts(params = {}) {
   if (params.page != null) q.set('page', params.page);
   if (params.limit != null) q.set('limit', params.limit);
   const url = `${base}/hope/posts${q.toString() ? `?${q}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Hope posts fetch failed');
-  const data = await res.json();
-  return data.posts || [];
+  return withCache(`hope:${url}`, 90_000, async () => {
+    const res = await fetchWithTimeout(url, {}, 12_000);
+    if (!res.ok) throw new Error('Hope posts fetch failed');
+    const data = await res.json();
+    return data.posts || [];
+  });
 }
 
 /** Get user subscription. Requires auth. */
@@ -453,10 +461,12 @@ export async function fetchPetEvents(params = {}) {
   if (params.city && params.city !== 'All') q.set('city', params.city);
   if (params.search) q.set('search', params.search);
   const url = `${base}/pet-events${q.toString() ? `?${q}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Pet events fetch failed');
-  const data = await res.json();
-  return data.events || [];
+  return withCache(`events:${url}`, 120_000, async () => {
+    const res = await fetchWithTimeout(url, {}, 12_000);
+    if (!res.ok) throw new Error('Pet events fetch failed');
+    const data = await res.json();
+    return data.events || [];
+  });
 }
 
 /** Register for a pet event (public). */

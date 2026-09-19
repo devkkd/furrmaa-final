@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { fetchNotifications, markNotificationRead } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 const AccNotification = () => {
     const [notifications, setNotifications] = useState([]);
@@ -44,7 +45,7 @@ const AccNotification = () => {
 
             {/* Notifications List */}
             {loading ? (
-                <div className="py-12 text-center text-gray-500">Loading notifications...</div>
+                <LogoLoader />
             ) : (
                 <div className="space-y-4">
                     {notifications.map((notification) => {

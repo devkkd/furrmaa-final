@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { fetchMyPets, createPet, updatePet, deletePet } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 const emptyForm = { name: '', type: 'dog', breed: '', age: '', gender: 'male' };
 
@@ -84,7 +85,7 @@ export default function MyPetsPage() {
       </div>
 
       {loading ? (
-        <p className="text-gray-500">Loading pets...</p>
+        <LogoLoader />
       ) : pets.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-600 mb-4">No pets added yet.</p>

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { fetchHopeChat, sendHopeChatMessage, fetchMe } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function HopeChatDetailPage() {
   const params = useParams();
@@ -52,7 +53,7 @@ export default function HopeChatDetailPage() {
     }
   };
 
-  if (loading) return <div className="p-10 text-gray-500">Loading chat...</div>;
+  if (loading) return <LogoLoader />;
   if (!chat) return <div className="p-10"><p className="text-gray-500">Chat not found.</p><Link href="/account/hope-chats" className="text-[#1F2E46] font-bold">← Back</Link></div>;
 
   return (

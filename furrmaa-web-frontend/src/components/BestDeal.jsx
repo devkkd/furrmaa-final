@@ -5,6 +5,7 @@ import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
 import { usePetStore } from '@/store/petStore'
 import { fetchProducts, normalizeProduct } from '@/lib/api'
+import LogoLoader from '@/components/LogoLoader'
 
 export default function BestDeal() {
   const petType = usePetStore((state) => state.petType)
@@ -72,7 +73,7 @@ return (
 
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4">
         {loading ? (
-          <p className="text-gray-500 col-span-full">Loading...</p>
+          <LogoLoader />
         ) : bestDeals.length === 0 ? (
           <p className="text-gray-500 col-span-full">
             No best deals yet. Enable &quot;Show on homepage Best Deals&quot; when adding a product in Admin.

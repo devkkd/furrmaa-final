@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { fetchMyBookings, createBooking, fetchMyPets, fetchServiceProviders } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 const SERVICE_TYPES = ['grooming', 'training', 'walking', 'sitting', 'boarding', 'veterinary', 'other'];
 
@@ -66,7 +67,7 @@ export default function BookingsPage() {
 
       <p className="text-sm text-gray-500 mb-6">Or browse services on <Link href="/vet" className="text-[#1F2E46] font-semibold">Near By Vet</Link></p>
 
-      {loading ? <p className="text-gray-500">Loading...</p> : bookings.length === 0 ? (
+      {loading ? <LogoLoader /> : bookings.length === 0 ? (
         <p className="text-gray-500">No bookings yet.</p>
       ) : (
         <div className="space-y-4">

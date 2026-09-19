@@ -5,6 +5,7 @@ import { usePetStore } from '@/store/petStore'
 import { useProducts } from '@/hooks/useProducts'
 import { useEffect, useState } from "react";
 import Link from 'next/link'
+import LogoLoader from '@/components/LogoLoader'
 
 export default function TopSelling() {
   const petType = usePetStore(state => state.petType)
@@ -47,7 +48,7 @@ const displayProducts = isMobile
       </div>
 
       <div className="max-w-7xl mx-auto px-3 md:px-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-5 md:gap-4">
-        {loading ? <p className="text-gray-500 col-span-full">Loading...</p> : displayProducts.map((product, i) => (
+        {loading ? <LogoLoader /> : displayProducts.map((product, i) => (
           <ProductCard key={product.id || product._id || i} product={product} />
         ))}
       </div>

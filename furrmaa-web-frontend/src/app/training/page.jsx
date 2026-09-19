@@ -9,6 +9,7 @@ import { useTrainingVideos } from "@/hooks/useTrainingVideos";
 import { usePetStore } from "@/store/petStore";
 import WhyChooseFurrmaa from "@/components/WhyChooseFurrmaa";
 import { fetchSubscription } from "@/lib/api";
+import LogoLoader from "@/components/LogoLoader";
 
 const PetTrainingPage = () => {
   const [selectedPlan, setSelectedPlan] = useState("basic");
@@ -76,11 +77,7 @@ const PetTrainingPage = () => {
 
         {/* Loading */}
         {loading ? (
-          <div className="py-10 sm:py-12 text-center md:text-left">
-            <p className="text-gray-500 text-sm md:text-base">
-              Loading training programs...
-            </p>
-          </div>
+          <LogoLoader />
         ) : error ? (
           <div className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 rounded-xl bg-red-50 border border-red-200 text-center">
             <p className="text-red-700 font-medium text-sm md:text-base mb-2">

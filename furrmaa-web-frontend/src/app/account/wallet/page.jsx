@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Container from '@/components/Container';
+import LogoLoader from '@/components/LogoLoader';
 import { WALLET_UI_ENABLED } from '@/lib/featureFlags';
 import {
   fetchWallet,
@@ -197,7 +198,7 @@ export default function WalletPage() {
 
           <h2 className="font-bold text-gray-900 mb-3">Transaction history</h2>
           {loading ? (
-            <p className="text-gray-500 text-sm">Loading…</p>
+            <LogoLoader size="sm" className="py-4" />
           ) : filtered.length === 0 ? (
             <p className="text-gray-500 text-sm py-6">No transactions yet</p>
           ) : (

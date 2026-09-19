@@ -6,6 +6,7 @@ import { FaPlay } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { fetchSocialPosts } from "@/lib/api";
+import LogoLoader from "@/components/LogoLoader";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -79,7 +80,7 @@ export default function TrendingPetFeed() {
         </p>
 
         {loading ? (
-          <p className="text-gray-500">Loading trending feed...</p>
+          <LogoLoader />
         ) : feedItems.length === 0 ? (
           <div className="text-gray-500">
             <p>No trending feed yet. Users can post from the app or web Pet Social.</p>

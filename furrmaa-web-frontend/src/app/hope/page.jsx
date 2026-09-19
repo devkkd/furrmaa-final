@@ -18,6 +18,7 @@ import WhyChooseFurrmaa from "@/components/WhyChooseFurrmaa";
 import { fetchHopePosts } from "@/lib/api";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import LocationPickerModal from "@/components/LocationPickerModal";
+import LogoLoader from "@/components/LogoLoader";
 
 const CheckCircle = () => (
   <svg
@@ -452,9 +453,7 @@ function HopePageContent() {
 
     {/* ================= LOADING ================= */}
     {loading ? (
-      <p className="text-gray-500 py-10 sm:py-12 text-center text-sm sm:text-base">
-        Loading posts...
-      </p>
+      <LogoLoader />
     ) : error ? (
       /* ================= ERROR ================= */
       <div className="py-10 sm:py-12 text-center px-4">
@@ -605,9 +604,7 @@ export default function HopePage() {
   return (
     <Suspense
       fallback={
-        <div className="py-12 text-center text-gray-500">
-          Loading...
-        </div>
+        <LogoLoader />
       }
     >
       <HopePageContent />

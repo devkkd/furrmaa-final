@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
 import { FaApple } from 'react-icons/fa'
 import Container from '@/components/Container'
+import LogoLoader from '@/components/LogoLoader'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -364,7 +365,7 @@ const AuthPage = () => {
     if (!modeReady) {
         return (
             <section className="min-h-[100vh] flex items-center justify-center bg-gray-50 px-4">
-                <p className="text-gray-500 text-sm">Loading...</p>
+                <LogoLoader />
             </section>
         )
     }

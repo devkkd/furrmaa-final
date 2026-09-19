@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import { getToken, setToken, fetchMe } from '@/lib/api'
 import AccountSideBar from '@/components/AccountSideBar'
 import MobileAccountNav from '@/components/MobileAccountNav'
+import LogoLoader from '@/components/LogoLoader'
 
 export default function AccountLayout({ children }) {
   const router = useRouter()
@@ -46,7 +47,7 @@ export default function AccountLayout({ children }) {
   if (checking) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+        <LogoLoader />
       </div>
     )
   }

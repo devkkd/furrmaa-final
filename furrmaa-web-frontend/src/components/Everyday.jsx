@@ -12,6 +12,7 @@ import "swiper/css/navigation";
 import { usePetStore } from "@/store/petStore";
 import { fetchMainCategories } from "@/lib/api";
 import { AdminImage } from "@/app/admin/components/AdminImage";
+import LogoLoader from "@/components/LogoLoader";
 
 function titleToCategory(title) {
   const slug = (title || "").toLowerCase().trim();
@@ -81,7 +82,7 @@ return (
       </h2>
 
       {loading ? (
-        <p className="text-center text-gray-500 text-sm py-8">Loading categories...</p>
+        <LogoLoader />
       ) : (
       <div className="max-w-[1400px] mx-auto px-4 flex items-center justify-center gap-2 md:gap-6">
         {data.length > 0 ? (

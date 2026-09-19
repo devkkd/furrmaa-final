@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Container from '@/components/Container';
+import LogoLoader from '@/components/LogoLoader';
 import {
   fetchSubscription,
   upgradeSubscription,
@@ -184,7 +185,7 @@ export default function SubscriptionPage() {
           )}
 
           {loading ? (
-            <p className="text-gray-500 py-8">Loading subscription…</p>
+            <LogoLoader />
           ) : (
             <>
               <div className="border border-gray-200 rounded-xl p-6 mb-6">

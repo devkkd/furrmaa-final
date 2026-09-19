@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { fetchMyCremationRequests } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function CremationRequestsPage() {
   const [requests, setRequests] = useState([]);
@@ -22,7 +23,7 @@ export default function CremationRequestsPage() {
         <Link href="/cremation" className="px-4 py-2 rounded-xl bg-[#1F2E46] text-white text-sm font-semibold">New Request</Link>
       </div>
 
-      {loading ? <p className="text-gray-500">Loading...</p> : requests.length === 0 ? (
+      {loading ? <LogoLoader /> : requests.length === 0 ? (
         <p className="text-gray-500">No cremation requests yet. <Link href="/cremation" className="text-[#1F2E46] font-semibold">Browse centers</Link></p>
       ) : (
         <div className="space-y-4">

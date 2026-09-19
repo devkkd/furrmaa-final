@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Container from "@/components/Container";
 import { fetchHopePostById, startHopeChat, getToken } from "@/lib/api";
+import LogoLoader from "@/components/LogoLoader";
 
 export default function HopeDetailPage() {
   const params = useParams();
@@ -38,7 +39,7 @@ export default function HopeDetailPage() {
     }
   };
 
-  if (loading) return <Container><p className="py-16 text-gray-500">Loading...</p></Container>;
+  if (loading) return <Container><LogoLoader /></Container>;
   if (!post) return <Container><p className="py-16 text-gray-500">Post not found.</p><Link href="/hope" className="text-[#1F2E46] font-bold">← Back to Hope</Link></Container>;
 
   const imageUrl = post.images && post.images[0];

@@ -9,6 +9,7 @@ import { IoCheckmarkCircle } from 'react-icons/io5';
 import Link from 'next/link';
 import { fetchOrderById } from '@/lib/api';
 import ProductInfoCard from '@/components/ProductInfoCard';
+import LogoLoader from '@/components/LogoLoader';
 
 const OrderDetails = () => {
   const { order_id } = useParams();
@@ -40,7 +41,7 @@ const OrderDetails = () => {
     return (
       <section className="bg-white min-h-screen py-6 md:py-10">
         <Container>
-          <div className="p-10 text-center text-gray-500">Loading order details...</div>
+          <LogoLoader />
         </Container>
       </section>
     );

@@ -4,6 +4,7 @@ import Container from '@/components/Container';
 import { IoChevronDown } from 'react-icons/io5';
 import WhyChooseFurrmaa from '@/components/WhyChooseFurrmaa';
 import { fetchFaqs } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 const FaqPage = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -32,7 +33,7 @@ const FaqPage = () => {
 
           {/* Full Width Question List */}
           {loading ? (
-            <div className="py-12 text-center text-gray-500">Loading FAQs...</div>
+            <LogoLoader />
           ) : faqs.length === 0 ? (
             <div className="py-12 text-center text-gray-500">No FAQs found.</div>
           ) : (

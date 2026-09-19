@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { fetchFeaturedFeedback } from "@/lib/api";
+import LogoLoader from "@/components/LogoLoader";
 
 function toCard(item) {
   return {
@@ -91,9 +92,7 @@ export default function Feedback() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-500 text-lg">
-          Loading feedback...
-        </div>
+        <LogoLoader />
       ) : feedbacks.length === 0 ? (
         <div className="text-center py-20 text-gray-500 text-lg">
           No community feedback available right now.

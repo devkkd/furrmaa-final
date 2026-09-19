@@ -7,6 +7,7 @@ import { fetchWishlist, removeFromWishlist } from '@/lib/api';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { addProductToCart } from '@/lib/cartActions';
 import { useRouter } from 'next/navigation';
+import LogoLoader from '@/components/LogoLoader';
 
 const PLACEHOLDER = 'https://placehold.co/120x120/e5e7eb/6b7280?text=Pet';
 
@@ -66,7 +67,7 @@ export default function WishlistPage() {
           )}
 
           {loading ? (
-            <p className="text-gray-500">Loading…</p>
+            <LogoLoader />
           ) : items.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-600 mb-4">Your wishlist is empty</p>

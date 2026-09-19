@@ -13,6 +13,7 @@ import Link from "next/link";
 import { fetchCremationCenters } from "@/lib/api";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import LocationPickerModal from "@/components/LocationPickerModal";
+import LogoLoader from "@/components/LogoLoader";
 
 const CremationServices = () => {
   const [services, setServices] = useState([]);
@@ -231,9 +232,7 @@ const CremationServices = () => {
 
         {/* ================= SERVICES ================= */}
         {loading ? (
-          <div className="py-10 sm:py-14 text-center text-gray-500 text-sm sm:text-base">
-            Loading cremation centers...
-          </div>
+          <LogoLoader />
         ) : services.length === 0 ? (
           <div className="py-10 sm:py-14 text-center text-gray-500 text-sm sm:text-base px-4">
             No cremation centers found for selected location.

@@ -8,12 +8,11 @@ import Everyday from "@/components/Everyday";
 import Wellness from "@/components/Wellness";
 import Card from "@/components/Card";
 import TopSelling from "@/components/TopSelling";
+import LogoLoader from "@/components/LogoLoader";
 import { getToken } from "@/lib/api";
 import { useWishlistStore } from "@/store/wishlistStore";
 
-const SectionLoader = () => (
-  <div className="w-full py-10 text-center text-sm text-gray-400">Loading...</div>
-);
+const SectionLoader = () => <LogoLoader />;
 
 const PetCard = dynamic(() => import("@/components/PetCard"), { loading: SectionLoader });
 const NewArrivals = dynamic(() => import("@/components/NewArrivals"), { loading: SectionLoader });

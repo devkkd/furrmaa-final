@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { fetchSettings, updateSettings } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 const defaultSettings = {
   notifications: { push: true, email: true, sms: false, orderUpdates: true, promotions: true, reminders: true },
@@ -40,7 +41,7 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading) return <div className="p-10 text-gray-500">Loading settings...</div>;
+  if (loading) return <LogoLoader />;
 
   return (
     <div className="bg-white border border-gray-100 md:rounded-[32px] p-4 md:p-10 shadow-sm min-h-[600px]">

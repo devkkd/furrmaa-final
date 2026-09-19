@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Container from '@/components/Container';
+import LogoLoader from '@/components/LogoLoader';
 import { HiCheckCircle } from 'react-icons/hi';
 import { fetchSubscription, purchaseTrainingSubscription, verifyTrainingSubscriptionPayment, loadRazorpayScript, payTrainingSubscriptionWithWallet } from '@/lib/api';
 import { WALLET_UI_ENABLED } from '@/lib/featureFlags';
@@ -167,7 +168,7 @@ const SubscriptionPage = () => {
 
                                 {/* Subscription Status */}
                                 {loading ? (
-                                    <div className="text-center py-8 text-gray-500">Checking subscription...</div>
+                                    <LogoLoader size="sm" className="py-4" />
                                 ) : hasTrainingAccess ? (
                                     <div className="bg-green-50 border-2 border-green-200 rounded-[32px] p-6 md:p-8 text-center space-y-3 mb-8">
                                         <div className="inline-block p-3 bg-green-100 rounded-full mb-2">

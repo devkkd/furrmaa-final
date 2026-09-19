@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { fetchHopeChats } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function HopeChatsPage() {
   const [chats, setChats] = useState([]);
@@ -22,7 +23,7 @@ export default function HopeChatsPage() {
         <Link href="/hope" className="text-sm text-[#1F2E46] font-semibold">Browse Hope →</Link>
       </div>
 
-      {loading ? <p className="text-gray-500">Loading...</p> : chats.length === 0 ? (
+      {loading ? <LogoLoader /> : chats.length === 0 ? (
         <p className="text-gray-500">No chats yet. Message someone from a <Link href="/hope" className="text-[#1F2E46] font-semibold">Hope post</Link>.</p>
       ) : (
         <div className="space-y-3">

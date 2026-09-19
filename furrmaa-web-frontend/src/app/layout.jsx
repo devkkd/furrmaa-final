@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ApiWarmup from "@/components/ApiWarmup";
 
 const monaSans = Mona_Sans({
   subsets: ["latin"],
@@ -37,6 +38,7 @@ export default function RootLayout({ children }) {
           `}
         </Script>
 
+        <ApiWarmup />
         <Header />
         {children}
         <Footer />

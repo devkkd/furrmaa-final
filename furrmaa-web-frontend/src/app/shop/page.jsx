@@ -7,6 +7,7 @@ import FilterSidebar from "@/components/FilterSidebar";
 import ProductCard from "@/components/ProductCard";
 import { usePetStore } from "@/store/petStore";
 import { useProducts } from "@/hooks/useProducts";
+import LogoLoader from "@/components/LogoLoader";
 
 function StorePageContent() {
   const router = useRouter();
@@ -179,7 +180,7 @@ function StorePageContent() {
           <div className="flex-1">
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {loading ? (
-                <p className="text-gray-500 col-span-full">Loading...</p>
+                <LogoLoader />
               ) : (
                 <>
                   {filteredProducts.map((product) => (
@@ -200,7 +201,7 @@ function StorePageContent() {
 
 export default function StorePage() {
   return (
-    <Suspense fallback={<div className="py-12 text-center text-gray-500">Loading...</div>}>
+    <Suspense fallback={<LogoLoader />}>
       <StorePageContent />
     </Suspense>
   );

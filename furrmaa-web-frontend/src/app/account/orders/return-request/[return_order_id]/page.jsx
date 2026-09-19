@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Container from '@/components/Container';
 import ProductInfoCard from '@/components/ProductInfoCard';
 import { fetchOrderById, submitReturnRequest } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 const ReturnOrderPage = () => {
     const { return_order_id } = useParams();
@@ -38,7 +39,7 @@ const ReturnOrderPage = () => {
         return (
             <section className="bg-white min-h-screen py-6 md:py-10">
                 <Container>
-                    <div className="p-10 text-center text-gray-500">Loading order details...</div>
+                    <LogoLoader />
                 </Container>
             </section>
         );

@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import Container from '@/components/Container';
+import LogoLoader from '@/components/LogoLoader';
 import { IoMdRadioButtonOn, IoMdRadioButtonOff } from 'react-icons/io';
 import { fetchAddresses, createAddress, updateAddress, deleteAddress } from '@/lib/api';
 
@@ -175,7 +176,7 @@ const MyAddress = () => {
 
                     {/* Address Grid */}
                     {loading ? (
-                        <div className="py-12 text-center text-gray-500">Loading addresses...</div>
+                        <LogoLoader />
                     ) : addresses.length === 0 ? (
                         <div className="py-12 text-center text-gray-500">
                             <p>No addresses found. Add your first address to get started.</p>

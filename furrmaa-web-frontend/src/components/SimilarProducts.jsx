@@ -3,6 +3,7 @@
 import React from 'react';
 import ProductCard from '@/components/ProductCard';
 import { useProducts } from '@/hooks/useProducts';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function SimilarProducts({ category, currentProductId }) {
   // Fetch products that match the same category
@@ -18,7 +19,7 @@ export default function SimilarProducts({ category, currentProductId }) {
     return (
       <div className="mt-20">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Similar Products</h2>
-        <div className="animate-pulse flex gap-4">Loading...</div>
+        <LogoLoader size="sm" className="py-6" />
       </div>
     );
   }

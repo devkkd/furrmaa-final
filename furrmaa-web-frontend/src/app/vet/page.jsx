@@ -10,6 +10,7 @@ import WhyChooseFurrmaa from '@/components/WhyChooseFurrmaa';
 import { useVetServices } from '@/hooks/useVetServices';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import LocationPickerModal from '@/components/LocationPickerModal';
+import LogoLoader from '@/components/LogoLoader';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -204,8 +205,8 @@ const Vet = () => {
                         ))}
                     </div>
 
-                    {loading ? (
-                        <p className="text-gray-500 py-12">Loading vet services...</p>
+                        {loading ? (
+                        <LogoLoader />
                     ) : filteredServices.length === 0 ? (
                         <p className="text-gray-500 py-12">No vet services found. Try adjusting your search or filters.</p>
                     ) : (

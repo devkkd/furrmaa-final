@@ -9,6 +9,7 @@ import WhyChooseFurrmaa from '@/components/WhyChooseFurrmaa';
 import Container from '@/components/Container';
 import { markTrainingProgressComplete, fetchTrainingVideoById } from '@/lib/api';
 import InstructorCard from '@/components/InstructorCard';
+import LogoLoader from '@/components/LogoLoader';
 
 function videoToLesson(video, index = 0) {
   const duration = video.duration || 5;
@@ -64,7 +65,7 @@ const TrainingLessonPage = () => {
     } catch (_) {}
   };
 
-  if (loading && !lessonFromBackend && !lessonFromList) return <Container><p className="py-12 text-gray-500">Loading...</p></Container>;
+  if (loading && !lessonFromBackend && !lessonFromList) return <Container><LogoLoader /></Container>;
   
   if (error && !currentLesson) {
     return (
@@ -79,7 +80,7 @@ const TrainingLessonPage = () => {
   }
   
   if (!currentLesson && !loadingLesson) return <div className="p-8 text-gray-600">Lesson not found</div>;
-  if (loadingLesson && !lessonFromList && !lessonFromBackend) return <Container><p className="py-12 text-gray-500">Loading lesson...</p></Container>;
+  if (loadingLesson && !lessonFromList && !lessonFromBackend) return <Container><LogoLoader /></Container>;
 
   const progress = progressByPlan[plan] ?? 0;
   const pageTitle = currentPlan?.title || (plan ? `${String(plan).charAt(0).toUpperCase() + String(plan).slice(1)} Training` : 'Basic Training');

@@ -4,6 +4,7 @@ import { HiOutlineLocationMarker, HiChevronDown, HiChevronUp } from 'react-icons
 import Container from '@/components/Container';
 import WhyChooseFurrmaa from '@/components/WhyChooseFurrmaa';
 import { fetchPetEvents, registerPetEvent } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 const PetEvents = () => {
     const [expandedEventId, setExpandedEventId] = useState(null);
@@ -121,9 +122,7 @@ const PetEvents = () => {
 
                     {/* Events List */}
                     {loading ? (
-                        <div className="flex justify-center py-16">
-                            <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#a3e635] border-t-transparent" />
-                        </div>
+                        <LogoLoader />
                     ) : events.length === 0 ? (
                         <div className="text-center py-16 text-gray-600">
                             <p className="text-lg font-medium">No pet events in this location right now.</p>

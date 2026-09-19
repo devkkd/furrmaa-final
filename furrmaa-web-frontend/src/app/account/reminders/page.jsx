@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { fetchReminders, createReminder, updateReminder, deleteReminder, fetchMyPets } from '@/lib/api';
+import LogoLoader from '@/components/LogoLoader';
 
 const TYPES = ['feeding', 'medication', 'grooming', 'vaccination', 'vet_visit', 'exercise', 'other'];
 const emptyForm = { title: '', date: '', time: '09:00', type: 'feeding', description: '', pet: '', enabled: true };
@@ -74,7 +75,7 @@ export default function RemindersPage() {
         <button type="button" onClick={() => setShowForm(true)} className="px-4 py-2 rounded-xl bg-[#1F2E46] text-white text-sm font-semibold">+ Add</button>
       </div>
 
-      {loading ? <p className="text-gray-500">Loading...</p> : reminders.length === 0 ? (
+      {loading ? <LogoLoader /> : reminders.length === 0 ? (
         <p className="text-gray-500">No reminders yet.</p>
       ) : (
         <div className="space-y-3">
