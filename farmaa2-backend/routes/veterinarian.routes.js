@@ -1,6 +1,7 @@
 import express from 'express';
 import User from '../models/User.model.js';
 import { vetLocationClause, preferredCityToken } from '../utils/locationFilter.js';
+import { setPublicCache } from '../utils/httpCache.js';
 
 const router = express.Router();
 
@@ -18,7 +19,6 @@ router.get('/', async (req, res) => {
       query.specialization = category;
     }
     const andClauses = [];
-    // Prefer city token so "Jaipur Municipal..." matches address.city "Jaipur"
     const locRaw = location || city;
     const locForFilter = preferredCityToken(locRaw) || locRaw;
     const vetLoc = vetLocationClause(locForFilter);
@@ -42,10 +42,14 @@ router.get('/', async (req, res) => {
     }
     if (andClauses.length) query.$and = andClauses;
 
-    const veterinarians = await User.find(query).select(
-      'name email phone address profileImage specialization qualification clinicName experience licenseNumber rating totalReviews serviceType'
-    ).sort({ rating: -1, createdAt: -1 });
+    const veterinarians = await User.find(query)
+      .select(
+        'name email phone address profileImage specialization qualification clinicName experience licenseNumber rating totalReviews serviceType'
+      )
+      .sort({ rating: -1, createdAt: -1 })
+      .lean();
 
+    setPublicCache(res, 120);
     res.json({ success: true, veterinarians });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -3,6 +3,7 @@ import cors from 'cors';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import connectDB from './config/database.js';
+import { ensureUserPhoneNotUnique } from './models/User.model.js';
 import { verifyEmailConfig } from './utils/email.service.js';
 import firebaseAdmin from './config/firebase.admin.js';
 import { isOpenAIConfigured } from './services/openai.service.js';
@@ -125,7 +126,8 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-connectDB().then(() => {
+connectDB().then(async () => {
+  await ensureUserPhoneNotUnique();
   app.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);
     if (isOpenAIConfigured()) {

@@ -53,19 +53,36 @@ useEffect(() => {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchMainCategories({ section: 'everyday', petType: petType || 'dog' })
-      .then((list) => {
-        if (!cancelled && Array.isArray(list)) {
-          const active = list.filter((c) => c.isActive !== false);
-          setData(active.map(mapCategory).filter((c) => !isOther(c.title, c.slug)));
+
+    const load = async (attempt = 0) => {
+      try {
+        const list = await fetchMainCategories({
+          section: 'everyday',
+          petType: petType || 'dog',
+        });
+        if (cancelled) return;
+        const active = (Array.isArray(list) ? list : [])
+          .filter((c) => c.isActive !== false)
+          .map(mapCategory)
+          .filter((c) => !isOther(c.title, c.slug));
+        if (active.length === 0 && attempt < 1) {
+          await new Promise((r) => setTimeout(r, 2200));
+          if (!cancelled) await load(attempt + 1);
+          return;
         }
-      })
-      .catch(() => {
+        setData(active);
+      } catch {
+        if (attempt < 1) {
+          await new Promise((r) => setTimeout(r, 2200));
+          if (!cancelled) await load(attempt + 1);
+          return;
+        }
         if (!cancelled) setData([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+      }
+      if (!cancelled) setLoading(false);
+    };
+
+    load();
     return () => {
       cancelled = true;
     };

@@ -1,47 +1,54 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   fetchMainCategories,
   fetchProducts,
   fetchWhyChooseFeatures,
-  fetchHopePosts,
-  fetchPetEvents,
-  fetchVeterinarians,
   getToken,
 } from '@/lib/api';
 import { usePetStore } from '@/store/petStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 
 /**
- * Warm critical public APIs in the background so home/shop feel instant.
- * Safe: uses existing cache + in-flight dedupe.
+ * Light prefetch for home catalog only — no health gate flood (VPS is always on).
+ * Other pages fetch what they need; withCache still dedupes.
  */
 export default function ApiWarmup() {
+  const pathname = usePathname();
   const petType = usePetStore((s) => s.petType) || 'dog';
+  const isHome = pathname === '/' || pathname === '';
 
   useEffect(() => {
-    const warm = () => {
-      fetchMainCategories({ section: 'everyday', petType }).catch(() => {});
-      fetchMainCategories({ section: 'wellness', petType }).catch(() => {});
-      fetchProducts({ petType, sortBy: 'popularity', limit: 12 }).catch(() => {});
-      fetchProducts({ petType, sortBy: 'newest', limit: 12 }).catch(() => {});
-      fetchProducts({ petType, bestDeals: true, limit: 12 }).catch(() => {});
-      fetchWhyChooseFeatures().catch(() => {});
-      fetchHopePosts({ limit: 12 }).catch(() => {});
-      fetchPetEvents({ city: 'Jaipur' }).catch(() => {});
-      fetchVeterinarians({}).catch(() => {});
+    if (!isHome) {
       if (getToken()) useWishlistStore.getState().ensureLoaded();
+      return;
+    }
+
+    let cancelled = false;
+
+    const warm = () => {
+      if (cancelled) return;
+      Promise.allSettled([
+        fetchMainCategories({ section: 'everyday', petType }),
+        fetchMainCategories({ section: 'wellness', petType }),
+        fetchProducts({ petType, sortBy: 'popularity', limit: 12 }),
+        fetchProducts({ petType, sortBy: 'newest', limit: 12 }),
+        fetchProducts({ petType, bestDeals: true, limit: 12 }),
+        fetchWhyChooseFeatures(),
+      ]).finally(() => {
+        if (!cancelled && getToken()) useWishlistStore.getState().ensureLoaded();
+      });
     };
 
-    // Idle warmup — don't block first paint
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(warm, { timeout: 2500 });
-      return () => window.cancelIdleCallback?.(id);
-    }
-    const t = setTimeout(warm, 400);
-    return () => clearTimeout(t);
-  }, [petType]);
+    // Slight defer so first paint / LCP can start first
+    const t = setTimeout(warm, 50);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [isHome, petType]);
 
   return null;
 }

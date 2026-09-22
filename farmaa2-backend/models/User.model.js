@@ -126,4 +126,21 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 
 export default mongoose.model('User', userSchema);
 
+/** Drop legacy unique index on phone so clinic numbers can be shared across vet listings. */
+export async function ensureUserPhoneNotUnique() {
+  try {
+    const indexes = await mongoose.model('User').collection.indexes();
+    for (const idx of indexes) {
+      const keys = Object.keys(idx.key || {});
+      if (keys.length === 1 && keys[0] === 'phone' && idx.unique) {
+        await mongoose.model('User').collection.dropIndex(idx.name);
+        console.log(`[User] Dropped unique phone index: ${idx.name}`);
+      }
+    }
+  } catch (err) {
+    if (err?.code !== 27 && err?.codeName !== 'IndexNotFound') {
+      console.warn('[User] ensureUserPhoneNotUnique:', err.message);
+    }
+  }
+}
 

@@ -1694,7 +1694,7 @@ router.delete('/posts/:id', async (req, res) => {
 router.get('/veterinarians', async (req, res) => {
   try {
     const { specialization, city, isActive, serviceType } = req.query;
-    const query = { role: 'veterinarian' };
+    const query = { role: 'veterinarian', isActive: { $ne: false } };
     
     if (specialization) {
       query.specialization = { $regex: specialization, $options: 'i' };
@@ -1722,7 +1722,7 @@ router.post('/veterinarians', async (req, res) => {
   try {
     const {
       name,
-      email,
+      email: emailRaw,
       phone,
       password,
       address,
@@ -1736,18 +1736,21 @@ router.post('/veterinarians', async (req, res) => {
       serviceType,
     } = req.body;
 
-    // Check if user with email already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: 'User with this email already exists' });
+    // Same clinic phone can be reused — email must stay unique, not derived only from phone.
+    const phoneDigits = String(phone || '').replace(/\D/g, '').slice(-10);
+    let email = String(emailRaw || '').trim().toLowerCase();
+    if (!email || /@farmaa\.local$/i.test(email)) {
+      email = `vet_${phoneDigits || 'x'}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}@farmaa.local`;
+    }
+    while (await User.findOne({ email }).select('_id').lean()) {
+      email = `vet_${phoneDigits || 'x'}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}@farmaa.local`;
     }
 
-    // Create new veterinarian
     const veterinarian = await User.create({
       name,
       email,
-      phone,
-      password: password || 'default123', // Default password if not provided
+      phone: phoneDigits || undefined,
+      password: password || 'default123',
       address: address ? normalizeVetAddress(address) : address,
       role: 'veterinarian',
       specialization,
@@ -1766,6 +1769,13 @@ router.post('/veterinarians', async (req, res) => {
       veterinarian: await User.findById(veterinarian._id).select('-password'),
     });
   } catch (error) {
+    if (error?.code === 11000 && error?.keyPattern?.phone) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Phone unique index still on DB. Restart backend once (auto-drops phone_1) or run: db.users.dropIndex("phone_1")',
+      });
+    }
     res.status(400).json({ success: false, message: error.message });
   }
 });
@@ -1773,32 +1783,44 @@ router.post('/veterinarians', async (req, res) => {
 // Update veterinarian
 router.put('/veterinarians/:id', async (req, res) => {
   try {
-    const { password, ...updateData } = req.body;
+    const { password, email, ...updateData } = req.body;
     const vet = await User.findById(req.params.id);
     
     if (!vet || vet.role !== 'veterinarian') {
       return res.status(404).json({ success: false, message: 'Veterinarian not found' });
     }
     
-    // Update password separately if provided
     if (password) {
       vet.password = password;
-      await vet.save();
+    }
+
+    if (updateData.phone != null && updateData.phone !== '') {
+      const digits = String(updateData.phone).replace(/\D/g, '').slice(-10);
+      updateData.phone = digits || updateData.phone;
     }
     
-    // Update other fields
     if (updateData.address) {
-      updateData.address = normalizeVetAddress(updateData.address);
+      vet.address = normalizeVetAddress(updateData.address);
+      vet.markModified('address');
+      delete updateData.address;
     }
     if (updateData.serviceType != null) {
       updateData.serviceType = String(updateData.serviceType).trim();
     }
+    // Do not let client overwrite internal email
     Object.assign(vet, updateData);
     await vet.save();
     
     const updatedVet = await User.findById(vet._id).select('-password');
     res.json({ success: true, veterinarian: updatedVet });
   } catch (error) {
+    if (error?.code === 11000 && error?.keyPattern?.phone) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Phone unique index still on DB. Restart backend once (auto-drops phone_1) or run: db.users.dropIndex("phone_1")',
+      });
+    }
     res.status(400).json({ success: false, message: error.message });
   }
 });
@@ -1809,12 +1831,10 @@ router.delete('/veterinarians/:id', async (req, res) => {
     if (!vet || vet.role !== 'veterinarian') {
       return res.status(404).json({ success: false, message: 'Veterinarian not found' });
     }
-    
-    // Soft delete by setting isActive to false
-    vet.isActive = false;
-    await vet.save();
-    
-    res.json({ success: true, message: 'Veterinarian deactivated successfully' });
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({ success: true, message: 'Veterinarian removed successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

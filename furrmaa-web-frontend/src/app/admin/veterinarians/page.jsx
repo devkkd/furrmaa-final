@@ -127,7 +127,7 @@ export default function AdminVeterinariansPage() {
     }
     setSaving(true);
     try {
-      const email = `vet_${(form.phone?.trim() || Date.now()).toString().replace(/\D/g, '')}@farmaa.local`;
+      const email = `vet_${(form.phone?.trim() || 'x').toString().replace(/\D/g, '').slice(-10) || 'x'}_${Date.now()}@farmaa.local`;
       const address = buildAddress(form.location, placeMeta, locationCoords);
       await adminCreateVeterinarian({
         name: form.name.trim(),
@@ -274,14 +274,15 @@ export default function AdminVeterinariansPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Location *</label>
               <LocationAutocomplete
+                key={editingId || 'new-vet-location'}
                 value={form.location}
                 onChange={(location) => {
-                  setForm({ ...form, location });
+                  setForm((f) => ({ ...f, location }));
                   setLocationCoords({ lat: null, lng: null });
                   setPlaceMeta(parseCityState(location));
                 }}
                 onPlaceSelect={(p) => {
-                  setForm({ ...form, location: p.label });
+                  setForm((f) => ({ ...f, location: p.label }));
                   setPlaceMeta({ city: p.city || '', state: p.state || '' });
                   if (p.lat != null && p.lng != null) {
                     setLocationCoords({ lat: p.lat, lng: p.lng });

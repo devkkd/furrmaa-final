@@ -27,10 +27,12 @@ router.get('/posts', async (req, res) => {
       .populate('user', 'name profileImage')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .lean();
     
     const total = await HopePost.countDocuments(query);
 
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=30');
     res.json({ 
       success: true, 
       posts,

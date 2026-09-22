@@ -169,7 +169,7 @@ const AdminVeterinariansScreen = () => {
       const address = await buildAddressPayload(formData.location.trim());
       const payload = {
         name: formData.name.trim(),
-        email: `vet_${formData.phone?.trim() || Date.now()}@farmaa.local`,
+        email: `vet_${(formData.phone?.trim() || 'x').replace(/\D/g, '').slice(-10) || 'x'}_${Date.now()}@farmaa.local`,
         phone: formData.phone.trim() || undefined,
         address,
         profileImage: formData.profileImage || undefined,
@@ -253,7 +253,7 @@ const AdminVeterinariansScreen = () => {
   const handleDelete = (vetId: string, vetName: string) => {
     Alert.alert(
       'Delete Veterinarian',
-      `Are you sure you want to deactivate "${vetName}"?`,
+      `Remove "${vetName}" permanently?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -263,7 +263,7 @@ const AdminVeterinariansScreen = () => {
             try {
               setLoading(true);
               await api.CLIENT.delete(`${api.ENDPOINTS.ADMIN.VETERINARIANS}/${vetId}`);
-              Alert.alert('Success', 'Veterinarian deactivated successfully');
+              Alert.alert('Success', 'Veterinarian removed');
               fetchVeterinarians();
             } catch (err: any) {
               Alert.alert('Error', err.response?.data?.message || 'Failed to delete veterinarian');

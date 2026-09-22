@@ -1,12 +1,28 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaStar, FaRegHeart, FaHeart } from 'react-icons/fa'
 import { addProductToCart } from '@/lib/cartActions'
 import { getToken, addToWishlist, removeFromWishlist } from '@/lib/api'
 import { useWishlistStore } from '@/store/wishlistStore'
+
+function canOptimizeImage(src) {
+  if (!src || typeof src !== 'string') return false;
+  if (src.startsWith('/')) return true;
+  try {
+    const host = new URL(src).hostname;
+    return (
+      host === 'res.cloudinary.com' ||
+      host.endsWith('.cloudinary.com') ||
+      host === 'placehold.co'
+    );
+  } catch {
+    return false;
+  }
+}
 
 export default function ProductCard({ product }) {
   const router = useRouter()
@@ -89,17 +105,27 @@ export default function ProductCard({ product }) {
       <div className="bg-white text-black rounded-xl md:rounded-2xl p-1 md:p-2 flex flex-col w-full hover:shadow-lg border border-transparent hover:border-gray-100 transition-all duration-300">
 
         <div className="relative flex items-center justify-center h-[150px] md:h-[220px] mb-2 md:mb-3 rounded-[16px] overflow-hidden">
-          <img
-            src={productImage}
-            alt={product.name}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-500"
-          />
+          {canOptimizeImage(productImage) ? (
+            <Image
+              src={productImage}
+              alt={product.name || 'Product'}
+              fill
+              sizes="(max-width: 768px) 33vw, 180px"
+              className="object-contain group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <img
+              src={productImage}
+              alt={product.name || 'Product'}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-500"
+            />
+          )}
           <button
             type="button"
             disabled={wishBusy}
-            className="absolute top-1 md:top-3 right-1 md:right-3 p-1 rounded-full transition-colors disabled:opacity-50"
+            className="absolute top-1 md:top-3 right-1 md:right-3 p-1 rounded-full transition-colors disabled:opacity-50 z-10"
             onClick={toggleWishlist}
             aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >

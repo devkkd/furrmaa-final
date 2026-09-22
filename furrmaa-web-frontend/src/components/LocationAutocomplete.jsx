@@ -9,16 +9,7 @@ import {
 
 /**
  * Address / location input with Google Places suggestions (falls back to plain input).
- *
- * @param {object} props
- * @param {string} props.value
- * @param {(v: string) => void} props.onChange
- * @param {(place: ReturnType<typeof parseGooglePlace>) => void} [props.onPlaceSelect]
- * @param {string} [props.placeholder]
- * @param {string} [props.className]
- * @param {string[]} [props.types] - e.g. ['geocode'] or ['establishment', 'geocode']
- * @param {boolean} [props.disabled]
- * @param {string} [props.id]
+ * Remount with a new `key` when switching edit records so value stays editable.
  */
 export default function LocationAutocomplete({
   value,
@@ -38,10 +29,18 @@ export default function LocationAutocomplete({
   onPlaceSelectRef.current = onPlaceSelect;
   onChangeRef.current = onChange;
 
+  // Keep DOM in sync when parent value changes (edit form open / reset)
+  useEffect(() => {
+    if (inputRef.current && inputRef.current.value !== (value || '')) {
+      inputRef.current.value = value || '';
+    }
+  }, [value]);
+
   useEffect(() => {
     if (!isGooglePlacesConfigured() || !inputRef.current) return;
 
     let cancelled = false;
+    let listener = null;
 
     loadGoogleMapsPlaces()
       .then((maps) => {
@@ -53,10 +52,11 @@ export default function LocationAutocomplete({
           fields: ['place_id', 'formatted_address', 'geometry', 'address_components', 'name'],
         });
 
-        ac.addListener('place_changed', () => {
+        listener = ac.addListener('place_changed', () => {
           const place = ac.getPlace();
           if (!place?.geometry) return;
           const parsed = parseGooglePlace(place);
+          if (inputRef.current) inputRef.current.value = parsed.label;
           onChangeRef.current(parsed.label);
           onPlaceSelectRef.current?.(parsed);
         });
@@ -67,11 +67,15 @@ export default function LocationAutocomplete({
 
     return () => {
       cancelled = true;
+      if (listener && window.google?.maps?.event) {
+        window.google.maps.event.removeListener(listener);
+      }
+      autocompleteRef.current = null;
     };
   }, [types.join(',')]);
 
   const hint = isGooglePlacesConfigured()
-    ? 'Start typing for address suggestions'
+    ? 'Type freely to edit, or pick a suggestion'
     : 'Type your city or area (add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY for suggestions)';
 
   return (
@@ -80,8 +84,9 @@ export default function LocationAutocomplete({
         ref={inputRef}
         id={id}
         type="text"
-        value={value}
+        defaultValue={value || ''}
         onChange={(e) => onChange(e.target.value)}
+        onInput={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={className}
         disabled={disabled}

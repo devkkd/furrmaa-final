@@ -1,10 +1,22 @@
 const DEFAULT_API_BASE_URL = 'http://localhost:5000/api';
+
+/**
+ * Production API base.
+ * Hostinger VPS tip: set NEXT_PUBLIC_API_SAME_ORIGIN=true + nginx/Next rewrite to Node
+ * so the browser calls https://furrmaa.com/api (same server = fastest).
+ * Or set NEXT_PUBLIC_LIVE_API_URL / NEXT_PUBLIC_API_URL to your VPS API URL
+ * (e.g. https://api.furrmaa.com/api) — avoid Render if backend is on the VPS.
+ */
 const LIVE_API_BASE_URL =
-  process.env.NEXT_PUBLIC_LIVE_API_URL || 'https://furrmaa-final.onrender.com/api';
+  process.env.NEXT_PUBLIC_LIVE_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  'https://furrmaa-final.onrender.com/api';
 
 function normalizeApiUrl(url) {
   const raw = String(url || '').trim().replace(/\/$/, '');
   if (!raw) return DEFAULT_API_BASE_URL;
+  if (raw === '/api') return '/api';
+  if (raw.startsWith('/')) return raw.endsWith('/api') ? raw : `${raw}/api`;
   return raw.endsWith('/api') ? raw : `${raw}/api`;
 }
 
@@ -21,19 +33,36 @@ function envPointsToLocal(url) {
   return !url || /localhost|127\.0\.0\.1/i.test(url);
 }
 
+function wantsSameOrigin() {
+  return String(process.env.NEXT_PUBLIC_API_SAME_ORIGIN || '').toLowerCase() === 'true';
+}
+
 /**
- * NEXT_PUBLIC_* vars are baked in at `next build` — local .env is not uploaded to hosting.
- * On furrmaa.com we must not call localhost; use LIVE_API_BASE_URL unless env has a prod URL.
+ * NEXT_PUBLIC_* vars are baked in at `next build`.
+ * On Hostinger VPS: prefer same-origin /api when enabled, else LIVE/API env (not localhost).
  */
 export function getApiBaseUrl() {
   const envUrl = process.env.NEXT_PUBLIC_API_URL;
 
   if (typeof window !== 'undefined') {
     if (!isLocalHost(window.location.hostname)) {
+      // Same-machine nginx/Next proxy — no extra DNS/CORS hop
+      if (wantsSameOrigin()) {
+        return `${window.location.origin}/api`;
+      }
       if (!envPointsToLocal(envUrl)) return normalizeApiUrl(envUrl);
       return normalizeApiUrl(LIVE_API_BASE_URL);
     }
     return normalizeApiUrl(envUrl || DEFAULT_API_BASE_URL);
+  }
+
+  // SSR
+  if (wantsSameOrigin() && process.env.NODE_ENV === 'production') {
+    const site = process.env.NEXT_PUBLIC_SITE_URL || process.env.FRONTEND_URL;
+    if (site && !envPointsToLocal(site)) {
+      return `${String(site).replace(/\/$/, '')}/api`;
+    }
+    return '/api';
   }
 
   if (process.env.NODE_ENV === 'production' && envPointsToLocal(envUrl)) {
