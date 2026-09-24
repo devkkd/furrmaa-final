@@ -36,6 +36,10 @@ router.get('/', async (req, res) => {
             { serviceType: { $in: [null, ''] } },
           ],
         });
+      } else if (/hotel|hostel|boarding/i.test(typeStr)) {
+        andClauses.push({
+          serviceType: { $regex: /hotel|hostel|boarding/i },
+        });
       } else {
         query.serviceType = typeRegex;
       }

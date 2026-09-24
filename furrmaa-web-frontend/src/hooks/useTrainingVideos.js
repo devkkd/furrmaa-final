@@ -3,8 +3,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchTrainingVideos, fetchTrainingProgress } from '@/lib/api';
 
-function videoToLesson(video, index) {
+function videoToLesson(video, index, petType = 'dog') {
   const duration = video.duration || 5;
+  const fallbackImg =
+    petType === 'cat'
+      ? `/images/cat-${(index % 2) + 1}.png`
+      : `/images/dog-${(index % 4) + 1}.png`;
   return {
     id: video._id,
     _id: video._id,
@@ -12,47 +16,98 @@ function videoToLesson(video, index) {
     lessonNum: `${index + 1} Lesson`,
     time: `${index + 1} Day | ${duration} min`,
     duration,
-    image: video.thumbnail || `/images/lessons/lesson${(index % 7) + 1}.png`,
+    image: video.thumbnail || fallbackImg,
     videoUrl: video.videoUrl,
-    description: video.description || 'This lesson covers the fundamentals of basic training and bonding.',
+    description:
+      video.description ||
+      (petType === 'cat'
+        ? 'This lesson covers gentle cat training and bonding basics.'
+        : 'This lesson covers the fundamentals of basic training and bonding.'),
     completed: false,
     isActive: video.isFree !== false,
   };
 }
 
-function buildProgramsFromVideos(videos, petType = 'dog') {
-  const defaultPrograms = [
-    { program: 'basic', title: 'Basic Training', category: 'basic', isFree: true, image: '/images/CardTwo/p1.png', textColor: 'text-gray-900', order: 1 },
-    { program: 'intermediate', title: 'Intermediate Training', category: 'intermediate', isFree: false, image: '/images/CardTwo/inter.png', textColor: 'text-white', order: 2 },
-    { program: 'advanced', title: 'Advanced Training', category: 'advanced', isFree: false, image: '/images/CardTwo/adv.png', textColor: 'text-white', order: 3 },
+function programDefaults(petType = 'dog') {
+  const isCat = petType === 'cat';
+  return [
+    {
+      program: 'basic',
+      title: isCat ? 'Basic Cat Training' : 'Basic Dog Training',
+      description: isCat
+        ? 'Litter habits, calm cues, and bonding for cats & kittens.'
+        : 'Foundation skills, simple commands, and bonding for dogs & puppies.',
+      isFree: true,
+      image: isCat ? '/images/cat-1.png' : '/images/dog-1.png',
+      textColor: 'text-gray-900',
+      order: 1,
+      tags: isCat ? ['Kitten', 'Cat'] : ['Puppy', 'Dog'],
+    },
+    {
+      program: 'intermediate',
+      title: isCat ? 'Intermediate Cat Training' : 'Intermediate Dog Training',
+      description: isCat
+        ? 'Scratching, enrichment, and behavior shaping for cats.'
+        : 'Discipline, behavior shaping, and everyday control for dogs.',
+      isFree: false,
+      image: isCat ? '/images/cat-2.png' : '/images/dog-2.png',
+      textColor: 'text-white',
+      order: 2,
+      tags: isCat ? ['Cat', 'Habits'] : ['Dog', 'Obedience'],
+    },
+    {
+      program: 'advanced',
+      title: isCat ? 'Advanced Cat Training' : 'Advanced Dog Training',
+      description: isCat
+        ? 'Advanced enrichment, clicker work, and confident routines.'
+        : 'Master-level commands, agility, and obedience.',
+      isFree: false,
+      image: isCat ? '/images/cat-1.png' : '/images/dog-3.png',
+      textColor: 'text-white',
+      order: 3,
+      tags: isCat ? ['Cat', 'Advanced'] : ['Dog', 'Advanced'],
+    },
   ];
+}
 
+function buildProgramsFromVideos(videos, petType = 'dog') {
+  const defaultPrograms = programDefaults(petType);
   const programsMap = new Map();
+
   defaultPrograms.forEach((p) => {
     programsMap.set(p.program, {
       program: p.program,
       id: p.program,
       title: p.title,
-      description: p.program === 'basic' ? 'Foundation skills, simple commands, bonding.' : p.program === 'intermediate' ? 'Discipline, behavior shaping, control.' : 'Master-level commands, agility, obedience.',
-      color: p.program === 'basic' ? 'bg-[#FDE68A]' : p.program === 'intermediate' ? 'bg-[#E29587]' : 'bg-[#6366F1]',
+      description: p.description,
+      color:
+        p.program === 'basic'
+          ? 'bg-[#FDE68A]'
+          : p.program === 'intermediate'
+            ? 'bg-[#E29587]'
+            : 'bg-[#6366F1]',
       textColor: p.textColor,
-      tags: [],
+      tags: [...p.tags],
       isFree: p.isFree,
       image: p.image,
       sessions: [],
       order: p.order,
+      petType,
     });
   });
 
   videos.forEach((v) => {
     const petTypeArr = Array.isArray(v.petType) ? v.petType : [v.petType || 'both'];
-    const matchesPet = !petType || petTypeArr.includes(petType) || petTypeArr.includes('both');
+    const matchesPet =
+      !petType || petTypeArr.includes(petType) || petTypeArr.includes('both');
     if (!matchesPet) return;
     const cat = (v.category || 'basic').toLowerCase();
-    const programKey = ['basic', 'intermediate', 'advanced'].includes(cat) ? cat : 'basic';
+    const programKey = ['basic', 'intermediate', 'advanced'].includes(cat)
+      ? cat
+      : 'basic';
     const prog = programsMap.get(programKey);
     if (!prog) return;
-    const lesson = videoToLesson(v, prog.sessions.length);
+    const lesson = videoToLesson(v, prog.sessions.length, petType);
     lesson.isActive = v.isFree !== false;
     prog.sessions.push(lesson);
   });
@@ -61,8 +116,14 @@ function buildProgramsFromVideos(videos, petType = 'dog') {
     .sort((a, b) => (a.order || 0) - (b.order || 0))
     .map((p) => {
       const count = p.sessions.length;
-      const tags = [`${count} Lessons`, `${count} Days`, `${count} Great Ways to Training`];
-      return { ...p, tags: p.tags.length ? p.tags : tags };
+      const countTags =
+        count > 0
+          ? [`${count} Lessons`, `${count} Days`]
+          : [];
+      return {
+        ...p,
+        tags: [...p.tags, ...countTags, 'View More Details'],
+      };
     });
 }
 
@@ -77,7 +138,9 @@ function mergeProgress(programs, completedVideoIds) {
     const freeSessions = sessions.filter((s) => s.isActive !== false);
     const completedFree = freeSessions.filter((s) => s.completed).length;
     const totalFree = freeSessions.length;
-    progressByPlan[p.program] = totalFree ? Math.round((completedFree / totalFree) * 100) : 0;
+    progressByPlan[p.program] = totalFree
+      ? Math.round((completedFree / totalFree) * 100)
+      : 0;
     return { ...p, sessions };
   });
   return { merged, progressByPlan };
@@ -86,7 +149,11 @@ function mergeProgress(programs, completedVideoIds) {
 export function useTrainingVideos(options = {}) {
   const { petType, category } = options;
   const [programs, setPrograms] = useState([]);
-  const [progressByPlan, setProgressByPlan] = useState({ basic: 0, intermediate: 0, advanced: 0 });
+  const [progressByPlan, setProgressByPlan] = useState({
+    basic: 0,
+    intermediate: 0,
+    advanced: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -95,10 +162,13 @@ export function useTrainingVideos(options = {}) {
     setLoading(true);
     fetchTrainingVideos({ category, petType })
       .then((videos) => {
-        const built = buildProgramsFromVideos(videos || [], petType);
+        const built = buildProgramsFromVideos(videos || [], petType || 'dog');
         return fetchTrainingProgress()
           .then(({ completedVideoIds }) => {
-            const { merged, progressByPlan: planProgress } = mergeProgress(built, completedVideoIds);
+            const { merged, progressByPlan: planProgress } = mergeProgress(
+              built,
+              completedVideoIds
+            );
             setPrograms(merged);
             setProgressByPlan(planProgress);
           })
@@ -111,7 +181,10 @@ export function useTrainingVideos(options = {}) {
       .catch((err) => {
         setPrograms([]);
         setProgressByPlan({ basic: 0, intermediate: 0, advanced: 0 });
-        setError(err?.message || 'Could not load training. Check if backend is running and try again.');
+        setError(
+          err?.message ||
+            'Could not load training. Check if backend is running and try again.'
+        );
       })
       .finally(() => setLoading(false));
   }, [petType, category]);
@@ -126,10 +199,17 @@ export function useTrainingVideos(options = {}) {
       setPrograms((prev) => {
         if (prev.length === 0) return prev;
         const existingIds = prev.flatMap((p) =>
-          (p.sessions || []).filter((s) => s.completed).map((s) => String(s.id || s._id))
+          (p.sessions || [])
+            .filter((s) => s.completed)
+            .map((s) => String(s.id || s._id))
         );
-        const allIds = [...new Set([...existingIds, ...optimisticCompletedIds.map(String)])];
-        const { merged, progressByPlan: planProgress } = mergeProgress(prev, allIds);
+        const allIds = [
+          ...new Set([...existingIds, ...optimisticCompletedIds.map(String)]),
+        ];
+        const { merged, progressByPlan: planProgress } = mergeProgress(
+          prev,
+          allIds
+        );
         setProgressByPlan(planProgress);
         return merged;
       });
@@ -138,7 +218,10 @@ export function useTrainingVideos(options = {}) {
       .then(({ completedVideoIds }) => {
         setPrograms((prev) => {
           if (prev.length === 0) return prev;
-          const { merged, progressByPlan: planProgress } = mergeProgress(prev, completedVideoIds);
+          const { merged, progressByPlan: planProgress } = mergeProgress(
+            prev,
+            completedVideoIds
+          );
           setProgressByPlan(planProgress);
           return merged;
         });

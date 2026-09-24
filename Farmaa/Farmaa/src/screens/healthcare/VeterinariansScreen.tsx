@@ -230,7 +230,8 @@ const VeterinariansScreen = () => {
               distanceKm: dKm,
               rating: p.rating || 0,
               totalReviews: p.totalReviews || 0,
-            });
+              price: p.price,
+            } as any);
           });
         } catch (_) {}
 
@@ -324,7 +325,8 @@ const VeterinariansScreen = () => {
                   distanceKm: dKm,
                   rating: p.rating || 0,
                   totalReviews: p.totalReviews || 0,
-                });
+                  price: p.price,
+                } as any);
               });
             } catch (_) {}
           }
@@ -437,6 +439,24 @@ const VeterinariansScreen = () => {
             <Image source={directonIcon} style={styles.actionButtonIcon} />
             <Text style={styles.directionsText}>Direction</Text>
           </TouchableOpacity>
+          {/hotel|hostel|boarding/i.test(item.serviceType || '') ? (
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: '#1F2E46' }]}
+              onPress={() =>
+                (navigation as any).navigate('Booking', {
+                  provider: {
+                    _id: item.id,
+                    name: item.name,
+                    rating: item.rating || 0,
+                    price: (item as any).price || 199,
+                  },
+                  serviceType: item.serviceType || 'Pet Hotels / Hostels',
+                })
+              }
+            >
+              <Text style={[styles.actionButtonText, { color: '#fff' }]}>Book/hr</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
     </View>

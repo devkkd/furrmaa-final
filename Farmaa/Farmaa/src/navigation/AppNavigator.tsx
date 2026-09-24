@@ -130,7 +130,6 @@ import EmergencyScreen from '../screens/emergency/EmergencyScreen';
 import shoppingBagIcon from '../assets/images/bag-2.png';
 import exploreIcon from '../assets/images/search-normal.png';
 import trainIcon from '../assets/images/pet.png';
-import feedIcon from '../assets/images/video-square.png';
 import vetIcon from '../assets/images/Group 16.png';
 import moreIcon from '../assets/images/category-2.png';
 
@@ -170,19 +169,21 @@ const MainTabs = () => {
         tabBarActiveTintColor: '#1E293B',
         tabBarInactiveTintColor: '#1E293B',
         tabBarStyle: {
-          paddingBottom: Math.max(insets.bottom, 10),
-          paddingTop: 5,
-          height: 60 + Math.max(insets.bottom - 10, 0),
+          paddingBottom: Math.max(insets.bottom, 8),
+          paddingTop: 6,
+          height: 64 + Math.max(insets.bottom - 8, 0),
           backgroundColor: '#F1F5F9',
-          margin:10,
+          marginHorizontal: 8,
+          marginBottom: 6,
+          marginTop: 0,
           borderTopWidth: 0, 
           elevation: 0,
+          borderRadius: 16,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
-          marginTop: 4,
-          padding:5,
-
+          fontSize: 11,
+          marginTop: 2,
+          padding: 0,
         },
 
       }}
@@ -195,7 +196,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               name="shopping-bag"
-              size={30}
+              size={34}
               color={color}
               focused={focused}
             />
@@ -210,22 +211,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               name="train"
-              size={30}
-              color={color}
-              focused={focused}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen 
-        name="SocialTab" 
-        component={SocialFeedScreen}
-        options={{
-          tabBarLabel: 'Feed',
-          tabBarIcon: ({ color, focused }) => (
-            <Icon
-              name="feed"
-              size={30}
+              size={34}
               color={color}
               focused={focused}
             />
@@ -240,7 +226,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               name="vet"
-              size={30}
+              size={34}
               color={color}
               focused={focused}
             />
@@ -255,7 +241,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               name="more"
-              size={30}
+              size={34}
               color={color}
               focused={focused}
             />
@@ -281,7 +267,6 @@ const Icon = ({
   const iconMap: { [key: string]: any } = {
     'shopping-bag': shoppingBagIcon,
     train: trainIcon,
-    feed: feedIcon,
     vet: vetIcon,
     more: moreIcon,
   };
@@ -293,10 +278,11 @@ const Icon = ({
     <View
       style={{
         backgroundColor: focused ? '#1E293B' : 'transparent',
-        paddingHorizontal: 22,
-        paddingVertical: 8,
-        borderRadius: 30,
-        height: 40,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 24,
+        height: 42,
+        minWidth: 48,
         justifyContent: 'center',
         alignItems: 'center',
       }}

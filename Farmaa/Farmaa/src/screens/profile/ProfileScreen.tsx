@@ -238,20 +238,6 @@ const ProfileScreen = () => {
               <Text style={styles.serviceTitle}>My Wallet</Text>
             </TouchableOpacity>
           ) : null}
-          <TouchableOpacity
-            style={styles.serviceCard}
-            onPress={() => (navigation as any).navigate('CreatePost', {})}
-          >
-            <Image source={eventsIcon} style={styles.serviceIcon} />
-            <Text style={styles.serviceTitle}>Upload Feed</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.serviceCard}
-            onPress={() => (navigation as any).navigate('SocialFeed', {})}
-          >
-            <Image source={aiChatIcon} style={styles.serviceIcon} />
-            <Text style={styles.serviceTitle}>Feed</Text>
-          </TouchableOpacity>
         </View>
       </View>
 

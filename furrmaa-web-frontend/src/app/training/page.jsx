@@ -16,6 +16,7 @@ const PetTrainingPage = () => {
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
 
   const petType = usePetStore((s) => s.petType || "dog");
+  const setPet = usePetStore((s) => s.setPet);
   const router = useRouter();
 
   const {
@@ -25,6 +26,10 @@ const PetTrainingPage = () => {
     error,
     refetch,
   } = useTrainingVideos({ petType });
+
+  useEffect(() => {
+    setSelectedPlan("basic");
+  }, [petType]);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +65,7 @@ const PetTrainingPage = () => {
   );
 
   const currentLessons = currentPlan?.sessions || [];
+  const isCat = petType === "cat";
 
   return (
     <section className="w-full bg-white py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-6 overflow-hidden">
@@ -67,12 +73,40 @@ const PetTrainingPage = () => {
         {/* Header */}
         <header className="mb-6 sm:mb-8 md:mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-black mb-2">
-            Pet Training
+            {isCat ? "Cat Training" : "Dog Training"}
           </h1>
 
-          <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium">
-            Start where your pet feels comfortable
+          <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium mb-4">
+            {isCat
+              ? "Start where your cat feels comfortable"
+              : "Start where your dog feels comfortable"}
           </p>
+
+          {/* Dog / Cat category switch */}
+          <div className="inline-flex rounded-full border border-gray-200 bg-gray-50 p-1 gap-1">
+            <button
+              type="button"
+              onClick={() => setPet("dog")}
+              className={`px-4 sm:px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                !isCat
+                  ? "bg-[#1F2E46] text-white"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Dog
+            </button>
+            <button
+              type="button"
+              onClick={() => setPet("cat")}
+              className={`px-4 sm:px-5 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                isCat
+                  ? "bg-[#1F2E46] text-white"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Cat
+            </button>
+          </div>
         </header>
 
         {/* Loading */}

@@ -119,6 +119,9 @@ const MyBookingsScreen = () => {
               )}
               <Text style={styles.bookingDate}>Date: {formatDate(item.date)}</Text>
               <Text style={styles.bookingTime}>Time: {item.time}</Text>
+              {item.duration ? (
+                <Text style={styles.bookingTime}>Duration: {item.duration} hour(s)</Text>
+              ) : null}
             </View>
           )}
           refreshControl={

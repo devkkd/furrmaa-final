@@ -251,10 +251,12 @@ export function normalizeProduct(p) {
 /** Fetch vet service types (categories for filter) – public */
 export async function fetchVetServiceTypes() {
   const base = getBaseUrl();
-  const res = await fetch(`${base}/vet-service-types`);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.types || [];
+  return withCache('vet-service-types', 300_000, async () => {
+    const res = await fetchWithRetry(`${base}/vet-service-types`, {}, { timeoutMs: 12_000, retries: 1 });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.types || [];
+  });
 }
 
 /** Fetch veterinarians from backend (serviceType = filter by type set in Manage Veterinarians) */
@@ -283,10 +285,12 @@ export async function fetchServiceProviders(params = {}) {
   if (params.location) q.set('location', params.location);
   if (params.city) q.set('city', params.city);
   const url = `${base}/service-providers${q.toString() ? `?${q}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Service providers fetch failed');
-  const data = await res.json();
-  return data.providers || data.serviceProviders || [];
+  return withCache(`providers:${url}`, 120_000, async () => {
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    if (!res.ok) throw new Error('Service providers fetch failed');
+    const data = await res.json();
+    return data.providers || data.serviceProviders || [];
+  });
 }
 
 /** Fetch cremation centers from backend */

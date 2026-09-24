@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchVetServiceTypes, fetchVeterinarians, fetchServiceProviders, fetchCremationCenters } from '@/lib/api';
 import { locationSearchToken } from '@/lib/geolocation';
 
@@ -74,25 +74,25 @@ export function useVetServices(options = {}) {
   const locationQuery = locationSearchToken(location) || locationSearchToken(city) || undefined;
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [typeList, setTypeList] = useState([]);
-  const categories = ['All', ...(typeList.length ? typeList.map((t) => t.name) : VET_SERVICE_CATEGORIES.slice(1))];
+  const [typeList, setTypeList] = useState(DEFAULT_TYPES);
+  const hasData = useRef(false);
+  const categories = ['All', ...typeList.map((t) => t.name)];
 
   useEffect(() => {
     let cancelled = false;
     fetchVetServiceTypes()
       .then((list) => {
-        if (cancelled) return;
+        if (cancelled || !list?.length) return;
         setTypeList(mergeTypeLists(list));
       })
-      .catch(() => {
-        if (!cancelled) setTypeList(DEFAULT_TYPES);
-      });
+      .catch(() => {});
     return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    // Keep previous list visible while refining (location / filter) — avoid long blank spinner
+    if (!hasData.current) setLoading(true);
 
     const selected = category && category !== 'All' ? category : null;
     const typesToUse = typeList.length ? typeList : DEFAULT_TYPES;
@@ -111,9 +111,9 @@ export function useVetServices(options = {}) {
 
         if (!selected) {
           const [vets, providers, centers] = await Promise.all([
-            fetchVeterinarians({ location: locationQuery }),
-            fetchServiceProviders({ location: locationQuery }),
-            fetchCremationCenters({ location: locationQuery }),
+            fetchVeterinarians({ location: locationQuery }).catch(() => []),
+            fetchServiceProviders({ location: locationQuery }).catch(() => []),
+            fetchCremationCenters({ location: locationQuery }).catch(() => []),
           ]);
 
           vets.forEach((v, i) => pushUnique(v, resolveTypeName(v, 'Veterinarians'), i));
@@ -129,27 +129,29 @@ export function useVetServices(options = {}) {
         } else {
           const listToFetch = typesToUse.filter((t) => t.name === selected);
 
-          for (const t of listToFetch) {
-            if (t.source === 'cremation') {
-              const centers = await fetchCremationCenters({ location: locationQuery });
-              centers.forEach((c, i) =>
-                pushUnique({
-                  _id: c._id,
-                  name: c.name,
-                  phone: c.phone,
-                  address: [c.address, c.city, c.state].filter(Boolean).join(', '),
-                }, t.name, all.length + i)
-              );
-            } else {
-              const slug = t.slug && t.slug !== 'All' ? t.slug : undefined;
-              const [vets, providers] = await Promise.all([
-                fetchVeterinarians({ location: locationQuery, serviceType: slug }),
-                fetchServiceProviders({ location: locationQuery, serviceType: slug }),
-              ]);
-              vets.forEach((v, i) => pushUnique(v, t.name, all.length + i));
-              providers.forEach((p, i) => pushUnique(p, t.name, all.length + i));
-            }
-          }
+          await Promise.all(
+            listToFetch.map(async (t) => {
+              if (t.source === 'cremation') {
+                const centers = await fetchCremationCenters({ location: locationQuery }).catch(() => []);
+                centers.forEach((c, i) =>
+                  pushUnique({
+                    _id: c._id,
+                    name: c.name,
+                    phone: c.phone,
+                    address: [c.address, c.city, c.state].filter(Boolean).join(', '),
+                  }, t.name, all.length + i)
+                );
+              } else {
+                const slug = t.slug && t.slug !== 'All' ? t.slug : undefined;
+                const [vets, providers] = await Promise.all([
+                  fetchVeterinarians({ location: locationQuery, serviceType: slug }).catch(() => []),
+                  fetchServiceProviders({ location: locationQuery, serviceType: slug }).catch(() => []),
+                ]);
+                vets.forEach((v, i) => pushUnique(v, t.name, all.length + i));
+                providers.forEach((p, i) => pushUnique(p, t.name, all.length + i));
+              }
+            })
+          );
         }
 
         let result = all;
@@ -163,9 +165,12 @@ export function useVetServices(options = {}) {
           );
         }
 
-        if (!cancelled) setServices(result);
-      } catch (e) {
-        if (!cancelled) setServices([]);
+        if (!cancelled) {
+          setServices(result);
+          hasData.current = true;
+        }
+      } catch {
+        if (!cancelled && !hasData.current) setServices([]);
       } finally {
         if (!cancelled) setLoading(false);
       }

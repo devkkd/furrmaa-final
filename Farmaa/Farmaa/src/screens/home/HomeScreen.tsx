@@ -11,6 +11,7 @@ import {
   StatusBar,
   Animated,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
@@ -112,6 +113,9 @@ const HomeScreen = () => {
   const [loadingNewArrivals, setLoadingNewArrivals] = useState(false);
   const [loadingBestDeals, setLoadingBestDeals] = useState(false);
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const searchAnim = useRef(new Animated.Value(0)).current;
+  const searchPulse = useRef(new Animated.Value(1)).current;
   const [everydayEssentials, setEverydayEssentials] = useState<
     { id: string; name: string; slug: string; icon: any }[]
   >([]);
@@ -182,24 +186,33 @@ const HomeScreen = () => {
     }
   };
 
-  // Banner data for carousel
+  // Banner data for carousel — full promotional slides (website-style)
   const mainBanners = [
     {
       id: 1,
       image: selectedPet === 'dog' ? dogBanner1 : catBanner1,
+      title: selectedPet === 'dog' ? 'Dog Essentials' : 'Cat Essentials',
     },
     {
       id: 2,
       image: selectedPet === 'dog' ? dogBanner2 : catBanner2,
+      title: 'Shop Furrmaa',
     },
     {
       id: 3,
-      image: selectedPet === 'dog' ? dogBanner1 : catBanner1,
+      image: selectedPet === 'dog' ? dogCareBanner : catCareBanner,
+      title: 'Pet Care',
+    },
+    {
+      id: 4,
+      image: helpBanner,
+      title: 'Furrmaa Website',
+      isWebsite: true,
     },
   ];
 
-  // Calculate banner width
-  const bannerWidth = (width - 40) * (2 / 3) - 10; // 2/3 of available width minus gap
+  // Full-width slider so banner images show completely
+  const bannerWidth = width - 32;
 
   // Auto-slide banner effect
   useEffect(() => {
@@ -380,13 +393,39 @@ const HomeScreen = () => {
   };
 
   const handleVoiceSearch = () => {
-    // Navigate to ProductsScreen with voice search indicator
-    // In production, integrate with @react-native-voice/voice for actual voice recognition
     navigateTo('Products', { 
       petType: selectedPet,
       voiceSearch: true 
     });
   };
+
+  const openSearch = () => {
+    setSearchExpanded(true);
+    Animated.spring(searchAnim, {
+      toValue: 1,
+      useNativeDriver: false,
+      friction: 7,
+    }).start();
+  };
+
+  const closeSearchBar = () => {
+    Animated.timing(searchAnim, {
+      toValue: 0,
+      duration: 180,
+      useNativeDriver: false,
+    }).start(() => setSearchExpanded(false));
+  };
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(searchPulse, { toValue: 1.12, duration: 700, useNativeDriver: true }),
+        Animated.timing(searchPulse, { toValue: 1, duration: 700, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [searchPulse]);
 
   return (
     <View style={styles.container}>
@@ -451,28 +490,62 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        {/* Search Bar */}
+        {/* Search Bar — icon with pulse; expands to full bar */}
         <View style={styles.searchContainer}>
-          <View style={styles.searchBox}>
+          {!searchExpanded ? (
             <TouchableOpacity
-              style={styles.searchInputContainer}
-              onPress={() => navigateTo('Search', {})}
+              style={styles.searchIconOnly}
+              onPress={openSearch}
+              activeOpacity={0.85}
             >
-              <Image source={searchIcon} style={{width: 24, height: 24, marginRight: 10}} resizeMode="contain"/>
-              <Text style={styles.searchPlaceholder}>
-                Search food, toys, meds & more...
-              </Text>
+              <Animated.View style={{ transform: [{ scale: searchPulse }] }}>
+                <Image source={searchIcon} style={{ width: 28, height: 28 }} resizeMode="contain" />
+              </Animated.View>
+              <Text style={styles.searchIconHint}>Search</Text>
             </TouchableOpacity>
-             <View style={styles.verticalDivider} />
-            <TouchableOpacity style={styles.micButton}>
-              <Image source={microphoneIcon} style={{width: 26, height: 26}} resizeMode="contain"/>
-            </TouchableOpacity>
-          </View>
+          ) : (
+            <Animated.View
+              style={[
+                styles.searchBox,
+                {
+                  flex: 1,
+                  opacity: searchAnim,
+                  transform: [
+                    {
+                      scaleX: searchAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.85, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <TouchableOpacity
+                style={styles.searchInputContainer}
+                onPress={() => {
+                  closeSearchBar();
+                  navigateTo('Search', {});
+                }}
+              >
+                <Animated.View style={{ transform: [{ scale: searchPulse }], marginRight: 10 }}>
+                  <Image source={searchIcon} style={{ width: 26, height: 26 }} resizeMode="contain" />
+                </Animated.View>
+                <Text style={styles.searchPlaceholder}>
+                  Search food, toys, meds & more...
+                </Text>
+              </TouchableOpacity>
+              <View style={styles.verticalDivider} />
+              <TouchableOpacity style={styles.micButton} onPress={handleVoiceSearch}>
+                <Image source={microphoneIcon} style={{ width: 26, height: 26 }} resizeMode="contain" />
+              </TouchableOpacity>
+            </Animated.View>
+          )}
           <TouchableOpacity
             style={styles.filterButton}
             onPress={() => navigateTo('Filter', { petType: selectedPet })}
           >
-            <Image source={filterIcon} style={{width: 20, height: 20}} resizeMode="contain"/>
+            <Image source={filterIcon} style={{ width: 22, height: 22 }} resizeMode="contain" />
           </TouchableOpacity>
         </View>
 
@@ -517,7 +590,7 @@ const HomeScreen = () => {
         <View style={styles.horizontalDivider} />
         </View>
 
-        {/* Promotional Banners */}
+        {/* Promotional Banners — full-width, full image visible */}
         <View style={styles.bannersContainer}>
           <View style={styles.mainBannerWrapper}>
             <ScrollView
@@ -525,29 +598,44 @@ const HomeScreen = () => {
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              scrollEnabled={false}
+              scrollEnabled={true}
               style={styles.bannerScrollView}
+              onMomentumScrollEnd={(e) => {
+                const idx = Math.round(e.nativeEvent.contentOffset.x / bannerWidth);
+                setCurrentBannerIndex(idx);
+              }}
               contentContainerStyle={{ width: bannerWidth * mainBanners.length }}
             >
-              {mainBanners.map((banner, index) => (
-                <View
+              {mainBanners.map((banner) => (
+                <TouchableOpacity
                   key={banner.id}
+                  activeOpacity={0.95}
+                  onPress={() => {
+                    if ((banner as any).isWebsite) {
+                      Linking.openURL('https://furrmaa.com').catch(() => {});
+                    } else {
+                      navigateTo('Products', { petType: selectedPet });
+                    }
+                  }}
                   style={[
                     styles.mainBanner,
                     selectedPet === 'cat' && styles.mainBannerCat,
                     { width: bannerWidth },
                   ]}
                 >
-                  {/* Banner background image */}
                   <Image
                     source={banner.image}
                     style={styles.mainBannerImage}
-                    resizeMode="cover"
+                    resizeMode="contain"
                   />
-                </View>
+                  {(banner as any).isWebsite ? (
+                    <View style={styles.websiteBannerBadge}>
+                      <Text style={styles.websiteBannerBadgeText}>furrmaa.com</Text>
+                    </View>
+                  ) : null}
+                </TouchableOpacity>
               ))}
             </ScrollView>
-            {/* Banner Indicators */}
             <View style={styles.bannerIndicators}>
               {mainBanners.map((_, index) => (
                 <View
@@ -1079,10 +1167,27 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     paddingHorizontal: 15,
-    paddingBottom: 15,
+    paddingBottom: 12,
     gap: 10,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 8,
+  },
+  searchIconOnly: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    gap: 10,
+  },
+  searchIconHint: {
+    fontSize: 15,
+    color: '#6B7280',
+    fontWeight: '500',
   },
   searchBox: {
     flex: 1,
@@ -1128,44 +1233,47 @@ const styles = StyleSheet.create({
   },
 
   categoriesScroll: {
-    marginBottom: 20,
+    marginBottom: 12,
   },
   categoriesContent: {
-    paddingHorizontal: 20,
-    gap: 15,
+    paddingHorizontal: 16,
+    gap: 8,
   },
   categoryItem: {
     alignItems: 'center',
-    width: 70,
+    width: 72,
   },
   categoryIcon: {
-    width: 45,
-    height: 45,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F3F4F6',
   },
   categoryIconText: {
-    height: 26,
-    width: 26,
+    height: 34,
+    width: 34,
   },
   categoryName: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#1F2937',
     textAlign: 'center',
+    marginTop: 4,
   },
     horizontalDivider: {
     height: 1,
     backgroundColor: '#D9DCE2',
-    marginBottom: 12,
-    marginTop: -20,
+    marginBottom: 10,
+    marginTop: -8,
   },
     activeBar: {
-    height: 4,
-    width: '100%',
+    height: 3,
+    width: '70%',
     backgroundColor: 'transparent',
-    marginTop: 10,
+    marginTop: 6,
     borderRadius: 10,
+    alignSelf: 'center',
   },
 
   activeBarActive: {
@@ -1174,38 +1282,46 @@ const styles = StyleSheet.create({
 
   bannersContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    gap: 10,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
   mainBannerWrapper: {
-    flex: 2,
-    height: 160,
+    flex: 1,
+    height: 200,
     position: 'relative',
   },
   bannerScrollView: {
     flex: 1,
   },
   mainBanner: {
-    height: 160,
-    borderRadius: 12,
-    padding: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    height: 200,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
     position: 'relative',
-    
   },
-    mainBannerImage: {
-    position: 'absolute',
+  mainBannerImage: {
     width: '100%',
     height: '100%',
-    overflow: 'hidden',
-    borderRadius: 12,
   },
   mainBannerCat: {
-    backgroundColor: '#FFFFFF', // Lighter blue for cat
+    backgroundColor: '#FFFFFF',
+  },
+  websiteBannerBadge: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    backgroundColor: 'rgba(31,46,70,0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  websiteBannerBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   bannerIndicators: {
     flexDirection: 'row',

@@ -33,6 +33,7 @@ function videoToLesson(video, index = 0) {
 const TrainingLessonPage = () => {
   const { plan, lessonID } = useParams();
   const petType = usePetStore((s) => s.petType || 'dog');
+  const isCat = petType === 'cat';
   const { programs, loading, progressByPlan, refetchProgress, error, refetch } = useTrainingVideos({ petType });
 
   const [lessonFromBackend, setLessonFromBackend] = useState(null);
@@ -90,7 +91,7 @@ const TrainingLessonPage = () => {
     <>
       <Container>
         <div className="pt-10">
-          <p className="text-sm text-gray-600 mb-2">Pet Training</p>
+          <p className="text-sm text-gray-600 mb-2">{isCat ? 'Cat Training' : 'Dog Training'}</p>
           <h1 className="text-3xl font-extrabold">{pageTitle}</h1>
         </div>
         

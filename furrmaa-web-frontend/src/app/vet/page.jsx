@@ -23,7 +23,19 @@ const Vet = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const { location, loading: locLoading, error: locError, fetchCurrentLocation, setLocation } = useGeolocation('');
 
-    React.useEffect(() => { fetchCurrentLocation(); }, [fetchCurrentLocation]);
+    // Do NOT block page on GPS (can take 20s+). Load list immediately; user can pick city.
+    // Soft background attempt only if nothing selected yet.
+    React.useEffect(() => {
+        let cancelled = false;
+        const t = setTimeout(() => {
+            if (cancelled || location?.trim()) return;
+            fetchCurrentLocation().catch(() => {});
+        }, 800);
+        return () => {
+            cancelled = true;
+            clearTimeout(t);
+        };
+    }, [fetchCurrentLocation, location]);
 
     const handleUseMyLocation = async () => {
         const addr = await fetchCurrentLocation();
