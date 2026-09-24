@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Container from '@/components/Container';
 import { HiOutlineLocationMarker, HiOutlineSearch, HiPhone } from 'react-icons/hi';
 import { RiDirectionLine } from 'react-icons/ri';
@@ -15,7 +16,14 @@ import LogoLoader from '@/components/LogoLoader';
 const ITEMS_PER_PAGE = 10;
 
 const Vet = () => {
+    const searchParams = useSearchParams();
     const [selectedCategory, setSelectedCategory] = useState('All');
+
+    // Set category from URL query param on mount
+    useEffect(() => {
+        const cat = searchParams.get('category');
+        if (cat) setSelectedCategory(cat);
+    }, [searchParams]);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('nearest');
     const [showSortDropdown, setShowSortDropdown] = useState(false);
@@ -325,4 +333,12 @@ const Vet = () => {
     );
 };
 
-export default Vet;
+function VetPage() {
+    return (
+        <Suspense fallback={<LogoLoader />}>
+            <Vet />
+        </Suspense>
+    );
+}
+
+export default VetPage;

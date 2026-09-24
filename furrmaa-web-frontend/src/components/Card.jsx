@@ -18,7 +18,7 @@ export default function Card({ show = "both" }) {
         {/* CARD 1 — changes with pet toggle */}
    
          <Link
-  href="/contactus"
+  href="/vet?category=Veterinarians"
   className={`
     block
     h-[180px] md:h-[300px]
@@ -36,7 +36,7 @@ export default function Card({ show = "both" }) {
 />
         {/* CARD 2 — changes with pet toggle */}
        <Link
-  href="/contactus"
+  href="/vet?category=Pet+Hotels+%2F+Hostels"
   className={`
     block
     h-[180px] md:h-[300px]
