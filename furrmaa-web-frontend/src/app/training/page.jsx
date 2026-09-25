@@ -250,18 +250,20 @@ const PetTrainingPage = () => {
                     </button>
                   </div>
 
-                  <img
-                    src={tier.image}
-                    alt={tier.title}
-                    className="
-                      absolute
-                      bottom-0
-                      right-0
-                      w-24 sm:w-32 md:w-48
-                      pointer-events-none
-                      opacity-80 sm:opacity-90 md:opacity-100
-                    "
-                  />
+                 <img
+  src={tier.image}
+  alt={tier.title}
+  className="
+    absolute
+    bottom-0
+    right-0
+    w-[150px]
+    h-[150px]
+    object-contain
+    object-bottom
+    pointer-events-none
+  "
+/>
                 </div>
               ))}
             </div>

@@ -7,8 +7,8 @@ export default function Card({ show = "both" }) {
   const isDog = petType === "dog";
 
   const images = {
-    card1: isDog ? "/images/dog-2.png"      : "/images/cat-2.3.png",
-    card2: isDog ? "/images/dog-4.png"      : "/images/c2.2.png",
+    card1: isDog ? "/images/dog-2.png"      : "/images/cat-2.4.png",
+    card2: isDog ? "/images/dog-4.png"      : "/images/c2.3.png",
   };
 
   return (

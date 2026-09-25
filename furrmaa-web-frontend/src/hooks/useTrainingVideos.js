@@ -38,7 +38,7 @@ function programDefaults(petType = 'dog') {
         ? 'Litter habits, calm cues, and bonding for cats & kittens.'
         : 'Foundation skills, simple commands, and bonding for dogs & puppies.',
       isFree: true,
-      image: isCat ? '/images/cat-1.png' : '/images/dog-1.png',
+      image: isCat ? '/images/cat-1.1.png' : '/images/td.png',
       textColor: 'text-gray-900',
       order: 1,
       tags: isCat ? ['Kitten', 'Cat'] : ['Puppy', 'Dog'],
@@ -50,7 +50,7 @@ function programDefaults(petType = 'dog') {
         ? 'Scratching, enrichment, and behavior shaping for cats.'
         : 'Discipline, behavior shaping, and everyday control for dogs.',
       isFree: false,
-      image: isCat ? '/images/cat-2.png' : '/images/dog-2.png',
+      image: isCat ? '/images/cat-1.2.png' : '/images/td3.png',
       textColor: 'text-white',
       order: 2,
       tags: isCat ? ['Cat', 'Habits'] : ['Dog', 'Obedience'],
@@ -62,7 +62,7 @@ function programDefaults(petType = 'dog') {
         ? 'Advanced enrichment, clicker work, and confident routines.'
         : 'Master-level commands, agility, and obedience.',
       isFree: false,
-      image: isCat ? '/images/cat-1.png' : '/images/dog-3.png',
+      image: isCat ? '/images/tc1.png' : '/images/td4.png',
       textColor: 'text-white',
       order: 3,
       tags: isCat ? ['Cat', 'Advanced'] : ['Dog', 'Advanced'],
