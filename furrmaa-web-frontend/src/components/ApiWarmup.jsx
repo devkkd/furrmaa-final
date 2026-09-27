@@ -11,10 +11,7 @@ import {
 import { usePetStore } from '@/store/petStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 
-/**
- * Light prefetch for home catalog only — no health gate flood (VPS is always on).
- * Other pages fetch what they need; withCache still dedupes.
- */
+/** Background prefetch — does not block UI (sections show static/cache first). */
 export default function ApiWarmup() {
   const pathname = usePathname();
   const petType = usePetStore((s) => s.petType) || 'dog';
@@ -27,7 +24,6 @@ export default function ApiWarmup() {
     }
 
     let cancelled = false;
-
     const warm = () => {
       if (cancelled) return;
       Promise.allSettled([
@@ -42,8 +38,7 @@ export default function ApiWarmup() {
       });
     };
 
-    // Slight defer so first paint / LCP can start first
-    const t = setTimeout(warm, 50);
+    const t = setTimeout(warm, 0);
     return () => {
       cancelled = true;
       clearTimeout(t);

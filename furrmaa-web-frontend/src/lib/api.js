@@ -213,7 +213,7 @@ export async function fetchProducts(params = {}) {
   const cacheKey = `products:${url}`;
 
   return withCache(cacheKey, 180_000, async () => {
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Products fetch failed');
     const data = await res.json();
     return data.products || [];
@@ -270,7 +270,7 @@ export async function fetchVeterinarians(params = {}) {
   if (params.serviceType && params.serviceType !== 'All') q.set('serviceType', params.serviceType);
   const url = `${base}/veterinarians${q.toString() ? `?${q}` : ''}`;
   return withCache(`vets:${url}`, 120_000, async () => {
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Veterinarians fetch failed');
     const data = await res.json();
     return data.veterinarians || [];
@@ -286,7 +286,7 @@ export async function fetchServiceProviders(params = {}) {
   if (params.city) q.set('city', params.city);
   const url = `${base}/service-providers${q.toString() ? `?${q}` : ''}`;
   return withCache(`providers:${url}`, 120_000, async () => {
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Service providers fetch failed');
     const data = await res.json();
     return data.providers || data.serviceProviders || [];
@@ -303,7 +303,7 @@ export async function fetchCremationCenters(params = {}) {
   if (params.search) q.set('search', params.search);
   const url = `${base}/cremation/centers${q.toString() ? `?${q}` : ''}`;
   return withCache(`cremation:${url}`, 120_000, async () => {
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Cremation centers fetch failed');
     const data = await res.json();
     return data.centers || [];
@@ -319,7 +319,7 @@ export async function fetchTrainingVideos(params = {}) {
   if (params.level) q.set('level', params.level);
   const url = `${base}/training-videos${q.toString() ? `?${q}` : ''}`;
   return withCache(`training:${url}`, 180_000, async () => {
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Training videos fetch failed');
     const data = await res.json();
     return data.videos || [];
@@ -380,7 +380,7 @@ export async function fetchHopePosts(params = {}) {
   if (params.limit != null) q.set('limit', params.limit);
   const url = `${base}/hope/posts${q.toString() ? `?${q}` : ''}`;
   return withCache(`hope:${url}`, 90_000, async () => {
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Hope posts fetch failed');
     const data = await res.json();
     return data.posts || [];
@@ -466,7 +466,7 @@ export async function fetchPetEvents(params = {}) {
   if (params.search) q.set('search', params.search);
   const url = `${base}/pet-events${q.toString() ? `?${q}` : ''}`;
   return withCache(`events:${url}`, 120_000, async () => {
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Pet events fetch failed');
     const data = await res.json();
     return data.events || [];
@@ -534,7 +534,7 @@ export async function fetchMainCategories(params = {}) {
   if (params.petType) q.set('petType', params.petType);
   const url = `${base}/categories/main${q.toString() ? `?${q}` : ''}`;
   return withCache(`categories:main:${url}`, 300_000, async () => {
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 8_000, retries: 0 });
     if (!res.ok) throw new Error('Categories fetch failed');
     const data = await res.json();
     return data.categories || [];
@@ -546,7 +546,7 @@ export async function fetchAllCategories() {
   const base = getBaseUrl();
   const parse = (data) => data?.categories ?? data?.data?.categories ?? (Array.isArray(data) ? data : []);
   const tryUrl = async (url) => {
-    const res = await fetchWithRetry(url, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error(res.statusText);
     const data = await res.json().catch(() => ({}));
     return parse(data);
@@ -565,7 +565,7 @@ export async function fetchAllCategories() {
 export async function fetchSizes() {
   const base = getBaseUrl();
   return withCache('sizes:all', 300_000, async () => {
-    const res = await fetchWithRetry(`${base}/sizes`, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(`${base}/sizes`, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Sizes fetch failed');
     const data = await res.json();
     return data.sizes || [];
@@ -576,7 +576,7 @@ export async function fetchSizes() {
 export async function fetchDietary() {
   const base = getBaseUrl();
   return withCache('dietary:all', 300_000, async () => {
-    const res = await fetchWithRetry(`${base}/dietary`, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(`${base}/dietary`, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Dietary fetch failed');
     const data = await res.json();
     return data.dietary || [];
@@ -1519,7 +1519,7 @@ export async function adminSetFeedbackFeatured(id, featured) {
 export async function fetchFeaturedFeedback(limit = 8) {
   const base = getBaseUrl();
   return withCache(`feedback:featured:${limit}`, 120_000, async () => {
-    const res = await fetchWithRetry(`${base}/feedback/featured?limit=${limit}`, {}, { timeoutMs: 15_000, retries: 1 });
+    const res = await fetchWithRetry(`${base}/feedback/featured?limit=${limit}`, {}, { timeoutMs: 10_000, retries: 0 });
     if (!res.ok) throw new Error('Failed to load feedback');
     const data = await res.json();
     return data.feedbacks || [];
@@ -1534,7 +1534,7 @@ export async function fetchWhyChooseFeatures() {
   if (cached != null && Array.isArray(cached.features) && cached.features.length > 0) {
     return cached;
   }
-  const res = await fetchWithRetry(`${base}/why-choose`, {}, { timeoutMs: 15_000, retries: 1 });
+  const res = await fetchWithRetry(`${base}/why-choose`, {}, { timeoutMs: 10_000, retries: 0 });
   if (!res.ok) throw new Error('Failed to load why-choose section');
   const data = await res.json();
   const result = {

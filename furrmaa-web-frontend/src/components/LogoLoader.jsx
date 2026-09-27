@@ -10,7 +10,7 @@ export default function LogoLoader({ size = 'md', className = '', label }) {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-2 py-10 col-span-full w-full ${className}`}
+      className={`flex flex-col items-center justify-center gap-2 py-4 col-span-full w-full ${className}`}
       role="status"
       aria-live="polite"
       aria-label={label || 'Loading'}

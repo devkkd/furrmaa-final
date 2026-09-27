@@ -1,14 +1,39 @@
 const store = new Map();
-/** In-flight promises so concurrent callers share one network request */
 const inflight = new Map();
+const SS_PREFIX = 'furrmaa_api_v1:';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/**
- * Timeouts tuned for always-on VPS (Hostinger).
- * Still retries once for brief blips — not Render cold-start waits.
- */
-export async function fetchWithTimeout(url, options = {}, timeoutMs = 15_000) {
+function readSession(key) {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(SS_PREFIX + key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || Date.now() > parsed.expiresAt) {
+      sessionStorage.removeItem(SS_PREFIX + key);
+      return null;
+    }
+    return parsed.value;
+  } catch {
+    return null;
+  }
+}
+
+function writeSession(key, value, ttlMs) {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(
+      SS_PREFIX + key,
+      JSON.stringify({ value, expiresAt: Date.now() + ttlMs })
+    );
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+/** Default 8s — fail fast; home shows static fallbacks instead of hanging. */
+export async function fetchWithTimeout(url, options = {}, timeoutMs = 8_000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -21,7 +46,7 @@ export async function fetchWithTimeout(url, options = {}, timeoutMs = 15_000) {
 export async function fetchWithRetry(
   url,
   options = {},
-  { timeoutMs = 15_000, retries = 1, backoffMs = 800 } = {}
+  { timeoutMs = 8_000, retries = 0, backoffMs = 400 } = {}
 ) {
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -43,12 +68,11 @@ export async function fetchWithRetry(
   throw lastError || new Error('Request failed');
 }
 
-/** Optional wake ping — cheap on VPS; kept for compatibility */
 export async function pingApiHealth(baseUrl) {
   const url = `${String(baseUrl || '').replace(/\/$/, '')}/health`;
   try {
-    await fetchWithRetry(url, {}, { timeoutMs: 10_000, retries: 1, backoffMs: 500 });
-    return true;
+    const res = await fetchWithTimeout(url, {}, 4_000);
+    return res.ok;
   } catch {
     return false;
   }
@@ -56,22 +80,42 @@ export async function pingApiHealth(baseUrl) {
 
 export function getCached(key) {
   const entry = store.get(key);
-  if (!entry) return null;
-  if (Date.now() > entry.expiresAt) {
-    store.delete(key);
-    return null;
+  if (entry) {
+    if (Date.now() > entry.expiresAt) {
+      store.delete(key);
+    } else {
+      return entry.value;
+    }
   }
-  return entry.value;
+  const fromSs = readSession(key);
+  if (fromSs != null) {
+    store.set(key, { value: fromSs, expiresAt: Date.now() + 60_000 });
+    return fromSs;
+  }
+  return null;
 }
 
 export function setCached(key, value, ttlMs = 60_000) {
   store.set(key, { value, expiresAt: Date.now() + ttlMs });
+  writeSession(key, value, ttlMs);
 }
 
 export function clearApiCache(prefix = '') {
   if (!prefix) {
     store.clear();
     inflight.clear();
+    if (typeof window !== 'undefined') {
+      try {
+        const keys = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const k = sessionStorage.key(i);
+          if (k && k.startsWith(SS_PREFIX)) keys.push(k);
+        }
+        keys.forEach((k) => sessionStorage.removeItem(k));
+      } catch {
+        /* ignore */
+      }
+    }
     return;
   }
   for (const key of store.keys()) {
@@ -83,8 +127,8 @@ export function clearApiCache(prefix = '') {
 }
 
 /**
- * In-memory GET cache + in-flight dedupe.
- * Does not cache empty arrays by default (avoids poisoning after a blip).
+ * Memory + sessionStorage cache + in-flight dedupe.
+ * Empty arrays are not cached (unless cacheEmpty).
  */
 export async function withCache(key, ttlMs, fn, opts = {}) {
   const { cacheEmpty = false } = opts;

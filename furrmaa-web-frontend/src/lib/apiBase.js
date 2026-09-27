@@ -2,10 +2,9 @@ const DEFAULT_API_BASE_URL = 'http://localhost:5000/api';
 
 /**
  * Production API base.
- * Hostinger VPS tip: set NEXT_PUBLIC_API_SAME_ORIGIN=true + nginx/Next rewrite to Node
- * so the browser calls https://furrmaa.com/api (same server = fastest).
- * Or set NEXT_PUBLIC_LIVE_API_URL / NEXT_PUBLIC_API_URL to your VPS API URL
- * (e.g. https://api.furrmaa.com/api) — avoid Render if backend is on the VPS.
+ * IMPORTANT (Hostinger): live site `https://www.furrmaa.com/api` currently returns 502
+ * unless nginx proxies to Node. Until that is fixed, point NEXT_PUBLIC_API_URL at a
+ * working always-on API (VPS IP/domain), NOT a sleeping Render free instance.
  */
 const LIVE_API_BASE_URL =
   process.env.NEXT_PUBLIC_LIVE_API_URL ||
