@@ -12,12 +12,12 @@ const CONTENT = {
     basicDesc: "Your best buddy's first step towards social obedience.",
     tags: ['Puppy', 'Dog', 'View More Details'],
     cta: "Let's Start →",
-    heroImg: '/images/dog-1.png',
+    heroImg: '/images/dog-1.1.png',
     videoImg: '/images/dog-2.png',
     trainerTitle: 'Hire a Personal Dog Trainer',
     trainerDesc:
       'Personalized, one-on-one training in your home. Positive methods. Real results.',
-    trainerImg: '/images/dog-3.png',
+    trainerImg: '/images/dog2.3.png',
     bookCta: 'Book Session Today →',
   },
   cat: {
@@ -28,12 +28,12 @@ const CONTENT = {
       "Gentle habits, litter confidence, and bonding — made simple for cats.",
     tags: ['Kitten', 'Cat', 'View More Details'],
     cta: "Let's Start →",
-    heroImg: '/images/cat-1.png',
-    videoImg: '/images/cat-2.png',
+    heroImg: '/images/cat-1.1.png',
+    videoImg: '/images/cat-2.4.png',
     trainerTitle: 'Hire a Personal Cat Trainer',
     trainerDesc:
       'Calm, cat-friendly coaching at home. Build trust and better routines together.',
-    trainerImg: '/images/cat-1.png',
+    trainerImg: '/images/cat-1.2.png',
     bookCta: 'Book Session Today →',
   },
 };

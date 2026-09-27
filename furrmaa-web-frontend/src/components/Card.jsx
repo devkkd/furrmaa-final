@@ -7,8 +7,8 @@ export default function Card({ show = "both" }) {
   const isDog = petType === "dog";
 
   const images = {
-    card1: isDog ? "/images/dog-2.png"      : "/images/cat-2.png",
-    card2: isDog ? "/images/dog-4.png"      : "/images/c2.png",
+    card1: isDog ? "/images/dog-2.png"      : "/images/cat-2.4.png",
+    card2: isDog ? "/images/dog-4.png"      : "/images/c2.3.png",
   };
 
   return (
@@ -18,7 +18,7 @@ export default function Card({ show = "both" }) {
         {/* CARD 1 — changes with pet toggle */}
    
          <Link
-  href="/contactus"
+  href="/vet?category=Veterinarians"
   className={`
     block
     h-[180px] md:h-[300px]
@@ -36,7 +36,7 @@ export default function Card({ show = "both" }) {
 />
         {/* CARD 2 — changes with pet toggle */}
        <Link
-  href="/contactus"
+  href="/vet?category=Pet+Hotels+%2F+Hostels"
   className={`
     block
     h-[180px] md:h-[300px]
