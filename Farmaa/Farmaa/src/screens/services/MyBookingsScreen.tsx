@@ -43,8 +43,7 @@ const MyBookingsScreen = () => {
       if (response.data?.bookings) {
         setBookings(response.data.bookings);
       }
-    } catch (error: any) {
-      console.error('Failed to fetch bookings:', error);
+    } catch {
       setBookings([]);
     } finally {
       setLoading(false);

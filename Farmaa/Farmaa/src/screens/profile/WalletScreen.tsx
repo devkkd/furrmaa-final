@@ -54,7 +54,6 @@ const WalletScreen = () => {
       setBalance(data.balance);
       setTransactions(data.transactions);
     } catch (error: any) {
-      console.error('Wallet load failed:', error);
       if (!isRefresh) {
         Alert.alert(
           'Wallet',

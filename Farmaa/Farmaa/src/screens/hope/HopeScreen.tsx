@@ -138,8 +138,7 @@ const HopeScreen = () => {
         return sortOrder === 'newest' ? tb - ta : ta - tb;
       });
       setPosts(sorted);
-    } catch (error: any) {
-      console.error('Failed to fetch hope posts:', error);
+    } catch {
       setPosts([]);
     } finally {
       setLoading(false);

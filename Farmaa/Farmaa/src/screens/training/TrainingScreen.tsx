@@ -67,7 +67,6 @@ const TrainingScreen = () => {
       const hasValidEndDate = !subData?.endDate || new Date(subData.endDate) > new Date();
       setHasActiveSubscription(isActive && hasValidEndDate);
     } catch (error: any) {
-      console.error('Failed to fetch subscription:', error);
       setHasActiveSubscription(false);
     }
   };
@@ -190,7 +189,6 @@ const TrainingScreen = () => {
       
       setTrainingPrograms(programs);
     } catch (error: any) {
-      console.error('Failed to fetch training programs:', error);
       // Fallback to default programs if API fails
       setTrainingPrograms([
         {

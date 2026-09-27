@@ -115,7 +115,6 @@ const AddAddressScreen = () => {
         }
       }
     } catch (error: any) {
-      console.error('Address save error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to save address. Please try again.';
       Alert.alert('Error', errorMessage);
     } finally {

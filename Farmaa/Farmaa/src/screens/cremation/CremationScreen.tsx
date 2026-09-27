@@ -87,8 +87,7 @@ const CremationScreen = () => {
 
       // Sort by distance (nearest first)
       setCenters(mapped);
-    } catch (e: any) {
-      console.error('Failed to fetch cremation centers:', e);
+    } catch {
       setCenters([]);
     } finally {
       setLoading(false);

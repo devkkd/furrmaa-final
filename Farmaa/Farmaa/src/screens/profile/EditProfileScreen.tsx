@@ -62,7 +62,6 @@ const MyAccountScreen = () => {
       await refreshUser();
       return true;
     } catch (error: any) {
-      console.error('Save profile image error:', error);
       Alert.alert(
         'Error',
         error.response?.data?.message || 'Could not save profile picture'
@@ -83,7 +82,6 @@ const MyAccountScreen = () => {
         setProfileImage(u.profileImage || '');
       }
     } catch (error: any) {
-      console.error('Failed to fetch profile:', error);
       // Fallback to auth context user data
       if (user) {
         setName(user.name || '');
@@ -162,7 +160,6 @@ const MyAccountScreen = () => {
         ]);
       }
     } catch (error: any) {
-      console.error('Update profile error:', error);
       Alert.alert(
         'Error',
         error.response?.data?.message || 'Failed to update profile'

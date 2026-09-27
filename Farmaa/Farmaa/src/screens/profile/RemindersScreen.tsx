@@ -48,8 +48,7 @@ const RemindersScreen = () => {
         }));
         setReminders(mappedReminders);
       }
-    } catch (error: any) {
-      console.error('Failed to fetch reminders:', error);
+    } catch {
       setReminders([]);
     } finally {
       setLoading(false);
@@ -60,8 +59,7 @@ const RemindersScreen = () => {
     try {
       await api.CLIENT.put(`${api.ENDPOINTS.REMINDERS}/${id}`, { enabled });
       setReminders(reminders.map(r => r._id === id ? { ...r, enabled } : r));
-    } catch (error: any) {
-      console.error('Failed to update reminder:', error);
+    } catch {
       Alert.alert('Error', 'Failed to update reminder');
     }
   };

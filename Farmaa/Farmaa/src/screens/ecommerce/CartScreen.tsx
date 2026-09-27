@@ -57,7 +57,6 @@ const CartScreen = () => {
       }
       setCartLines(await fetchServerCart());
     } catch (e: any) {
-      console.error('Failed to load cart:', e);
       Alert.alert('Error', e.response?.data?.message || 'Could not load cart');
     } finally {
       setLoadingCart(false);
@@ -95,8 +94,7 @@ const CartScreen = () => {
         const selectedAddr = addresses.find((a: Address) => a.isDefault) || addresses[0];
         setAddress(selectedAddr);
       }
-    } catch (error: any) {
-      console.error('Failed to fetch address:', error);
+    } catch {
     } finally {
       setLoadingAddress(false);
     }

@@ -39,8 +39,7 @@ const AdminWalletsScreen = () => {
       ]);
       setWallets(walletsRes.data?.wallets || []);
       setStats(statsRes.data?.stats || null);
-    } catch (err: any) {
-      console.error('Admin wallets load failed:', err);
+    } catch {
       setWallets([]);
       setStats(null);
     } finally {

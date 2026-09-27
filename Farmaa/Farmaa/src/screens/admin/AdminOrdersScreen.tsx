@@ -104,7 +104,6 @@ const AdminOrdersScreen = () => {
       setHasMore(response.data.pagination.page < response.data.pagination.pages);
       setPage(pageNum);
     } catch (err: any) {
-      console.error('Failed to fetch orders:', err);
       Alert.alert('Error', err.response?.data?.message || 'Failed to load orders');
     } finally {
       setLoading(false);

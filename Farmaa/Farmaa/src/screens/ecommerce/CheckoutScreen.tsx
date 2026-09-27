@@ -104,7 +104,6 @@ const CheckoutScreen = () => {
       const lines = await fetchServerCart();
       setOrderItems(linesToCheckoutItems(lines));
     } catch (error: any) {
-      console.error('Failed to fetch cart items:', error);
       setOrderItems([]);
     } finally {
       setLoading(false);
@@ -130,7 +129,6 @@ const CheckoutScreen = () => {
         });
       }
     } catch (error: any) {
-      console.error('Failed to fetch address:', error);
       // If no addresses, allow user to add one
     }
   };
@@ -290,7 +288,6 @@ const CheckoutScreen = () => {
       if (isPaymentCancelledError(error)) {
         return;
       }
-      console.error('Failed to place order:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to place order. Please try again.';
       Alert.alert('Order Failed', errorMessage, [
         {

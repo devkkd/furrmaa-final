@@ -75,7 +75,6 @@ const AdminHopePostsScreen = () => {
       const response = await api.CLIENT.get(url);
       setPosts(response.data.posts || []);
     } catch (err: any) {
-      console.error('Failed to fetch Hope posts:', err);
       setError(err.response?.data?.message || 'Failed to load Hope posts');
     } finally {
       setLoading(false);

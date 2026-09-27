@@ -25,7 +25,6 @@ export const apiClient = async (endpoint, options = {}) => {
 
     return await response.json();
   } catch (error) {
-    console.error('API Request failed:', error);
     throw error;
   }
 };

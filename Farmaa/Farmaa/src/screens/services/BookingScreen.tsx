@@ -108,7 +108,6 @@ const BookingScreen = () => {
         );
       }
     } catch (error: any) {
-      console.error('Booking error:', error);
       Alert.alert(
         'Error',
         error.response?.data?.message || 'Failed to create booking. Please try again.'

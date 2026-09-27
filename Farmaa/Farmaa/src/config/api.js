@@ -55,9 +55,6 @@ const getBaseURL = () => {
 };
 
 const API_BASE_URL = getBaseURL();
-if (__DEV__) {
-  console.log('[api] BASE_URL →', API_BASE_URL);
-}
 
 /**
  * ================================
@@ -112,15 +109,6 @@ apiClient.interceptors.response.use(
   async (error) => {
     if (error.response) {
       const status = error.response.status;
-      const data = error.response.data;
-      const msg = data?.message || data?.error;
-
-      // 400 validation (e.g. email already exists) – expected, log as warn
-      if (status === 400 && msg) {
-        console.warn('API (validation):', msg);
-      } else {
-        console.error('API ERROR:', status, data);
-      }
 
       // 🔐 Agar admin token invalid / expired
       if (status === 401) {
@@ -132,10 +120,6 @@ apiClient.interceptors.response.use(
           'firebase_email_otp',
         ]);
       }
-    } else if (error.request) {
-      console.error('NETWORK ERROR:', error.request);
-    } else {
-      console.error('ERROR:', error.message);
     }
 
     return Promise.reject(error);

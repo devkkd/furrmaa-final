@@ -32,8 +32,7 @@ const HopeDetailScreen = () => {
       try {
         const res = await api.CLIENT.get(`${api.ENDPOINTS.HOPE}/posts/${pet._id}`);
         if (res.data?.post) setPetData(res.data.post);
-      } catch (e) {
-        console.error('Hope post fetch failed', e);
+      } catch {
       }
     })();
   }, [pet?._id]);

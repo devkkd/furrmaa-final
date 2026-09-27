@@ -34,8 +34,7 @@ const AdoptionScreen = () => {
       setLoading(true);
       const response = await api.CLIENT.get(api.ENDPOINTS.ADOPTION_PETS);
       setPets(response.data?.pets || []);
-    } catch (error: any) {
-      console.error('Failed to fetch pets:', error);
+    } catch {
       // Fallback to empty array on error
       setPets([]);
     } finally {

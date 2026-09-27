@@ -122,7 +122,6 @@ export default function PostScreen({ }) {
         ]);
       }
     } catch (error: any) {
-      console.error('Failed to create hope post:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to create post. Please try again.');
     } finally {
       setLoading(false);

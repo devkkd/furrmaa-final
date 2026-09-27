@@ -78,8 +78,7 @@ const ProfileScreen = () => {
           onPress: async () => {
             try {
               await logout();
-            } catch (e) {
-              console.error('Logout failed:', e);
+            } catch {
               Alert.alert('Error', 'Could not complete logout. Please try again.');
             }
           },

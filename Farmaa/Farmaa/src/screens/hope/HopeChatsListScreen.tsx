@@ -89,7 +89,6 @@ const HopePostAndChatScreen = () => {
       
       setThreads(mapped);
     } catch (error: any) {
-      console.error('Failed to fetch chats:', error);
       setThreads([]);
     } finally {
       setLoading(false);
@@ -111,7 +110,6 @@ const HopePostAndChatScreen = () => {
         })
       );
     } catch (error: any) {
-      console.error('Failed to fetch my posts:', error);
       setMyPosts([]);
     }
   };

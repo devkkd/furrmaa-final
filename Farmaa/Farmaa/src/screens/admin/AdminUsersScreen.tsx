@@ -57,7 +57,6 @@ const AdminUsersScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.ADMIN.USERS, { params });
       setUsers(response.data.users || []);
     } catch (err: any) {
-      console.error('Failed to fetch users:', err);
       Alert.alert('Error', err.response?.data?.message || 'Failed to load users');
     } finally {
       setLoading(false);

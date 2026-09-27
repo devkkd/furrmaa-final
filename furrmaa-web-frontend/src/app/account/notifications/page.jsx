@@ -30,8 +30,7 @@ const AccNotification = () => {
                 setNotifications(notifications.map(n => 
                     n._id === notification._id ? { ...n, read: true } : n
                 ));
-            } catch (err) {
-                console.error('Failed to mark notification as read:', err);
+            } catch {
             }
         }
     };

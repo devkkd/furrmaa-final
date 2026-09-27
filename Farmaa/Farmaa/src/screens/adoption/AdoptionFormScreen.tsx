@@ -63,7 +63,6 @@ const AdoptionFormScreen = () => {
         );
       }
     } catch (error: any) {
-      console.error('Adoption submission error:', error);
       Alert.alert(
         'Error',
         error.response?.data?.message || 'Failed to submit adoption application. Please try again.'

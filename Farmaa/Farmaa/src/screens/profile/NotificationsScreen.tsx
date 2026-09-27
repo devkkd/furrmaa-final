@@ -38,8 +38,7 @@ const NotificationsScreen = () => {
       const data = response.data || {};
       setNotifications(Array.isArray(data.notifications) ? data.notifications : []);
       setUnreadCount(data.unreadCount ?? data.count ?? 0);
-    } catch (error: any) {
-      console.error('Failed to fetch notifications:', error);
+    } catch {
       setNotifications([]);
       setUnreadCount(0);
     } finally {
@@ -57,8 +56,7 @@ const NotificationsScreen = () => {
     try {
       await api.CLIENT.put(`${api.ENDPOINTS.NOTIFICATIONS}/${notificationId}/read`);
       fetchNotifications();
-    } catch (error) {
-      console.error('Failed to mark as read:', error);
+    } catch {
     }
   };
 
@@ -66,8 +64,7 @@ const NotificationsScreen = () => {
     try {
       await api.CLIENT.put(`${api.ENDPOINTS.NOTIFICATIONS}/read-all`);
       fetchNotifications();
-    } catch (error) {
-      console.error('Failed to mark all as read:', error);
+    } catch {
     }
   };
 

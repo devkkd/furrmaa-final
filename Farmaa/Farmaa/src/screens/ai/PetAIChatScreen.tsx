@@ -65,7 +65,6 @@ const PetAIChatScreen = () => {
         await sendMessage(firstMessage, newSessionId);
       }
     } catch (error: any) {
-      console.error('Failed to create session:', error);
       // Fallback: use local session ID
       const fallbackSessionId = `chat_${Date.now()}_${user?.id || 'guest'}`;
       setSessionId(fallbackSessionId);
@@ -94,7 +93,7 @@ const PetAIChatScreen = () => {
         setMessages(formattedMessages);
       }
     } catch (error: any) {
-      console.error('Failed to fetch chat session:', error);
+      // Ignore fetch errors
     } finally {
       setLoading(false);
     }
@@ -135,7 +134,6 @@ const PetAIChatScreen = () => {
         currentSessionId = response.data.chat.sessionId;
         setSessionId(currentSessionId);
       } catch (error) {
-        console.error('Failed to create session:', error);
         handleSendMessageLocal(text);
         return;
       }
@@ -158,7 +156,6 @@ const PetAIChatScreen = () => {
       };
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error: any) {
-      console.error('Failed to send message:', error);
       // Fallback response
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),

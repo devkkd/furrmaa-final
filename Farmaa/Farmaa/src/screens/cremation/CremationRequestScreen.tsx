@@ -102,7 +102,6 @@ const CremationRequestScreen = () => {
         }, 2000);
       }
     } catch (error: any) {
-      console.error('Failed to submit cremation request:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to submit request. Please try again.');
     } finally {
       setLoading(false);

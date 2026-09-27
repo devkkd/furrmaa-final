@@ -44,8 +44,7 @@ const SupportChatScreen = () => {
       setLoading(true);
       const response = await api.CLIENT.get(api.ENDPOINTS.SUPPORT);
       setChats(response.data.chats || []);
-    } catch (error: any) {
-      console.error('Failed to fetch chats:', error);
+    } catch {
     } finally {
       setLoading(false);
     }

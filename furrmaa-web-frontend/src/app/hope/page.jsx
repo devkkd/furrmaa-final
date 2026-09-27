@@ -123,31 +123,13 @@ function HopePageContent() {
           const postsArray = Array.isArray(data) ? data : [];
 
           setPosts(postsArray);
-
-          if (
-            postsArray.length === 0 &&
-            !params.postType &&
-            !params.petType &&
-            !params.location &&
-            !params.search
-          ) {
-            console.info(
-              "No posts found. This might be normal if the database is empty."
-            );
-          }
         }
       })
-      .catch((err) => {
-        console.error("Error fetching Hope posts:", err);
-
+      .catch(() => {
         if (!cancelled) {
           setPosts([]);
           setError(
             "Failed to load posts. Please try again later."
-          );
-
-          console.warn(
-            "Failed to fetch Hope posts. Check API endpoint and network connection."
           );
         }
       })

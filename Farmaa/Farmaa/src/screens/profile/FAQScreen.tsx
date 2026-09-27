@@ -51,7 +51,6 @@ const FAQScreen = () => {
         setFaqs([]);
       }
     } catch (error: any) {
-      console.error('Failed to fetch FAQs:', error);
       setFaqs([]);
     } finally {
       setLoading(false);

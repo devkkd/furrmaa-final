@@ -30,7 +30,6 @@ const getImagePicker = () => {
     try {
       imagePickerModule = require('react-native-image-picker');
     } catch (error) {
-      console.warn('react-native-image-picker not available:', error);
       imagePickerModule = false; // Mark as unavailable
     }
   }
@@ -110,7 +109,6 @@ export const pickAndUploadImage = async (
               resolve(null);
             }
           } catch (error: any) {
-            console.error('Image upload error:', error);
             Alert.alert(
               'Upload Error',
               error.response?.data?.message || 'Failed to upload image'
@@ -196,7 +194,6 @@ export const pickAndUploadVideo = async (
               resolve(null);
             }
           } catch (error: any) {
-            console.error('Video upload error:', error);
             Alert.alert(
               'Upload Error',
               error.response?.data?.message || 'Failed to upload video'
@@ -273,7 +270,6 @@ export const pickMultipleImages = async (
 
               return parseUploadResponse(uploadResponse.data);
             } catch (error: any) {
-              console.error('Image upload error:', error);
               return null;
             }
           });

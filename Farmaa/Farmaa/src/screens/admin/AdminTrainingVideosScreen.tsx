@@ -85,7 +85,6 @@ const AdminTrainingVideosScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.ADMIN.TRAINING_VIDEOS);
       setVideos(response.data.videos || []);
     } catch (err: any) {
-      console.error('Failed to fetch training videos:', err);
       Alert.alert('Error', err.response?.data?.message || 'Failed to load training videos');
     } finally {
       setLoading(false);
@@ -157,7 +156,6 @@ const AdminTrainingVideosScreen = () => {
       setActiveTab('list');
       fetchVideos();
     } catch (err: any) {
-      console.error('Add video error:', err);
       Alert.alert('Error', err.response?.data?.message || 'Failed to add video');
     } finally {
       setLoading(false);
@@ -231,7 +229,6 @@ const AdminTrainingVideosScreen = () => {
       setActiveTab('list');
       fetchVideos();
     } catch (err: any) {
-      console.error('Update video error:', err);
       Alert.alert('Error', err.response?.data?.message || 'Failed to update video');
     } finally {
       setLoading(false);

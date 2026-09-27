@@ -62,7 +62,6 @@ const HopeChatScreen = () => {
         })) || []);
       }
     } catch (error: any) {
-      console.error('Failed to start chat:', error);
       // Fallback to local messages
     } finally {
       setLoading(false);
@@ -84,7 +83,6 @@ const HopeChatScreen = () => {
         })) || []);
       }
     } catch (error: any) {
-      console.error('Failed to fetch chat:', error);
     } finally {
       setLoading(false);
     }
@@ -134,7 +132,6 @@ const HopeChatScreen = () => {
         }
       }
     } catch (error: any) {
-      console.error('Failed to send message:', error);
       Alert.alert('Error', 'Failed to send message. Please try again.');
       // Remove failed message
       setMsgs((prev) => prev.filter(msg => msg.id !== userMsg.id));

@@ -33,8 +33,7 @@ const ServiceProvidersScreen = () => {
       setLoading(true);
       const response = await api.CLIENT.get(api.ENDPOINTS.SERVICE_PROVIDERS);
       setProviders(response.data?.providers || []);
-    } catch (error: any) {
-      console.error('Failed to fetch providers:', error);
+    } catch {
       setProviders([]);
     } finally {
       setLoading(false);

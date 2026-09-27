@@ -40,8 +40,7 @@ const WishlistScreen = () => {
       if (response.data?.success) {
         setWishlist(response.data.wishlist || []);
       }
-    } catch (error) {
-      console.error('Failed to fetch wishlist:', error);
+    } catch {
     } finally {
       setLoading(false);
     }
@@ -51,8 +50,7 @@ const WishlistScreen = () => {
     try {
       await api.CLIENT.delete(`${api.ENDPOINTS.WISHLIST || '/wishlist'}/${productId}`);
       setWishlist(wishlist.filter(item => item.product?._id !== productId));
-    } catch (error) {
-      console.error('Failed to remove from wishlist:', error);
+    } catch {
     }
   };
 

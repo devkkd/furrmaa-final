@@ -81,7 +81,6 @@ const SubscriptionScreen = () => {
         },
       ]);
     } catch (error: any) {
-      console.error('Failed to activate free trial:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to activate free trial');
     } finally {
       setLoading(false);

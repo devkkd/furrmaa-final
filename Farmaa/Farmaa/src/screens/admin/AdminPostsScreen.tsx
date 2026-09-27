@@ -63,7 +63,6 @@ const AdminPostsScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.ADMIN.POSTS);
       setPosts(response.data.posts || []);
     } catch (err: any) {
-      console.error('Failed to fetch posts:', err);
       setError(err.response?.data?.message || 'Failed to load posts');
     } finally {
       setLoading(false);

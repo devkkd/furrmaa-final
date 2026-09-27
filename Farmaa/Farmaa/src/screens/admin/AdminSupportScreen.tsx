@@ -54,7 +54,6 @@ const AdminSupportScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.ADMIN.SUPPORT, { params });
       setChats(response.data.chats || []);
     } catch (err: any) {
-      console.error('Failed to fetch support chats:', err);
       Alert.alert('Error', err.response?.data?.message || 'Failed to load support chats');
     } finally {
       setLoading(false);

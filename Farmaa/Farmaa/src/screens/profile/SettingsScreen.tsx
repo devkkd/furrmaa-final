@@ -60,8 +60,7 @@ const SettingsScreen = () => {
       if (response.data?.settings) {
         setSettings(normalizeSettings(response.data.settings));
       }
-    } catch (error) {
-      console.error('Failed to fetch settings:', error);
+    } catch {
     }
   };
 
@@ -72,8 +71,7 @@ const SettingsScreen = () => {
       if (response.data?.settings) {
         setSettings(normalizeSettings(response.data.settings));
       }
-    } catch (error: any) {
-      console.error('Failed to update settings:', error);
+    } catch {
     } finally {
       setLoading(false);
     }

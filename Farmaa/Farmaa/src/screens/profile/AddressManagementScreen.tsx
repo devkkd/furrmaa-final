@@ -44,7 +44,6 @@ const AddressManagementScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.ADDRESSES);
       setAddresses(response.data.addresses || []);
     } catch (error: any) {
-      console.error('Failed to fetch addresses:', error);
       Alert.alert('Error', 'Failed to load addresses');
     } finally {
       setLoading(false);

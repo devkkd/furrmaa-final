@@ -93,7 +93,6 @@ const AdminPetEventsScreen = () => {
       const response = await api.CLIENT.get(url);
       setEvents(response.data.events || []);
     } catch (err: any) {
-      console.error('Failed to fetch pet events:', err);
       setError(err.response?.data?.message || 'Failed to load pet events');
     } finally {
       setLoading(false);

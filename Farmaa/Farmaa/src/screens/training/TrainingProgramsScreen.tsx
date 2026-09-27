@@ -37,8 +37,7 @@ const TrainingProgramsScreen = () => {
         params: { serviceType: 'training' },
       });
       setTrainers(response.data?.providers || []);
-    } catch (error: any) {
-      console.error('Failed to fetch trainers:', error);
+    } catch {
       setTrainers([]);
     } finally {
       setLoading(false);

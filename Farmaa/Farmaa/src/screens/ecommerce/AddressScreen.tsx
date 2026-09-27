@@ -53,7 +53,6 @@ const AddressScreen = () => {
         setSelectedAddress(defaultAddr._id);
       }
     } catch (error: any) {
-      console.error('Failed to fetch addresses:', error);
       if (error.response?.status !== 401) {
         Alert.alert('Error', 'Failed to load addresses');
       }

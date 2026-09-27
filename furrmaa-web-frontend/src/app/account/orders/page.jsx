@@ -32,8 +32,6 @@ const MyOrders = () => {
 
     fetchOrders()
       .then((data) => {
-        console.log("ORDERS DATA:", data)
-
         if (!cancelled) {
           setOrders(data || [])
           setError(null)
@@ -41,7 +39,6 @@ const MyOrders = () => {
       })
       .catch((err) => {
         if (!cancelled) {
-          console.error('Error fetching orders:', err)
           setOrders([])
           setError('Failed to load orders. Please try again later.')
         }

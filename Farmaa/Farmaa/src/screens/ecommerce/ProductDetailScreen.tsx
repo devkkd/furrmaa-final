@@ -67,7 +67,6 @@ const ProductDetailScreen = () => {
         setProductData(response.data.product);
       }
     } catch (error: any) {
-      console.error('Failed to fetch product:', error);
       if (!productData) {
         Alert.alert('Error', 'Failed to load product details');
         navigation.goBack();

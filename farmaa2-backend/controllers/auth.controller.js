@@ -348,8 +348,6 @@ export const login = async (req, res) => {
       firebaseUid: user.firebaseUid || null
     };
     
-    console.log('🔐 Login response user:', userResponse);
-
     res.json({
       success: true,
       token,
@@ -397,8 +395,6 @@ export const seedAdminLogin = async (req, res) => {
 
     const user = await ensureSeedAdminUser({ email, phone });
     const token = generateToken(user._id);
-
-    console.log('🔑 Seed admin login (no SMTP/Firebase):', user.email || user.phone);
 
     return res.json({
       success: true,
@@ -522,7 +518,6 @@ export const sendOTP = async (req, res) => {
     let otp;
     let expiresAt;
     const otpType = email ? 'email' : 'phone';
-    const identifier = email || phone;
     const cfg = getSeedAdminConfig();
     const emailNorm = email ? email.toLowerCase().trim() : '';
     const isAdminRequest = isSeedAdminIdentifier(emailNorm, phone);
@@ -531,7 +526,6 @@ export const sendOTP = async (req, res) => {
     if (process.env.NODE_ENV === 'development' && phone) {
       otp = devOtp;
       expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      console.log(`🔑 Dev OTP for ${phone}: ${otp}`);
     } else if (isAdminRequest) {
       const query = emailNorm
         ? { email: emailNorm, verified: false }
@@ -544,7 +538,6 @@ export const sendOTP = async (req, res) => {
         otp = devOtp;
         expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
       }
-      console.log(`🔑 Seed admin OTP for ${identifier}: ${otp}`);
     } else {
       otp = Math.floor(100000 + Math.random() * 900000).toString();
       expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -581,16 +574,10 @@ export const sendOTP = async (req, res) => {
           message: 'Failed to send OTP email. Please check email configuration.'
         });
       }
-      console.log(`📧 OTP sent to email: ${email}`);
     } else {
       const sms = await sendOtpSms(phone, otp);
-      if (sms.sent) {
-        console.log(`📱 OTP SMS sent (${sms.provider}) → ${phone}`);
-      } else if (sms.error === 'no_sms_provider') {
-        console.log(`📱 OTP for ${phone}: ${otp} — SMS env nahi. Yahi OTP use karo.`);
-      } else {
+      if (!sms.sent && sms.error !== 'no_sms_provider') {
         console.error(`📱 SMS failed for ${phone}:`, sms.error);
-        console.log(`📱 OTP for ${phone}: ${otp} — SMS failed, use manually`);
       }
     }
 
@@ -647,7 +634,6 @@ export const verifyOTP = async (req, res) => {
         const anyByPhone = await OTP.findOne({ phone }).sort({ createdAt: -1 });
         if (anyByPhone && anyByPhone.otp === otp.toString() && new Date() <= anyByPhone.expiresAt) {
           otpRecord = anyByPhone;
-          console.log('🔑 Dev: Reusing OTP for phone', phone);
         }
       }
     }
@@ -661,7 +647,6 @@ export const verifyOTP = async (req, res) => {
     if (isAdminLogin && (secret === cfg.otp || secret === cfg.password)) {
       const user = await ensureSeedAdminUser({ email: emailNorm, phone });
       const token = generateToken(user._id);
-      console.log('🔑 Seed admin verify (no SMTP/Firebase):', user.email || user.phone);
       return res.json({
         success: true,
         message: 'OTP verified successfully',
@@ -671,14 +656,6 @@ export const verifyOTP = async (req, res) => {
     }
 
     if (!otpRecord) {
-      if (phone) {
-        const anyOtp = await OTP.findOne({ phone }).sort({ createdAt: -1 });
-        if (anyOtp) {
-          console.log('⚠️ OTP found but already verified or expired. Phone:', phone);
-        } else {
-          console.log('⚠️ No OTP record for phone:', phone, '- request Send OTP first.');
-        }
-      }
       return res.status(400).json({
         success: false,
         message: 'OTP not found or already used. Please request a new OTP.'
@@ -724,7 +701,6 @@ export const verifyOTP = async (req, res) => {
       if (firebaseUid) userData.firebaseUid = firebaseUid;
 
       user = await User.create(userData);
-      console.log(`✅ New user created via OTP: ${email || phone}${isAdminLogin ? ' (admin)' : ''}`);
     } else {
       // Update existing user
       user.isVerified = true;
@@ -745,7 +721,6 @@ export const verifyOTP = async (req, res) => {
         }
       }
       await user.save();
-      console.log(`✅ User verified via OTP: ${email || phone}`);
     }
 
     // Check if user is active
@@ -770,8 +745,6 @@ export const verifyOTP = async (req, res) => {
       isVerified: user.isVerified,
       firebaseUid: user.firebaseUid || null
     };
-    
-    console.log('🔐 OTP verify successful for:', email || phone);
     
     res.json({
       success: true,

@@ -51,8 +51,7 @@ const SubscriptionScreen = () => {
       setLoading(true);
       const response = await api.CLIENT.get(api.ENDPOINTS.SUBSCRIPTION);
       setSubscription(response.data.subscription);
-    } catch (error: any) {
-      console.error('Failed to fetch subscription:', error);
+    } catch {
     } finally {
       setLoading(false);
     }

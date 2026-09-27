@@ -51,8 +51,7 @@ const MyPetsScreen = () => {
           setPets(response.data.user.pets);
         }
       }
-    } catch (error: any) {
-      console.error('Failed to fetch pets:', error);
+    } catch {
       setPets([]);
     } finally {
       setLoading(false);

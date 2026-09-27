@@ -38,8 +38,7 @@ const ChatHistoryScreen = () => {
       if (response.data?.chats) {
         setChatHistory(response.data.chats);
       }
-    } catch (error: any) {
-      console.error('Failed to fetch chat history:', error);
+    } catch {
       setChatHistory([]);
     } finally {
       setLoading(false);

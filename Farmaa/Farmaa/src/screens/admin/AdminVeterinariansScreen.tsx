@@ -124,7 +124,6 @@ const AdminVeterinariansScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.ADMIN.VETERINARIANS);
       setVeterinarians(response.data.veterinarians || []);
     } catch (err: any) {
-      console.error('Failed to fetch veterinarians:', err);
       setError(err.response?.data?.message || 'Failed to load veterinarians');
     } finally {
       setLoading(false);

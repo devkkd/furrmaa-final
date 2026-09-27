@@ -32,9 +32,8 @@ const WhatsAppUsScreen = () => {
           return Linking.openURL(webUrl);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         Alert.alert('Error', 'Could not open WhatsApp. Please make sure WhatsApp is installed.');
-        console.error('Error opening WhatsApp:', err);
       });
   };
 

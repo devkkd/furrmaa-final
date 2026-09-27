@@ -113,10 +113,7 @@ const TrainingLessonsScreen = () => {
           return { ...lesson, isLocked: shouldLock };
         });
       });
-    } catch (error: any) {
-      if (error.response?.status !== 401) {
-        console.error('Failed to fetch subscription:', error);
-      }
+    } catch {
       setHasActiveSubscription(false);
     }
   };
@@ -216,8 +213,7 @@ const TrainingLessonsScreen = () => {
         setCourseDetails(null);
         setTrainerDetails(null);
       }
-    } catch (error: any) {
-      console.error('Failed to fetch training videos:', error);
+    } catch {
       setVideos([]);
       setProgress(0);
     } finally {

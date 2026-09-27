@@ -49,7 +49,6 @@ const AdminProductsScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.ADMIN.PRODUCTS);
       setProducts(response.data.products || []);
     } catch (err: any) {
-      console.error('Failed to fetch products:', err);
       setError(err.response?.data?.message || 'Failed to load products');
     } finally {
       setLoading(false);

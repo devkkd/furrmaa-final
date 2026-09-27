@@ -41,7 +41,6 @@ const AddReminderScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.USER_PETS);
       setPets(response.data?.pets || []);
     } catch (error: any) {
-      console.error('Failed to fetch pets:', error);
     }
   };
 
@@ -84,7 +83,6 @@ const AddReminderScreen = () => {
         ]);
       }
     } catch (error: any) {
-      console.error('Failed to save reminder:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to create reminder. Please try again.');
     } finally {
       setLoading(false);

@@ -51,7 +51,6 @@ const AdminFeedbackScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.ADMIN.FEEDBACK, { params });
       setFeedbacks(response.data.feedbacks || []);
     } catch (err: any) {
-      console.error('Failed to fetch feedbacks:', err);
       Alert.alert('Error', err.response?.data?.message || 'Failed to load feedbacks');
     } finally {
       setLoading(false);

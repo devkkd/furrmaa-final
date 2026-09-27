@@ -22,7 +22,7 @@ let Video: any = null;
 try {
   Video = require('react-native-video').default;
 } catch (e) {
-  console.warn('react-native-video not installed. Video playback will be limited.');
+  // react-native-video not installed — video playback limited
 }
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
@@ -99,7 +99,6 @@ const SocialFeedScreen = () => {
       }
       setLikedPosts(liked);
     } catch (error: any) {
-      console.error('Failed to fetch posts:', error);
       setPosts([]);
     } finally {
       setLoading(false);
@@ -182,7 +181,6 @@ const SocialFeedScreen = () => {
         );
       }
     } catch (error: any) {
-      console.error('Failed to like post:', error);
       // Revert local state on error
       if (isLiked) {
         setLikedPosts((prev) => new Set(prev).add(postId));
@@ -234,7 +232,7 @@ const SocialFeedScreen = () => {
       });
     } catch (e: any) {
       if (e?.message !== 'User did not share') {
-        console.warn('Share error:', e);
+        // Share failed — ignore
       }
     }
   };

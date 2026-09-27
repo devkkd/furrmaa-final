@@ -98,7 +98,6 @@ const HomeScreen = () => {
         (navigation as any).navigate(screenName, params);
       }
     } catch (error) {
-      console.error('Navigation error:', error);
       (navigation as any).navigate(screenName, params);
     }
   };
@@ -182,7 +181,7 @@ const HomeScreen = () => {
         setWishlistIds((prev) => new Set(prev).add(productId));
       }
     } catch (e) {
-      console.warn('Wishlist toggle failed', e);
+      // Wishlist toggle failed — ignore
     }
   };
 
@@ -273,7 +272,6 @@ const HomeScreen = () => {
       setEverydayEssentials((everydayRes.data?.categories || []).map(mapHomeCategory));
       setWellnessCategories((wellnessRes.data?.categories || []).map(mapHomeCategory));
     } catch (error) {
-      console.error('Failed to fetch home categories:', error);
       setEverydayEssentials([]);
       setWellnessCategories([]);
     } finally {
@@ -296,7 +294,6 @@ const HomeScreen = () => {
       );
       setWhyChooseTagline(res.data?.tagline || '');
     } catch (error) {
-      console.error('Failed to fetch why-choose:', error);
       setWhyChooseFeatures([]);
       setWhyChooseTagline('');
     } finally {
@@ -333,7 +330,6 @@ const HomeScreen = () => {
         setTopProducts(sorted);
       }
     } catch (error: any) {
-      console.error('Failed to fetch top products:', error);
       setTopProducts([]);
     } finally {
       setLoadingProducts(false);
@@ -355,7 +351,6 @@ const HomeScreen = () => {
         setNewArrivals(newProducts);
       }
     } catch (error: any) {
-      console.error('Failed to fetch new arrivals:', error);
       setNewArrivals([]);
     } finally {
       setLoadingNewArrivals(false);
@@ -376,7 +371,6 @@ const HomeScreen = () => {
         setBestDeals(response.data.products.slice(0, 6));
       }
     } catch (error: any) {
-      console.error('Failed to fetch best deals:', error);
       setBestDeals([]);
     } finally {
       setLoadingBestDeals(false);

@@ -38,7 +38,6 @@ const AdminDashboardScreen = () => {
       const response = await api.CLIENT.get(api.ENDPOINTS.ADMIN.DASHBOARD);
       setStats(response.data.stats);
     } catch (err: any) {
-      console.error('Failed to fetch dashboard stats:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Failed to load dashboard';
       setError(errorMessage);
       // Don't show alert for 401/403 errors - just show error message

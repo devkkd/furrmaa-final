@@ -128,8 +128,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (storedToken && storedUser) {
         try {
           const userData = JSON.parse(storedUser);
-          console.log('📱 Loaded user from storage:', userData);
-          console.log('👤 User role:', userData.role);
           
           setToken(storedToken);
           setUser(userData);
@@ -151,31 +149,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   role: u.role ?? userData.role ?? 'user',
                   profileImage: u.profileImage ?? userData.profileImage ?? undefined,
                 };
-                console.log('🔄 Fresh user data from server:', freshUser);
                 setUser(freshUser);
                 AsyncStorage.setItem('user', JSON.stringify(freshUser));
               }
             })
             .catch(async (err: any) => {
               if (err?.response?.status === 401) {
-                console.log('⚠️ Stored session expired — clearing auth');
                 setToken(null);
                 setUser(null);
                 delete api.CLIENT.defaults.headers.common.Authorization;
                 await clearAuthStorage();
                 return;
               }
-              console.log('⚠️ Could not refresh user data, using stored data', err?.message);
             });
         } catch (parseError) {
-          console.error('Error parsing stored user data:', parseError);
           // Clear corrupted data
           await AsyncStorage.removeItem('token');
           await AsyncStorage.removeItem('user');
         }
       }
     } catch (error) {
-      console.error('Error loading auth:', error);
+      // Ignore load errors — loading flag cleared in finally
     } finally {
       // Always set loading to false, even if there's an error
       setLoading(false);
@@ -184,20 +178,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('🔐 Attempting login for:', email);
-      console.log('🌐 API URL:', api.BASE_URL + api.ENDPOINTS.AUTH.LOGIN);
-      
       const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.LOGIN, {
         email,
         password,
       });
 
-      console.log('✅ Login response:', response.data);
-
       const { token: newToken, user: userData } = response.data;
       
       if (!newToken || !userData) {
-        console.error('❌ Invalid response structure:', response.data);
         throw new Error('Invalid response from server');
       }
       
@@ -209,16 +197,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Set token in axios instance for future requests
       api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-      
-      console.log('✅ Login successful, token stored');
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Login failed';
-      console.error('❌ Login error:', {
-        message: errorMessage,
-        status: error.response?.status,
-        data: error.response?.data,
-        networkError: !error.response && error.message,
-      });
       throw new Error(errorMessage);
     }
   };
@@ -226,13 +206,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Firebase Email/Password Login - Uses Firebase ID Token
   const loginWithFirebase = async (email: string, password: string) => {
     try {
-      console.log('🔥 Firebase: Attempting login for:', email);
-      
       // Sign in with Firebase
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
       const firebaseUser = userCredential.user;
-      
-      console.log('✅ Firebase login successful, UID:', firebaseUser.uid);
       
       // Get Firebase ID Token
       const firebaseToken = await firebaseUser.getIdToken();
@@ -258,13 +234,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await AsyncStorage.setItem('user', JSON.stringify(userWithFirebase));
           
           api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-          
-          console.log('✅ Firebase login successful, synced with backend');
         }
       } catch (backendError: any) {
         // If backend login fails, try to create user or use Firebase auth only
-        console.warn('⚠️ Backend sync failed, using Firebase auth only:', backendError.message);
-        
         const firebaseUserData = {
           id: firebaseUser.uid,
           _id: firebaseUser.uid,
@@ -278,16 +250,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await AsyncStorage.setItem('user', JSON.stringify(firebaseUserData));
       }
     } catch (error: any) {
-      console.error('❌ Firebase Login error:', error);
       throw new Error(error.message || 'Login failed');
     }
   };
 
   const register = async (name: string, email: string, password: string, phone?: string) => {
     try {
-      console.log('📝 Attempting registration for:', email);
-      console.log('🌐 API URL:', api.BASE_URL + api.ENDPOINTS.AUTH.REGISTER);
-      
       const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.REGISTER, {
         name,
         email,
@@ -295,12 +263,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         phone,
       });
 
-      console.log('✅ Registration response:', response.data);
-
       const { token: newToken, user: userData } = response.data;
       
       if (!newToken || !userData) {
-        console.error('❌ Invalid response structure:', response.data);
         throw new Error('Invalid response from server');
       }
       
@@ -312,16 +277,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Set token in axios instance for future requests
       api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-      
-      console.log('✅ Registration successful, token stored');
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
-      console.error('❌ Registration error:', {
-        message: errorMessage,
-        status: error.response?.status,
-        data: error.response?.data,
-        networkError: !error.response && error.message,
-      });
       throw new Error(errorMessage);
     }
   };
@@ -329,16 +286,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Firebase Email/Password Registration
   const registerWithFirebase = async (name: string, email: string, password: string) => {
     try {
-      console.log('🔥 Firebase: Attempting registration for:', email);
-      
       // Create user with Firebase
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);
       const firebaseUser = userCredential.user;
       
       // Update profile with name
       await firebaseUser.updateProfile({ displayName: name });
-      
-      console.log('✅ Firebase registration successful, UID:', firebaseUser.uid);
       
       // Sync with backend
       try {
@@ -364,13 +317,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await AsyncStorage.setItem('user', JSON.stringify(userWithFirebase));
           
           api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-          
-          console.log('✅ Firebase registration successful, synced with backend');
         }
       } catch (backendError: any) {
         // If backend sync fails, use Firebase auth only
-        console.warn('⚠️ Backend sync failed, using Firebase auth only:', backendError.message);
-        
         const firebaseUserData = {
           id: firebaseUser.uid,
           _id: firebaseUser.uid,
@@ -384,7 +333,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await AsyncStorage.setItem('user', JSON.stringify(firebaseUserData));
       }
     } catch (error: any) {
-      console.error('❌ Firebase Registration error:', error);
       throw new Error(error.message || 'Registration failed');
     }
   };
@@ -392,7 +340,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendOTP = async (phone: string) => {
     // Seeded admin: never Firebase / SMS
     if (isSeedAdminIdentifier(phone)) {
-      console.log('🔑 Seed admin phone — skipping Firebase/SMS');
       try {
         const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.SEND_OTP, { phone });
         return response.data?.otp || '';
@@ -407,20 +354,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      console.log('📱 Sending OTP to:', phone);
-
       // Always call backend so OTP is stored in DB (required for verifyOTP)
       const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.SEND_OTP, {
         phone,
       });
 
-      console.log('✅ OTP sent:', response.data);
-
       // In development backend returns otp in response for testing
       return response.data.otp || '';
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to send OTP';
-      console.error('❌ Send OTP error:', errorMessage);
       throw new Error(errorMessage);
     }
   };
@@ -430,7 +372,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Seeded admin: never SMTP / Firebase
     if (isSeedAdminIdentifier(trimmed)) {
-      console.log('🔑 Seed admin email — skipping SMTP/Firebase');
       try {
         const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.SEND_OTP, { email: trimmed });
         return response.data?.otp || '';
@@ -440,17 +381,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      console.log('📧 Sending OTP to email:', trimmed);
-
       const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.SEND_OTP, {
         email: trimmed,
       });
 
-      console.log('✅ Email OTP sent:', response.data);
       return response.data.otp || '';
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to send OTP';
-      console.error('❌ Send email OTP error:', errorMessage);
       throw new Error(errorMessage);
     }
   };
@@ -458,8 +395,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Firebase OTP - Phone Authentication
   const sendOTPWithFirebase = async (phone: string) => {
     try {
-      console.log('🔥 Firebase: Sending OTP to:', phone);
-      
       // Format phone number for Firebase
       // Preserve spaces if present (for test numbers)
       let formattedPhone = phone.trim();
@@ -477,9 +412,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         formattedPhone = `+91${cleanPhone}`;
       }
       
-      console.log('📱 Formatted phone:', formattedPhone);
-      console.log('📱 Original phone:', phone);
-      
       // Send OTP via Firebase
       const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
       
@@ -490,11 +422,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         type: 'phone',
       }));
       
-      console.log('✅ Firebase Phone OTP sent successfully');
       return 'OTP sent via Firebase';
     } catch (error: any) {
-      console.error('❌ Firebase Send Phone OTP error:', error);
-      
       // Better error messages
       let errorMessage = error.message || 'Failed to send OTP via Firebase';
       
@@ -515,8 +444,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Firebase Email OTP - Email Link Authentication
   const sendEmailOTPWithFirebase = async (email: string) => {
     try {
-      console.log('🔥 Firebase: Sending Email OTP to:', email);
-      
       // Firebase Email Link Authentication
       const actionCodeSettings = {
         url: 'furmaa://email-action',
@@ -537,10 +464,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: email,
         type: 'email',
       }));
-      
-      console.log('✅ Firebase Email OTP sent successfully');
     } catch (error: any) {
-      console.error('❌ Firebase Send Email OTP error:', error);
       throw new Error(error.message || 'Failed to send Email OTP via Firebase');
     }
   };
@@ -548,8 +472,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Firebase Email OTP Verification
   const verifyEmailOTPWithFirebase = async (email: string, otp: string) => {
     try {
-      console.log('🔥 Firebase: Verifying Email OTP for:', email);
-      
       // Check if email link was clicked (in production, this would be handled via deep link)
       // For now, we'll use email/password as fallback or check if user clicked the link
       // Note: Firebase Email Link auth requires the user to click the link in their email
@@ -586,14 +508,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await AsyncStorage.removeItem('firebase_email_otp');
             
             api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-            
-            console.log('✅ Firebase Email OTP verification successful');
           }
         } catch (backendError: any) {
           if (isAxiosNetworkOnlyFailure(backendError)) {
-            console.warn('⚠️ Backend not reachable. Using Firebase auth only.');
-            console.warn('⚠️ Make sure backend is running on:', api.BASE_URL);
-
             const firebaseUserData = {
               id: currentUser.uid,
               _id: currentUser.uid,
@@ -608,7 +525,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await AsyncStorage.setItem('user', JSON.stringify(firebaseUserData));
             await AsyncStorage.removeItem('firebase_email_otp');
 
-            console.log('✅ Firebase Email OTP verified (backend offline, using Firebase auth only)');
             return;
           }
           throw backendError;
@@ -617,7 +533,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Please click the link in your email to verify');
       }
     } catch (error: any) {
-      console.error('❌ Firebase Verify Email OTP error:', error);
       throw new Error(error.message || 'Email OTP verification failed');
     }
   };
@@ -626,7 +541,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Seeded admin: direct login — no Firebase / SMTP
     if (isSeedAdminIdentifier(identifier)) {
       try {
-        console.log('🔑 Seed admin verify — skipping Firebase/SMTP');
         const isEmail = identifier.includes('@');
         const body = isEmail
           ? {
@@ -664,18 +578,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      console.log('🔐 Verifying OTP for:', identifier, `(${type})`);
-      console.log('🌐 API URL:', api.BASE_URL + api.ENDPOINTS.AUTH.VERIFY_OTP);
-
       const body =
         type === 'email'
           ? { email: identifier.trim().toLowerCase(), otp }
           : { phone: identifier, otp };
       
       const response = await api.CLIENT.post(api.ENDPOINTS.AUTH.VERIFY_OTP, body);
-
-      console.log('✅ OTP verified:', response.data);
-      console.log('👤 User role from server:', response.data?.user?.role);
 
       const { token: newToken, user: userData } = response.data;
       
@@ -691,8 +599,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: userData.email || (type === 'email' ? identifier.trim().toLowerCase() : undefined),
       };
       
-      console.log('👤 Final user data:', userWithRole);
-      
       setToken(newToken);
       setUser(userWithRole);
       
@@ -700,17 +606,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await AsyncStorage.setItem('user', JSON.stringify(userWithRole));
       
       api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-      
-      console.log('✅ OTP verification successful, token stored');
     } catch (error: any) {
-      console.error('❌ Verify OTP error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        code: error.code,
-        request: error.request ? 'Request sent but no response' : null,
-      });
-
       // Better error messages for network issues
       let errorMessage = 'OTP verification failed';
       
@@ -724,7 +620,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         errorMessage = error.message;
       }
       
-      console.error('❌ Verify OTP error:', errorMessage);
       throw new Error(errorMessage);
     }
   };
@@ -732,8 +627,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Firebase OTP Verification - Uses Firebase ID Token
   const verifyOTPWithFirebase = async (phone: string, otp: string) => {
     try {
-      console.log('🔥 Firebase: Verifying OTP for:', phone);
-      
       // Get stored confirmation
       const stored = await AsyncStorage.getItem('firebase_otp_confirmation');
       if (!stored) {
@@ -748,8 +641,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Sign in with credential
       const userCredential = await auth().signInWithCredential(credential);
       const firebaseUser = userCredential.user;
-      
-      console.log('✅ Firebase OTP verified, Firebase UID:', firebaseUser.uid);
       
       // Get Firebase ID Token
       const firebaseToken = await firebaseUser.getIdToken();
@@ -778,14 +669,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await AsyncStorage.removeItem('firebase_otp_confirmation');
           
           api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-          
-          console.log('✅ Firebase OTP verification successful, synced with backend');
         }
       } catch (backendError: any) {
         if (isAxiosNetworkOnlyFailure(backendError)) {
-          console.warn('⚠️ Backend not reachable. Using Firebase auth only.');
-          console.warn('⚠️ Make sure backend is running on:', api.BASE_URL);
-
           const firebaseUserData = {
             id: firebaseUser.uid,
             _id: firebaseUser.uid,
@@ -800,11 +686,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await AsyncStorage.setItem('user', JSON.stringify(firebaseUserData));
           await AsyncStorage.removeItem('firebase_otp_confirmation');
 
-          console.log('✅ Firebase OTP verified (backend offline, using Firebase auth only)');
           return;
         }
-
-        console.warn('⚠️ Backend sync failed:', backendError.message);
 
         const firebaseUserData = {
           id: firebaseUser.uid,
@@ -819,11 +702,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(firebaseUserData);
         await AsyncStorage.setItem('user', JSON.stringify(firebaseUserData));
         await AsyncStorage.removeItem('firebase_otp_confirmation');
-
-        console.log('✅ Firebase OTP verified (backend sync skipped)');
       }
     } catch (error: any) {
-      console.error('❌ Firebase Verify OTP error:', error);
       throw new Error(error.message || 'OTP verification failed');
     }
   };
@@ -831,8 +711,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Google Sign-In
   const loginWithGoogle = async () => {
     try {
-      console.log('🔵 Google Sign-In: Starting...');
-      
       // Check if Google Play Services are available
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       
@@ -844,7 +722,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       const userInfo = signInResult.data;
-      console.log('✅ Google Sign-In: Got user info', userInfo.user?.email);
       
       // Create Firebase credential
       const googleCredential = auth.GoogleAuthProvider.credential(userInfo.idToken);
@@ -852,8 +729,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Sign in to Firebase with Google credential
       const firebaseUserCredential = await auth().signInWithCredential(googleCredential);
       const firebaseUser = firebaseUserCredential.user;
-      
-      console.log('✅ Google Sign-In: Firebase authenticated', firebaseUser.uid);
       
       // Get Firebase ID Token
       const firebaseToken = await firebaseUser.getIdToken();
@@ -879,8 +754,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await AsyncStorage.setItem('user', JSON.stringify(userWithFirebase));
           
           api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-          
-          console.log('✅ Google Sign-In: Synced with backend');
         }
       } catch (backendError: any) {
         const status = backendError.response?.status;
@@ -895,9 +768,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         if (isAxiosNetworkOnlyFailure(backendError)) {
-          console.warn('⚠️ Backend not reachable. Using Firebase auth only.');
-          console.warn('⚠️ Make sure backend is running on:', api.BASE_URL);
-
           const firebaseUserData = {
             id: firebaseUser.uid,
             _id: firebaseUser.uid,
@@ -911,11 +781,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(firebaseUserData);
           await AsyncStorage.setItem('user', JSON.stringify(firebaseUserData));
 
-          console.log('✅ Google Sign-In successful (backend offline, using Firebase auth only)');
           return;
         }
-
-        console.warn('⚠️ Backend sync failed:', backendError.message);
 
         const firebaseUserData = {
           id: firebaseUser.uid,
@@ -929,11 +796,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setUser(firebaseUserData);
         await AsyncStorage.setItem('user', JSON.stringify(firebaseUserData));
-
-        console.log('✅ Google Sign-In successful (backend sync skipped)');
       }
     } catch (error: any) {
-      console.error('❌ Google Sign-In error:', error);
       throw new Error(error.message || 'Google Sign-In failed');
     }
   };
@@ -975,8 +839,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Apple Sign-In is only available on iOS');
       }
       
-      console.log('🍎 Apple Sign-In: Starting...');
-      
       // Start Apple Sign-In
       const appleAuthRequestResponse = await appleAuth.performRequest({
         requestedOperation: appleAuth.Operation.LOGIN,
@@ -995,8 +857,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Sign in to Firebase with Apple credential
       const firebaseUserCredential = await auth().signInWithCredential(appleCredential);
       const firebaseUser = firebaseUserCredential.user;
-      
-      console.log('✅ Apple Sign-In: Firebase authenticated', firebaseUser.uid);
       
       // Get user name from Apple response
       const fullName = appleAuthRequestResponse.fullName;
@@ -1028,8 +888,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await AsyncStorage.setItem('user', JSON.stringify(userWithFirebase));
           
           api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-          
-          console.log('✅ Apple Sign-In: Synced with backend');
         }
       } catch (backendError: any) {
         // If user already exists, try login
@@ -1055,12 +913,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               await AsyncStorage.setItem('user', JSON.stringify(userWithFirebase));
               
               api.CLIENT.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-              
-              console.log('✅ Apple Sign-In: Logged in via backend');
             }
           } catch (loginError) {
-            console.warn('⚠️ Backend sync failed, using Firebase auth only:', loginError);
-            
             // Use Firebase auth only
             const firebaseUserData = {
               id: firebaseUser.uid,
@@ -1079,7 +933,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     } catch (error: any) {
-      console.error('❌ Apple Sign-In error:', error);
       throw new Error(error.message || 'Apple Sign-In failed');
     }
   };
@@ -1096,29 +949,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (client) {
         try {
           await client.credentialsManager.clearCredentials();
-        } catch (auth0Err) {
-          console.warn('Auth0 clearCredentials:', auth0Err);
+        } catch {
+          // Ignore Auth0 clear errors
         }
       }
 
       try {
         await auth().signOut();
-      } catch (firebaseError) {
-        console.log('⚠️ Firebase sign out:', firebaseError);
+      } catch {
+        // Ignore Firebase sign out errors
       }
 
       try {
         if (GoogleSignin.hasPreviousSignIn()) {
           await GoogleSignin.signOut();
         }
-      } catch (googleError) {
-        console.log('⚠️ Google sign out:', googleError);
+      } catch {
+        // Ignore Google sign out errors
       }
 
       resetToLoginScreen();
-      console.log('✅ Logout successful');
     } catch (error) {
-      console.error('Error logging out:', error);
       setToken(null);
       setUser(null);
       await clearAuthStorage().catch(() => {});

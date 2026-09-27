@@ -105,7 +105,6 @@ const AdminOrderDetailScreen = () => {
       const response = await api.CLIENT.get(`${api.ENDPOINTS.ADMIN.ORDERS}/${orderId}`);
       setOrder(response.data.order);
     } catch (err: any) {
-      console.error('Failed to fetch order:', err);
       Alert.alert('Error', err.response?.data?.message || 'Failed to load order');
       navigation.goBack();
     } finally {

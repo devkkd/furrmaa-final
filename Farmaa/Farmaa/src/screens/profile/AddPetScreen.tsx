@@ -67,7 +67,6 @@ const AddPetScreen = () => {
         ]);
       }
     } catch (error: any) {
-      console.error('Failed to save pet:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to add pet. Please try again.');
     } finally {
       setLoading(false);

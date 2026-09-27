@@ -192,9 +192,8 @@ const ProductsScreen = () => {
 
       setAllProducts(mapped);
       setProducts(mapped); // Set products directly from API response (already filtered by category)
-    } catch (e) {
+    } catch {
       // No fallback - show empty state if API fails
-      console.error('Failed to fetch products:', e);
       setAllProducts([]);
       setProducts([]);
     } finally {
@@ -265,8 +264,7 @@ const ProductsScreen = () => {
     //       setIsListening(false);
     //     }
     //   };
-    // } catch (error) {
-    //   console.error('Voice search error:', error);
+    // } catch {
     //   setIsListening(false);
     // }
 

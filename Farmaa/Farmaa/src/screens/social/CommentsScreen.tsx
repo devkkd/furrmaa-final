@@ -56,7 +56,6 @@ const CommentsScreen = () => {
         setComments(response.data.comments || []);
       }
     } catch (error: any) {
-      console.error('Failed to fetch comments:', error);
       // If error, show empty state
       setComments([]);
     } finally {
@@ -84,7 +83,6 @@ const CommentsScreen = () => {
         await fetchComments();
       }
     } catch (error: any) {
-      console.error('Failed to add comment:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to add comment');
     } finally {
       setSending(false);

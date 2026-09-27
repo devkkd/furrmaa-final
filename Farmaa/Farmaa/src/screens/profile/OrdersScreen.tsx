@@ -59,8 +59,7 @@ const OrdersScreen = () => {
       if (response.data?.orders) {
         setOrders(response.data.orders);
       }
-    } catch (error: any) {
-      console.error('Failed to fetch orders:', error);
+    } catch {
     } finally {
       setLoading(false);
       setRefreshing(false);

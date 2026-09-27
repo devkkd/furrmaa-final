@@ -74,7 +74,6 @@ const EmergencyScreen = () => {
         setLocation('');
       }
     } catch (error: any) {
-      console.error('Emergency submission error:', error);
       Alert.alert(
         'Error',
         error.response?.data?.message || 'Failed to submit emergency request. Please try again or call the emergency number.'
