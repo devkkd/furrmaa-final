@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
+import LocationAutocompleteInput from '../../components/LocationAutocompleteInput';
 import AdminTextInput from './AdminTextInput';
 
 interface HopePost {
@@ -277,11 +278,12 @@ const AdminHopePostsScreen = () => {
       />
 
       <Text style={styles.label}>Location *</Text>
-      <AdminTextInput
-        style={styles.input}
-        placeholder="Location (e.g. Pratap Nagar, Jaipur)"
+      <LocationAutocompleteInput
+        placeholder="Search location (e.g. Pratap Nagar, Jaipur)"
         value={formData.locationText}
-        onChangeText={(text) => setFormData({ ...formData, locationText: text })}
+        onChangeText={(text) => setFormData((f) => ({ ...f, locationText: text }))}
+        onSelectSuggestion={(p) => setFormData((f) => ({ ...f, locationText: p.displayName }))}
+        inputStyle={styles.input}
       />
 
       <Text style={styles.label}>Description</Text>

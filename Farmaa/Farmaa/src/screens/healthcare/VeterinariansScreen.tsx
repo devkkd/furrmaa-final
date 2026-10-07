@@ -369,9 +369,12 @@ const VeterinariansScreen = () => {
         (s.serviceType && s.serviceType.toLowerCase().includes(q))
     );
   }
-  if (sortBy === 'Farthest to Nearest') {
-    filteredServices = [...filteredServices].reverse();
-  }
+  // Nearest first by default (real km); farthest only when user picks that sort
+  filteredServices = [...filteredServices].sort((a, b) => {
+    const da = a.distanceKm ?? 9999;
+    const db = b.distanceKm ?? 9999;
+    return sortBy === 'Farthest to Nearest' ? db - da : da - db;
+  });
 
   const shouldShowEmpty = showEmptyState || filteredServices.length === 0;
 

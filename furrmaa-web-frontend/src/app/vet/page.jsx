@@ -29,7 +29,7 @@ const Vet = () => {
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [showLocationModal, setShowLocationModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const { location, loading: locLoading, error: locError, fetchCurrentLocation, setLocation } = useGeolocation('');
+    const { location, coords, loading: locLoading, error: locError, fetchCurrentLocation, setLocation } = useGeolocation('');
 
     // Do NOT block page on GPS (can take 20s+). Load list immediately; user can pick city.
     // Soft background attempt only if nothing selected yet.
@@ -49,14 +49,15 @@ const Vet = () => {
         const addr = await fetchCurrentLocation();
         if (addr) setShowLocationModal(false);
     };
-    const handleConfirmLocation = (val) => {
-        setLocation(val);
+    const handleConfirmLocation = (val, placeCoords) => {
+        setLocation(val, placeCoords);
         setShowLocationModal(false);
     };
 
     const { services, loading, categories } = useVetServices({
         category: selectedCategory,
         location: location?.trim() || undefined,
+        userCoords: coords,
     });
 
     const filteredServices = useMemo(() => {
@@ -70,7 +71,12 @@ const Vet = () => {
                     (s.category && s.category.toLowerCase().includes(q))
             );
         }
-        if (sortBy === 'farthest') list.reverse();
+        // Always sort by real distance — nearest first by default
+        list.sort((a, b) => {
+            const da = a.distanceKm ?? 9999;
+            const db = b.distanceKm ?? 9999;
+            return sortBy === 'farthest' ? db - da : da - db;
+        });
         return list;
     }, [services, searchQuery, sortBy]);
 

@@ -54,6 +54,45 @@ export async function getCurrentLocationString() {
   }
 }
 
+/** Address + coords for distance sorting (Near By). */
+export async function getCurrentLocationWithCoords() {
+  const { lat, lng } = await getCurrentPosition();
+  let address;
+  try {
+    address = await reverseGeocode(lat, lng);
+  } catch {
+    address = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  }
+  return { address, lat, lng };
+}
+
+/** Forward geocode address → lat/lng (Nominatim). */
+export async function forwardGeocode(address) {
+  if (!address?.trim()) return null;
+  const q = encodeURIComponent(address.trim());
+  const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
+  const res = await fetch(url, { headers: NOMINATIM_HEADERS });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const first = Array.isArray(data) ? data[0] : null;
+  if (!first || first.lat == null || first.lon == null) return null;
+  return { lat: parseFloat(first.lat), lng: parseFloat(first.lon) };
+}
+
+/** Haversine distance in km */
+export function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 const COORD_PATTERN = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/;
 
 /** True when location is a raw "lat, lng" fallback (not useful for API filters). */

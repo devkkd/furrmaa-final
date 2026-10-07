@@ -289,8 +289,7 @@ export default function AdminVeterinariansPage() {
                   }
                 }}
                 placeholder="Search clinic city / address (e.g. Jaipur)"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                types={['establishment', 'geocode']}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
               />
               {(placeMeta.city || locationCoords.lat != null) && (
                 <p className="text-xs text-emerald-700 mt-1">

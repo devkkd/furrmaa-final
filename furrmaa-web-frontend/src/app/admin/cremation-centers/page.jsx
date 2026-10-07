@@ -7,6 +7,7 @@ import {
   adminUpdateCremationCenter,
   adminDeleteCremationCenter,
 } from '@/lib/api';
+import LocationAutocomplete from '@/components/LocationAutocomplete';
 
 const empty = { name: '', address: '', city: '', state: '', phone: '', description: '', isActive: true };
 
@@ -85,14 +86,69 @@ export default function AdminCremationCentersPage() {
         </div>
       )}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSave} className="bg-white rounded-xl p-6 w-full max-w-lg space-y-3">
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <form onSubmit={handleSave} className="bg-white rounded-xl p-6 w-full max-w-lg space-y-3 my-4">
             <h2 className="font-bold text-lg">{editingId ? 'Edit' : 'Add'} Center</h2>
-            {['name', 'address', 'city', 'state', 'phone'].map((f) => (
-              <input key={f} className="w-full border rounded-lg px-3 py-2" placeholder={f} value={form[f]} onChange={(e) => setForm({ ...form, [f]: e.target.value })} required={f !== 'phone'} />
-            ))}
-            <textarea className="w-full border rounded-lg px-3 py-2" placeholder="Description" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} /> Active</label>
+            <input
+              className="w-full border rounded-lg px-3 py-2 bg-white"
+              placeholder="name"
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              required
+            />
+            <LocationAutocomplete
+              key={`${editingId || 'new'}-crem-address`}
+              value={form.address}
+              onChange={(address) => setForm((f) => ({ ...f, address }))}
+              onPlaceSelect={(p) =>
+                setForm((f) => ({
+                  ...f,
+                  address: p.label,
+                  city: p.city || f.city,
+                  state: p.state || f.state,
+                }))
+              }
+              placeholder="Search address"
+              className="w-full border rounded-lg px-3 py-2 text-sm bg-white"
+            />
+            <LocationAutocomplete
+              key={`${editingId || 'new'}-crem-city`}
+              value={form.city}
+              onChange={(city) => setForm((f) => ({ ...f, city }))}
+              onPlaceSelect={(p) =>
+                setForm((f) => ({
+                  ...f,
+                  city: p.city || p.label.split(',')[0] || p.label,
+                  state: p.state || f.state,
+                }))
+              }
+              placeholder="Search city"
+              className="w-full border rounded-lg px-3 py-2 text-sm bg-white"
+              types={['(cities)']}
+            />
+            <input
+              className="w-full border rounded-lg px-3 py-2 bg-white"
+              placeholder="state"
+              value={form.state}
+              onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+              required
+            />
+            <input
+              className="w-full border rounded-lg px-3 py-2 bg-white"
+              placeholder="phone"
+              value={form.phone}
+              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+            />
+            <textarea
+              className="w-full border rounded-lg px-3 py-2 bg-white"
+              placeholder="Description"
+              rows={2}
+              value={form.description}
+              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            />
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} /> Active
+            </label>
             <div className="flex gap-2">
               <button type="button" onClick={() => setShowForm(false)} className="flex-1 py-2 border rounded-lg">Cancel</button>
               <button type="submit" disabled={saving} className="flex-1 py-2 bg-[#1F2E46] text-white rounded-lg">Save</button>

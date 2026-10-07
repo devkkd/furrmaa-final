@@ -8,11 +8,17 @@ const defaultStyle = {
   color: '#111827',
 };
 
-export const AdminTextInput = ({ style, placeholderTextColor, ...props }: TextInputProps) => (
+export const AdminTextInput = ({
+  style,
+  placeholderTextColor,
+  editable = true,
+  ...props
+}: TextInputProps) => (
   <TextInput
+    {...props}
     placeholderTextColor={placeholderTextColor ?? ADMIN_PLACEHOLDER_COLOR}
     style={[defaultStyle, style]}
-    {...props}
+    editable={editable !== false}
   />
 );
 

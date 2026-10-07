@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   isGooglePlacesConfigured,
   loadGoogleMapsPlaces,
@@ -8,9 +9,24 @@ import {
 } from '@/lib/googlePlaces';
 
 /**
+ * Google AutocompleteService types cannot mix e.g. establishment + geocode.
+ * Invalid types make predictions fail and the field feels "stuck".
+ */
+function normalizePlacesTypes(types) {
+  const list = (Array.isArray(types) ? types : String(types || '').split(','))
+    .map((t) => String(t).trim())
+    .filter(Boolean);
+  if (!list.length) return undefined;
+  const hasEst = list.includes('establishment');
+  const hasGeo = list.some((t) => t === 'geocode' || t === 'address');
+  if (hasEst && hasGeo) return undefined;
+  if (list.length > 1 && list.some((t) => t.startsWith('('))) return undefined;
+  return list;
+}
+
+/**
  * Location input with Google Places suggestions.
- * Uses AutocompleteService (not the Autocomplete widget) so the field
- * never gets stuck / readonly while typing.
+ * Custom dropdown (no Autocomplete widget) so the field never goes readonly/disabled.
  */
 export default function LocationAutocomplete({
   value,
@@ -25,13 +41,25 @@ export default function LocationAutocomplete({
   const [suggestions, setSuggestions] = useState([]);
   const [listOpen, setListOpen] = useState(false);
   const [suggestLoading, setSuggestLoading] = useState(false);
+  const [menuPos, setMenuPos] = useState(null);
 
   const wrapRef = useRef(null);
+  const inputRef = useRef(null);
   const mapsRef = useRef(null);
   const serviceRef = useRef(null);
   const sessionTokenRef = useRef(null);
   const debounceRef = useRef(null);
-  const typesKey = Array.isArray(types) ? types.join(',') : String(types || '');
+  const typesNorm = normalizePlacesTypes(types);
+  const typesKey = typesNorm ? typesNorm.join(',') : '';
+
+  const unlockInput = () => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.removeAttribute('readonly');
+    el.removeAttribute('disabled');
+    if (el.readOnly) el.readOnly = false;
+    if (el.disabled && !disabled) el.disabled = false;
+  };
 
   useEffect(() => {
     if (!isGooglePlacesConfigured()) return undefined;
@@ -52,9 +80,34 @@ export default function LocationAutocomplete({
     };
   }, []);
 
+  const updateMenuPos = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setMenuPos({
+      top: r.bottom + 4,
+      left: r.left,
+      width: Math.max(r.width, 200),
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!listOpen) return undefined;
+    updateMenuPos();
+    const onScroll = () => updateMenuPos();
+    window.addEventListener('resize', onScroll);
+    window.addEventListener('scroll', onScroll, true);
+    return () => {
+      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('scroll', onScroll, true);
+    };
+  }, [listOpen, suggestions.length, updateMenuPos]);
+
   useEffect(() => {
     const onDoc = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        const menu = document.getElementById('furrmaa-places-menu');
+        if (menu && menu.contains(e.target)) return;
         setListOpen(false);
       }
     };
@@ -82,23 +135,26 @@ export default function LocationAutocomplete({
         componentRestrictions: { country: 'in' },
         sessionToken: sessionTokenRef.current || undefined,
       };
-      if (typesKey) req.types = typesKey.split(',');
+      if (typesNorm?.length) req.types = typesNorm;
 
       serviceRef.current.getPlacePredictions(req, (preds, status) => {
         setSuggestLoading(false);
+        unlockInput();
         if (status === 'OK' && preds?.length) {
           setSuggestions(preds);
           setListOpen(true);
+          requestAnimationFrame(updateMenuPos);
         } else {
           setSuggestions([]);
           setListOpen(false);
         }
       });
     },
-    [typesKey]
+    [typesKey, typesNorm, updateMenuPos]
   );
 
   const handleChange = (e) => {
+    unlockInput();
     const next = e.target.value;
     onChange(next);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -114,6 +170,7 @@ export default function LocationAutocomplete({
       onPlaceSelect?.({ label, formattedAddress: label });
       setSuggestions([]);
       setListOpen(false);
+      unlockInput();
       return;
     }
 
@@ -142,6 +199,8 @@ export default function LocationAutocomplete({
         }
         setSuggestions([]);
         setListOpen(false);
+        unlockInput();
+        inputRef.current?.focus();
       }
     );
   };
@@ -152,45 +211,64 @@ export default function LocationAutocomplete({
       : 'Type freely to edit, or pick a suggestion'
     : 'Type your city or area (add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY for suggestions)';
 
+  const menu =
+    typeof document !== 'undefined' &&
+    listOpen &&
+    suggestions.length > 0 &&
+    menuPos ? (
+      <ul
+        id="furrmaa-places-menu"
+        className="z-[10050] max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg"
+        style={{
+          position: 'fixed',
+          top: menuPos.top,
+          left: menuPos.left,
+          width: menuPos.width,
+        }}
+        role="listbox"
+      >
+        {suggestions.map((s) => (
+          <li key={s.place_id}>
+            <button
+              type="button"
+              className="w-full text-left px-3 py-2.5 text-sm text-gray-800 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => pickPrediction(s)}
+            >
+              {s.description}
+            </button>
+          </li>
+        ))}
+      </ul>
+    ) : null;
+
   return (
     <div ref={wrapRef} className="relative">
       <input
+        ref={inputRef}
         id={id}
         type="text"
         value={value ?? ''}
         onChange={handleChange}
         onFocus={() => {
-          if (suggestions.length) setListOpen(true);
+          unlockInput();
+          if (suggestions.length) {
+            setListOpen(true);
+            updateMenuPos();
+          }
         }}
+        onClick={unlockInput}
         placeholder={placeholder}
-        className={`${className} disabled:opacity-60`}
-        disabled={Boolean(disabled)}
+        className={`${className} bg-white ${disabled ? 'opacity-60' : ''}`}
+        disabled={false}
+        readOnly={false}
         autoComplete="off"
         autoCorrect="off"
         spellCheck={false}
         inputMode="search"
       />
       <p className="text-xs text-gray-400 mt-1">{hint}</p>
-
-      {listOpen && suggestions.length > 0 && (
-        <ul
-          className="absolute left-0 right-0 top-full mt-1 z-[10050] max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg"
-          role="listbox"
-        >
-          {suggestions.map((s) => (
-            <li key={s.place_id}>
-              <button
-                type="button"
-                className="w-full text-left px-3 py-2.5 text-sm text-gray-800 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => pickPrediction(s)}
-              >
-                {s.description}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      {menu && createPortal(menu, document.body)}
     </div>
   );
 }

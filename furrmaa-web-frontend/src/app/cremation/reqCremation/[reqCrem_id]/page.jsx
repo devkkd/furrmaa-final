@@ -124,7 +124,6 @@ const RequestForCremation = () => {
                                         onPlaceSelect={(p) => setFormData((prev) => ({ ...prev, address: p.label }))}
                                         placeholder="Search pickup address"
                                         className="w-full px-5 py-3.5 border border-gray-200 rounded-xl bg-gray-50/30 focus:outline-none focus:ring-1 focus:ring-gray-300 text-[15px]"
-                                        types={['geocode', 'establishment']}
                                     />
                                 </div>
                             </div>

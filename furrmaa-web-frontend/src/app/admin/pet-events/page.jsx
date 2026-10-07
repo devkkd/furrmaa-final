@@ -198,8 +198,9 @@ export default function AdminPetEventsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Venue / address *</label>
               <LocationAutocomplete
+                key={`${editingId || 'new'}-venue`}
                 value={form.venue}
-                onChange={(venue) => setForm({ ...form, venue })}
+                onChange={(venue) => setForm((f) => ({ ...f, venue }))}
                 onPlaceSelect={(p) => {
                   setForm((f) => ({
                     ...f,
@@ -216,15 +217,15 @@ export default function AdminPetEventsPage() {
                   }
                 }}
                 placeholder="Search venue or address"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                types={['establishment', 'geocode']}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
               <LocationAutocomplete
+                key={`${editingId || 'new'}-city`}
                 value={form.city}
-                onChange={(city) => setForm({ ...form, city })}
+                onChange={(city) => setForm((f) => ({ ...f, city }))}
                 onPlaceSelect={(p) => {
                   setForm((f) => ({ ...f, city: p.city || p.label.split(',')[0] }));
                   if (p.lat != null && p.lng != null) {
@@ -238,7 +239,7 @@ export default function AdminPetEventsPage() {
                   }
                 }}
                 placeholder="Search city"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
                 types={['(cities)']}
               />
             </div>

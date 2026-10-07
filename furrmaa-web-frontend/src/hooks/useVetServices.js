@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { fetchVetServiceTypes, fetchVeterinarians, fetchServiceProviders, fetchCremationCenters } from '@/lib/api';
-import { isCoordinateLocation, locationSearchToken } from '@/lib/geolocation';
+import { haversineKm, isCoordinateLocation, locationSearchToken } from '@/lib/geolocation';
 
 /** Fallback when API has no types */
 export const VET_SERVICE_CATEGORIES = [
@@ -24,7 +24,7 @@ const DEFAULT_TYPES = VET_SERVICE_CATEGORIES.slice(1).map((name) => ({
 }));
 
 /** Normalize vet/service; typeName = admin type name (filter tab) */
-function toServiceItem(item, typeName, index) {
+function toServiceItem(item, typeName) {
   const addr = item.address;
   const addressStr = typeof addr === 'object'
     ? [addr?.street, addr?.city, addr?.state].filter(Boolean).join(', ')
@@ -32,16 +32,50 @@ function toServiceItem(item, typeName, index) {
   const fullAddress = typeof addr === 'object'
     ? `${addr?.street || ''}, ${addr?.city || ''}, ${addr?.state || ''}`.replace(/^,\s*|,\s*$/g, '').trim() || addressStr
     : addressStr;
+  const latRaw =
+    (typeof addr === 'object' ? addr?.latitude ?? addr?.lat : null) ??
+    item.latitude ??
+    item.lat;
+  const lngRaw =
+    (typeof addr === 'object' ? addr?.longitude ?? addr?.lng : null) ??
+    item.longitude ??
+    item.lng;
+  const lat = latRaw != null && latRaw !== '' ? Number(latRaw) : null;
+  const lng = lngRaw != null && lngRaw !== '' ? Number(lngRaw) : null;
   return {
     id: item._id,
     name: item.name || item.clinicName || 'Service',
-    distance: `${(index + 1) * 0.5} km away`,
+    distance: '— km',
+    distanceKm: 9999,
+    lat: Number.isFinite(lat) ? lat : null,
+    lng: Number.isFinite(lng) ? lng : null,
     address: fullAddress || 'Address not available',
     image: item.profileImage || undefined,
     category: item.specialization || item.services?.[0] || typeName,
     phone: item.phone,
     type: typeName,
   };
+}
+
+function withDistanceSorted(list, userCoords) {
+  const scored = (list || []).map((s) => {
+    if (
+      userCoords?.lat != null &&
+      userCoords?.lng != null &&
+      s.lat != null &&
+      s.lng != null
+    ) {
+      const km = haversineKm(userCoords.lat, userCoords.lng, s.lat, s.lng);
+      return {
+        ...s,
+        distanceKm: km,
+        distance: `${km.toFixed(1)} km away`,
+      };
+    }
+    return { ...s, distanceKm: 9999, distance: s.distance || '— km' };
+  });
+  // Nearest first by default
+  return scored.sort((a, b) => (a.distanceKm ?? 9999) - (b.distanceKm ?? 9999));
 }
 
 function mergeTypeLists(apiTypes) {
@@ -70,7 +104,7 @@ function resolveTypeName(record, fallback = 'Veterinarians') {
 }
 
 export function useVetServices(options = {}) {
-  const { category, city, location, search } = options;
+  const { category, city, location, search, userCoords } = options;
   // Send full address when possible so API can match city + locality;
   // fall back to extracted city token (never raw lat,lng).
   const rawLoc = String(location || city || '').trim();
@@ -107,11 +141,11 @@ export function useVetServices(options = {}) {
         const all = [];
         const seen = new Set();
 
-        const pushUnique = (item, typeName, index) => {
+        const pushUnique = (item, typeName) => {
           const key = String(item._id || item.id || '');
           if (key && seen.has(key)) return;
           if (key) seen.add(key);
-          all.push(toServiceItem(item, typeName, index));
+          all.push(toServiceItem(item, typeName));
         };
 
         if (!selected) {
@@ -121,15 +155,17 @@ export function useVetServices(options = {}) {
             fetchCremationCenters({ location: locationQuery }).catch(() => []),
           ]);
 
-          vets.forEach((v, i) => pushUnique(v, resolveTypeName(v, 'Veterinarians'), i));
-          providers.forEach((p, i) => pushUnique(p, resolveTypeName(p, 'Service'), vets.length + i));
-          centers.forEach((c, i) =>
+          vets.forEach((v) => pushUnique(v, resolveTypeName(v, 'Veterinarians')));
+          providers.forEach((p) => pushUnique(p, resolveTypeName(p, 'Service')));
+          centers.forEach((c) =>
             pushUnique({
               _id: c._id,
               name: c.name,
               phone: c.phone,
               address: [c.address, c.city, c.state].filter(Boolean).join(', '),
-            }, 'Pet Cremation', vets.length + providers.length + i)
+              latitude: c.latitude,
+              longitude: c.longitude,
+            }, 'Pet Cremation')
           );
         } else {
           const listToFetch = typesToUse.filter((t) => t.name === selected);
@@ -138,13 +174,15 @@ export function useVetServices(options = {}) {
             listToFetch.map(async (t) => {
               if (t.source === 'cremation') {
                 const centers = await fetchCremationCenters({ location: locationQuery }).catch(() => []);
-                centers.forEach((c, i) =>
+                centers.forEach((c) =>
                   pushUnique({
                     _id: c._id,
                     name: c.name,
                     phone: c.phone,
                     address: [c.address, c.city, c.state].filter(Boolean).join(', '),
-                  }, t.name, all.length + i)
+                    latitude: c.latitude,
+                    longitude: c.longitude,
+                  }, t.name)
                 );
               } else {
                 const slug = t.slug && t.slug !== 'All' ? t.slug : undefined;
@@ -152,8 +190,8 @@ export function useVetServices(options = {}) {
                   fetchVeterinarians({ location: locationQuery, serviceType: slug }).catch(() => []),
                   fetchServiceProviders({ location: locationQuery, serviceType: slug }).catch(() => []),
                 ]);
-                vets.forEach((v, i) => pushUnique(v, t.name, all.length + i));
-                providers.forEach((p, i) => pushUnique(p, t.name, all.length + i));
+                vets.forEach((v) => pushUnique(v, t.name));
+                providers.forEach((p) => pushUnique(p, t.name));
               }
             })
           );
@@ -170,6 +208,8 @@ export function useVetServices(options = {}) {
           );
         }
 
+        result = withDistanceSorted(result, userCoords);
+
         if (!cancelled) {
           setServices(result);
           hasData.current = true;
@@ -183,7 +223,7 @@ export function useVetServices(options = {}) {
 
     load();
     return () => { cancelled = true; };
-  }, [category, city, location, search, typeList, locationQuery]);
+  }, [category, city, location, search, typeList, locationQuery, userCoords?.lat, userCoords?.lng]);
 
   return { services, loading, categories };
 }

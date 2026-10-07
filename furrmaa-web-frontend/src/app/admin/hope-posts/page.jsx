@@ -267,11 +267,13 @@ export default function AdminHopePostsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Location *</label>
               <LocationAutocomplete
+                key={editingId || 'new-hope-location'}
                 value={form.locationText}
-                onChange={(locationText) => setForm({ ...form, locationText })}
-                onPlaceSelect={(p) => setForm({ ...form, locationText: p.label })}
+                onChange={(locationText) => setForm((f) => ({ ...f, locationText }))}
+                onPlaceSelect={(p) => setForm((f) => ({ ...f, locationText: p.label }))}
                 placeholder="City / area"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"
+                types={['geocode']}
               />
             </div>
 

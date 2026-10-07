@@ -33,7 +33,11 @@ export default function LocationPickerModal({
   const handlePlaceSelect = (place) => {
     if (place?.label) {
       setManualLocation(place.label);
-      onConfirm(place.label);
+      const coords =
+        place.lat != null && place.lng != null
+          ? { lat: place.lat, lng: place.lng }
+          : undefined;
+      onConfirm(place.label, coords);
       setManualLocation('');
     }
   };
