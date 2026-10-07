@@ -10,7 +10,12 @@ export function escapeRegex(s) {
 
 const SKIP_PARTS = /^(india|in|bharat)$/i;
 const SKIP_WORDS =
-  /^(india|in|bharat|municipal|corporation|district|division|tehsil|taluka|nagar|area|near|the|and|of|ward|zone|block)$/i;
+  /^(india|in|bharat|municipal|corporation|district|division|tehsil|taluka|nagar|area|near|the|and|of|ward|zone|block|sector|phase|colony|scheme|road|marg|street)$/i;
+const ADMIN_PART =
+  /municipal|corporation|district|division|tehsil|taluka/i;
+/** State / UT segments — not the city we want to filter by */
+const STATE_LIKE =
+  /pradesh|rajasthan|gujarat|maharashtra|delhi|bengal|karnataka|tamil|punjab|haryana|bihar|odisha|kerala|goa|assam|uttarakhand|telangana|andhra|madhya|chhattisgarh|jharkhand|himachal|manipur|meghalaya|mizoram|nagaland|sikkim|tripura|ladakh|puducherry|chandigarh|india/i;
 
 const COORD_PATTERN = /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/;
 
@@ -21,6 +26,8 @@ export function isCoordinateLocation(locationOrCity) {
 
 /**
  * Prefer a city-like token from a geocoded / Places label.
+ * Locality comes first ("Nirman Nagar, Jaipur, Rajasthan") — use city, not colony.
+ * e.g. "Nirman Nagar, Jaipur, Rajasthan" → "Jaipur"
  * e.g. "Jaipur Municipal Corporation, Jaipur, Rajasthan" → "Jaipur"
  */
 export function preferredCityToken(locationOrCity) {
@@ -31,13 +38,20 @@ export function preferredCityToken(locationOrCity) {
     .map((p) => p.trim())
     .filter((p) => p.length >= 2 && !SKIP_PARTS.test(p));
   if (!parts.length) return raw;
-  const cityLike = parts.find((p) => !/municipal|corporation|district|division|tehsil|taluka/i.test(p));
-  if (cityLike) {
-    // If part is multi-word like "Jaipur Municipal", take first meaningful word
-    const words = cityLike.split(/\s+/).filter((w) => w.length >= 3 && !SKIP_WORDS.test(w));
-    return words[0] || cityLike;
-  }
-  return parts[1] || parts[0];
+
+  const nonState = parts.filter((p) => !STATE_LIKE.test(p) && !ADMIN_PART.test(p));
+  // Last non-state segment is usually the city (before state); first is often colony/sector
+  let cityPart =
+    (nonState.length >= 2 ? nonState[nonState.length - 1] : nonState[0]) ||
+    parts.find((p) => !STATE_LIKE.test(p) && !ADMIN_PART.test(p)) ||
+    parts[1] ||
+    parts[0];
+
+  const words = cityPart.split(/\s+/).filter((w) => w.length >= 3 && !SKIP_WORDS.test(w));
+  if (words.length === 1) return words[0];
+  // Keep short multi-word cities (e.g. "New Delhi")
+  if (words.length > 1 && cityPart.length <= 24) return words.join(' ');
+  return words[words.length - 1] || words[0] || cityPart;
 }
 
 /**

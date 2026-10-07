@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { fetchVetServiceTypes, fetchVeterinarians, fetchServiceProviders, fetchCremationCenters } from '@/lib/api';
-import { locationSearchToken } from '@/lib/geolocation';
+import { isCoordinateLocation, locationSearchToken } from '@/lib/geolocation';
 
 /** Fallback when API has no types */
 export const VET_SERVICE_CATEGORIES = [
@@ -71,7 +71,12 @@ function resolveTypeName(record, fallback = 'Veterinarians') {
 
 export function useVetServices(options = {}) {
   const { category, city, location, search } = options;
-  const locationQuery = locationSearchToken(location) || locationSearchToken(city) || undefined;
+  // Send full address when possible so API can match city + locality;
+  // fall back to extracted city token (never raw lat,lng).
+  const rawLoc = String(location || city || '').trim();
+  const locationQuery = rawLoc && !isCoordinateLocation(rawLoc)
+    ? rawLoc
+    : locationSearchToken(location) || locationSearchToken(city) || undefined;
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeList, setTypeList] = useState(DEFAULT_TYPES);

@@ -16,7 +16,8 @@ export function getCurrentPosition() {
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       (err) => reject(err),
-      { enableHighAccuracy: false, timeout: 20000, maximumAge: 300000 }
+      // Prefer GPS when available; avoid long-lived Wi‑Fi/IP cache (laptop often wrong city)
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 60_000 }
     );
   });
 }
@@ -61,15 +62,34 @@ export function isCoordinateLocation(location) {
 }
 
 /**
- * City token for list APIs — "Jaipur Municipal Corporation, Jaipur, Rajasthan" → "Jaipur"
+ * City token for list APIs.
+ * "Nirman Nagar, Jaipur, Rajasthan" → "Jaipur" (not "Nirman")
+ * "Jaipur Municipal Corporation, Jaipur, Rajasthan" → "Jaipur"
  */
 export function locationSearchToken(location) {
   if (!location?.trim() || isCoordinateLocation(location)) return '';
-  const parts = location.split(',').map((s) => s.trim()).filter(Boolean);
+  const parts = location
+    .split(',')
+    .map((s) => s.trim())
+    .filter((p) => p.length >= 2 && !/^(india|in|bharat)$/i.test(p));
   if (!parts.length) return '';
+
   const skipPart = /municipal|corporation|district|division|tehsil|taluka/i;
-  const skipWord = /^(municipal|corporation|district|division|tehsil|taluka|nagar|area|near|the|and|of)$/i;
-  const cityLike = parts.find((p) => !skipPart.test(p)) || parts[1] || parts[0];
-  const word = cityLike.split(/\s+/).find((w) => w.length >= 3 && !skipWord.test(w));
-  return word || cityLike || parts[0] || '';
+  const stateLike =
+    /pradesh|rajasthan|gujarat|maharashtra|delhi|bengal|karnataka|tamil|punjab|haryana|bihar|odisha|kerala|goa|assam|uttarakhand|telangana|andhra|madhya|chhattisgarh|jharkhand|himachal|manipur|meghalaya|mizoram|nagaland|sikkim|tripura|ladakh|puducherry|chandigarh|india/i;
+  const skipWord =
+    /^(municipal|corporation|district|division|tehsil|taluka|nagar|area|near|the|and|of|ward|zone|block|sector|phase|colony|scheme|road|marg|street)$/i;
+
+  const nonState = parts.filter((p) => !stateLike.test(p) && !skipPart.test(p));
+  // Locality first, city before state — prefer last non-state segment
+  const cityPart =
+    (nonState.length >= 2 ? nonState[nonState.length - 1] : nonState[0]) ||
+    parts.find((p) => !stateLike.test(p) && !skipPart.test(p)) ||
+    parts[1] ||
+    parts[0];
+
+  const words = cityPart.split(/\s+/).filter((w) => w.length >= 3 && !skipWord.test(w));
+  if (words.length === 1) return words[0];
+  if (words.length > 1 && cityPart.length <= 24) return words.join(' ');
+  return words[words.length - 1] || words[0] || cityPart || '';
 }

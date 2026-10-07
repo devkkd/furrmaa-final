@@ -106,6 +106,8 @@ const ChangeLocationScreen = () => {
             placeholderTextColor="#9CA3AF"
             value={searchQuery}
             onChangeText={setSearchQuery}
+            editable
+            autoCorrect={false}
           />
           <View style={styles.verticalDivider} />
           <TouchableOpacity style={styles.micButton}>
@@ -138,7 +140,7 @@ const ChangeLocationScreen = () => {
         </Text>
       </TouchableOpacity>
 
-      <ScrollView style={styles.suggestionsContainer}>
+      <ScrollView style={styles.suggestionsContainer} keyboardShouldPersistTaps="handled">
         <Text style={styles.suggestionsTitle}>
           {searchQuery.trim().length >= 2
             ? searchLoading
@@ -148,7 +150,7 @@ const ChangeLocationScreen = () => {
                 : 'No results – try another search or use "Use this address"'
             : 'Search for a city or area (min 2 characters)'}
         </Text>
-        {!searchLoading && searchResults.length > 0 && (
+        {searchResults.length > 0 && (
           <>
             {searchResults.map((item) => (
               <TouchableOpacity

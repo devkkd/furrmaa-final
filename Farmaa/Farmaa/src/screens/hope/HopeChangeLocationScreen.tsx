@@ -101,6 +101,8 @@ const HopeChangeLocationScreen = () => {
             value={q}
             onChangeText={setQ}
             autoFocus
+            editable
+            autoCorrect={false}
           />
          <View style={styles.verticalDivider} />
                  <TouchableOpacity style={styles.micButton}>
@@ -144,6 +146,7 @@ const HopeChangeLocationScreen = () => {
         data={searchResults}
         keyExtractor={(i) => i.id}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.locRow} onPress={() => selectLocation(item.displayName)}>
             <Text style={styles.locTitle} numberOfLines={2}>{item.displayName}</Text>
@@ -169,7 +172,7 @@ const styles = StyleSheet.create({
   backIcon: { height: 30, width: 30,marginRight:10 },
   title: { fontSize: 18, fontWeight: '700', color: '#111827' },
   headerSpacer: { width: 24 },
-  searchWrap: { flex: 1,
+  searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
@@ -178,7 +181,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#D9DCE2',
     maxHeight: 56,
-    marginHorizontal: 15, },
+    marginHorizontal: 15,
+  },
   searchBox: {
     flex: 1,
     flexDirection: 'row',

@@ -100,23 +100,64 @@ task generateLauncherIcons {
             )
         }
         def resDir = file("src/main/res")
-        def mipmapDirs = [
-            "mipmap-mdpi",
-            "mipmap-hdpi",
-            "mipmap-xhdpi",
-            "mipmap-xxhdpi",
-            "mipmap-xxxhdpi",
+        // Density → [legacy launcher px, adaptive foreground px]
+        def densitySizes = [
+            "mipmap-mdpi"   : [48, 108],
+            "mipmap-hdpi"   : [72, 162],
+            "mipmap-xhdpi"  : [96, 216],
+            "mipmap-xxhdpi" : [144, 324],
+            "mipmap-xxxhdpi": [192, 432],
         ]
-        def names = ["ic_launcher.png", "ic_launcher_round.png", "ic_launcher_foreground.png"]
-        mipmapDirs.each { dirName ->
+        // Percent of canvas used by logo (rest = padding so rounded masks don't clip)
+        int launcherPct = 72
+        int foregroundPct = 66
+
+        def srcImg = javax.imageio.ImageIO.read(src)
+        if (srcImg == null) {
+            throw new GradleException("Could not read logo image: " + src.absolutePath)
+        }
+
+        densitySizes.each { dirName, sizes ->
             def folder = new File(resDir, dirName)
             folder.mkdirs()
-            names.each { iconName ->
-                def dest = new File(folder, iconName)
-                dest.bytes = src.bytes
+            int launcherSize = sizes[0] as int
+            int fgSize = sizes[1] as int
+
+            [
+                [launcherSize, launcherPct, new File(folder, "ic_launcher.png"), true],
+                [launcherSize, launcherPct, new File(folder, "ic_launcher_round.png"), true],
+                [fgSize, foregroundPct, new File(folder, "ic_launcher_foreground.png"), false],
+            ].each { row ->
+                int canvasSize = row[0] as int
+                int pct = row[1] as int
+                File dest = row[2] as File
+                boolean whiteBg = row[3] as boolean
+
+                def out = new java.awt.image.BufferedImage(
+                    canvasSize, canvasSize, java.awt.image.BufferedImage.TYPE_INT_ARGB
+                )
+                def g = out.createGraphics()
+                g.setRenderingHint(
+                    java.awt.RenderingHints.KEY_INTERPOLATION,
+                    java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
+                )
+                g.setRenderingHint(
+                    java.awt.RenderingHints.KEY_ANTIALIASING,
+                    java.awt.RenderingHints.VALUE_ANTIALIAS_ON
+                )
+                if (whiteBg) {
+                    g.setColor(java.awt.Color.WHITE)
+                    g.fillRect(0, 0, canvasSize, canvasSize)
+                }
+                int content = Math.max(1, (int) ((canvasSize * pct) / 100))
+                int offset = (canvasSize - content) / 2
+                g.drawImage(srcImg, offset, offset, content, content, null)
+                g.dispose()
+                dest.parentFile.mkdirs()
+                javax.imageio.ImageIO.write(out, "png", dest)
             }
         }
-        println("✅ Launcher icons generated from: " + src.absolutePath)
+        println("✅ Launcher icons generated (padded/zoom-out) from: " + src.absolutePath)
     }
 }
 

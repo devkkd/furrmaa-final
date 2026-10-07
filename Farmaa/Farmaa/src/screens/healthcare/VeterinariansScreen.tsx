@@ -22,6 +22,7 @@ import {
   forwardGeocode,
   distanceKm,
   locationSearchToken,
+  isCoordinateLocation,
 } from '../../utils/geolocation';
 import { VET_SERVICE_TYPES } from '../../constants/vetServiceTypes';
 import locationIcon from '../../assets/images/location.png';
@@ -69,7 +70,14 @@ const VeterinariansScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [typeList, setTypeList] = useState<{ name: string; slug: string; source: string }[]>([]);
 
-  const locationFilter = locationSearchToken(currentLocation) || undefined;
+  // Full address so API matches city + locality (not only first colony word)
+  const locationFilter = (() => {
+    const raw = String(currentLocation || '').trim();
+    if (!raw || isCoordinateLocation(raw)) {
+      return locationSearchToken(currentLocation) || undefined;
+    }
+    return raw;
+  })();
 
   const defaultTypeList = VET_SERVICE_TYPES.slice(1).map((name) => ({
     name,

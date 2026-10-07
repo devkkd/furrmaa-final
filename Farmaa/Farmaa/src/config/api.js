@@ -51,7 +51,7 @@ const getBaseURL = () => {
     if (Platform.OS === 'ios') return EMULATOR_IOS;
     return `http://${LOCAL_HOST_IP}:${BACKEND_PORT}/api`;
   }
-  return 'https://furmma-backend-new.onrender.com/api';
+  return 'https://furrmaa.com/api';
 };
 
 const API_BASE_URL = getBaseURL();

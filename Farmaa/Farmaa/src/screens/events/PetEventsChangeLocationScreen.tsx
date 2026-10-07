@@ -98,6 +98,8 @@ const PetEventsChangeLocationScreen = () => {
             placeholderTextColor="#9CA3AF"
             value={q}
             onChangeText={setQ}
+            editable
+            autoCorrect={false}
           />
         </View>
       </View>
@@ -138,6 +140,7 @@ const PetEventsChangeLocationScreen = () => {
         data={searchResults}
         keyExtractor={(i) => i.id}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.locRow} onPress={() => select(item.displayName)}>

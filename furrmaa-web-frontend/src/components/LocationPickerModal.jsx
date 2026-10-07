@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import LocationAutocomplete from '@/components/LocationAutocomplete';
 
 /**
@@ -16,6 +16,10 @@ export default function LocationPickerModal({
 }) {
   const [manualLocation, setManualLocation] = useState('');
 
+  useEffect(() => {
+    if (open) setManualLocation('');
+  }, [open]);
+
   if (!open) return null;
 
   const handleConfirm = () => {
@@ -28,6 +32,7 @@ export default function LocationPickerModal({
 
   const handlePlaceSelect = (place) => {
     if (place?.label) {
+      setManualLocation(place.label);
       onConfirm(place.label);
       setManualLocation('');
     }
@@ -51,12 +56,14 @@ export default function LocationPickerModal({
         </button>
         <p className="text-xs text-gray-500 mb-2">Or search / type your area</p>
         <LocationAutocomplete
+          key={open ? 'loc-open' : 'loc-closed'}
           value={manualLocation}
           onChange={setManualLocation}
           onPlaceSelect={handlePlaceSelect}
           placeholder="e.g. Sector 62, Noida, Uttar Pradesh"
-          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"
+          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white"
           types={['geocode']}
+          disabled={false}
         />
         <div className="flex gap-2 mt-4">
           <button

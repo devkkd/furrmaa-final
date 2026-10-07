@@ -100,6 +100,8 @@ const CremationChangeLocationScreen = () => {
             placeholderTextColor="#9CA3AF"
             value={q}
             onChangeText={setQ}
+            editable
+            autoCorrect={false}
           />
           <View style={styles.verticalDivider} />   
           <TouchableOpacity>
@@ -148,6 +150,7 @@ const CremationChangeLocationScreen = () => {
         data={searchResults}
         keyExtractor={(i) => i.id}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.locRow} onPress={() => select(item.displayName)}>

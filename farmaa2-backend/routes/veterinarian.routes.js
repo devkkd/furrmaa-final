@@ -1,6 +1,6 @@
 import express from 'express';
 import User from '../models/User.model.js';
-import { vetLocationClause, preferredCityToken } from '../utils/locationFilter.js';
+import { vetLocationClause } from '../utils/locationFilter.js';
 import { setPublicCache } from '../utils/httpCache.js';
 
 const router = express.Router();
@@ -19,9 +19,9 @@ router.get('/', async (req, res) => {
       query.specialization = category;
     }
     const andClauses = [];
+    // Pass full label so tokens include city + locality (not only first colony word)
     const locRaw = location || city;
-    const locForFilter = preferredCityToken(locRaw) || locRaw;
-    const vetLoc = vetLocationClause(locForFilter);
+    const vetLoc = vetLocationClause(locRaw);
     if (vetLoc) andClauses.push(vetLoc);
     if (specialization) {
       query.specialization = { $regex: specialization, $options: 'i' };

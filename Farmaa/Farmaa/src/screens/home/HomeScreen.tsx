@@ -454,7 +454,7 @@ const HomeScreen = () => {
               ]}
               onPress={() => setSelectedPet('dog')}
             >
-              <Image source={dogFace} style={{width: 26, height: 26}} resizeMode="contain"/>
+              <Image source={dogFace} style={{width: 18, height: 18}} resizeMode="contain"/>
               <Text
                 style={[
                   styles.tabText,
@@ -471,7 +471,7 @@ const HomeScreen = () => {
               ]}
               onPress={() => setSelectedPet('cat')}
             >
-              <Image source={catFace} style={{width: 26, height: 26}} resizeMode="contain"/>
+              <Image source={catFace} style={{width: 18, height: 18}} resizeMode="contain"/>
               <Text
                 style={[
                   styles.tabText,
@@ -1112,36 +1112,37 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FBFF', 
     borderWidth: 1,
     borderColor: '#D9DCE2',
-    borderRadius: 27,
-    marginHorizontal: 10,
-    marginVertical: 10,
+    borderRadius: 24,
+    marginHorizontal: 12,
+    marginVertical: 6,
   },
   tabsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 5,
-    paddingVertical: 5,
-    gap: 10,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    gap: 6,
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 25,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 20,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 8,
+    gap: 6,
+    minHeight: 36,
   },
   tabIcon: {
-    fontSize: 16,
+    fontSize: 14,
   },
   tabButtonActive: {
     backgroundColor: '#1F2E46', // Navy blue for dog, will be overridden for cat
     borderColor: '#1E3A8A',
   },
   tabText: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '600',
     color: '#6B7280',
   },
@@ -1227,45 +1228,46 @@ const styles = StyleSheet.create({
   },
 
   categoriesScroll: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
   categoriesContent: {
-    paddingHorizontal: 16,
-    gap: 8,
+    paddingHorizontal: 12,
+    gap: 4,
   },
   categoryItem: {
     alignItems: 'center',
-    width: 72,
+    width: 64,
   },
   categoryIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
   },
   categoryIconText: {
-    height: 34,
-    width: 34,
+    height: 26,
+    width: 26,
   },
   categoryName: {
     fontSize: 11,
-    color: '#1F2937',
+    color: '#1F2E46',
     textAlign: 'center',
     marginTop: 4,
+    lineHeight: 14,
   },
     horizontalDivider: {
     height: 1,
     backgroundColor: '#D9DCE2',
     marginBottom: 10,
-    marginTop: -8,
+    marginTop: -4,
   },
     activeBar: {
-    height: 3,
-    width: '70%',
+    height: 2,
+    width: '60%',
     backgroundColor: 'transparent',
-    marginTop: 6,
+    marginTop: 4,
     borderRadius: 10,
     alignSelf: 'center',
   },

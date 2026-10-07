@@ -14,7 +14,7 @@ import { isGooglePlacesConfigured } from '../utils/googlePlaces';
 
 const DEBOUNCE_MS = 450;
 
-type Props = Omit<TextInputProps, 'value' | 'onChangeText'> & {
+type Props = Omit<TextInputProps, 'value' | 'onChangeText' | 'editable'> & {
   value: string;
   onChangeText: (text: string) => void;
   onSelectSuggestion?: (item: LocationSuggestion) => void;
@@ -22,6 +22,10 @@ type Props = Omit<TextInputProps, 'value' | 'onChangeText'> & {
   containerStyle?: object;
 };
 
+/**
+ * Location search that stays editable while suggestions load.
+ * Do not bind Google Autocomplete widgets that set readonly.
+ */
 export default function LocationAutocompleteInput({
   value,
   onChangeText,
@@ -34,23 +38,26 @@ export default function LocationAutocompleteInput({
   const [results, setResults] = useState<LocationSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reqIdRef = useRef(0);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const q = value.trim();
     if (q.length < 2) {
       setResults([]);
+      setLoading(false);
       return;
     }
     debounceRef.current = setTimeout(async () => {
+      const reqId = ++reqIdRef.current;
       setLoading(true);
       try {
         const list = await searchLocations(q);
-        setResults(list);
+        if (reqId === reqIdRef.current) setResults(list);
       } catch {
-        setResults([]);
+        if (reqId === reqIdRef.current) setResults([]);
       } finally {
-        setLoading(false);
+        if (reqId === reqIdRef.current) setLoading(false);
       }
     }, DEBOUNCE_MS);
     return () => {
@@ -67,15 +74,21 @@ export default function LocationAutocompleteInput({
   return (
     <View style={[styles.wrap, containerStyle]}>
       <TextInput
+        {...textInputProps}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor="#9CA3AF"
         style={[styles.input, inputStyle]}
-        {...textInputProps}
+        editable
+        autoCorrect={false}
+        autoCapitalize="words"
+        keyboardType="default"
       />
       {isGooglePlacesConfigured() ? (
-        <Text style={styles.hint}>Google address suggestions</Text>
+        <Text style={styles.hint}>
+          {loading ? 'Searching…' : 'Type freely, or pick a suggestion'}
+        </Text>
       ) : (
         <Text style={styles.hint}>Type 2+ characters for location suggestions</Text>
       )}
