@@ -8,7 +8,7 @@ export default function Card({ show = "both" }) {
 
   const images = {
     card1: isDog ? "/images/dog-2.png"      : "/images/cat-2.4.png",
-    card2: isDog ? "/images/dog-4.png"      : "/images/c2.3.png",
+    card2: isDog ? "/images/dog-4.png"      : "/images/cat-card2.jpeg",
   };
 
   return (

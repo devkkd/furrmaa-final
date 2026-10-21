@@ -10,7 +10,7 @@ export function escapeRegex(s) {
 
 const SKIP_PARTS = /^(india|in|bharat)$/i;
 const SKIP_WORDS =
-  /^(india|in|bharat|municipal|corporation|district|division|tehsil|taluka|nagar|area|near|the|and|of|ward|zone|block|sector|phase|colony|scheme|road|marg|street)$/i;
+  /^(india|in|bharat|municipal|corporation|district|division|tehsil|taluka|area|near|the|and|of|ward|zone|block|sector|phase|scheme|road|marg|street)$/i;
 const ADMIN_PART =
   /municipal|corporation|district|division|tehsil|taluka/i;
 /** State / UT segments — not the city we want to filter by */
@@ -110,11 +110,14 @@ export function locationTokens(locationOrCity) {
   const preferred = preferredCityToken(raw);
   if (preferred) tokens.add(preferred);
 
-  /** Single word e.g. "delhi" — substring match on city/locationText */
+  /** Single word / short phrase (no comma) — treat entire string as search token.
+   *  e.g. "nirman nagar" → ["nirman nagar", "nirman", "nagar"] so partial matches work.
+   *  Also add the whole phrase to catch exact area names stored in address.street.
+   */
   if (!raw.includes(',')) {
-    tokens.add(raw);
+    tokens.add(raw); // full phrase e.g. "nirman nagar"
     raw.split(/\s+/).forEach((w) => {
-      if (w.length >= 3 && !SKIP_WORDS.test(w)) tokens.add(w);
+      if (w.length >= 2) tokens.add(w); // each word, even short like "nagar"
     });
   }
 
@@ -179,7 +182,7 @@ export function hopeLocationClause(locationOrCity) {
   return buildLocationMatchClause(locationOrCity, ['locationText']);
 }
 
-/** Veterinarians & service providers: street, city, state */
+/** Veterinarians & service providers: street, city, state, fullAddress */
 export function vetLocationClause(locationOrCity) {
   const raw = String(locationOrCity || '').trim();
   if (!raw || isCoordinateLocation(raw)) return null;
@@ -187,5 +190,9 @@ export function vetLocationClause(locationOrCity) {
     'address.city',
     'address.street',
     'address.state',
+    'address.fullAddress',
+    'address.locality',
+    'address.subLocality',
+    'address.area',
   ]);
 }

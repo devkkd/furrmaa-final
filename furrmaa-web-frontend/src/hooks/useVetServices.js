@@ -107,6 +107,8 @@ export function useVetServices(options = {}) {
   const { category, city, location, search, userCoords } = options;
   // Send full address when possible so API can match city + locality;
   // fall back to extracted city token (never raw lat,lng).
+  // If user typed a short area name (no comma), send it as-is so backend
+  // can match it against address.street / address.city directly.
   const rawLoc = String(location || city || '').trim();
   const locationQuery = rawLoc && !isCoordinateLocation(rawLoc)
     ? rawLoc

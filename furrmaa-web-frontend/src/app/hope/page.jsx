@@ -146,104 +146,103 @@ function HopePageContent() {
 
   return (
     <div className="bg-white overflow-x-hidden">
-      {/* ================= HERO SECTION ================= */}
-      <section className="mx-auto px-4 sm:px-5 md:px-6 py-7 sm:py-8 md:py-12">
+      {/* ================= BROWSE POSTS ================= */}
+      <section className="border-t border-gray-200 py-5 sm:py-8">
         <Container>
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-10 lg:gap-12">
-            {/* HERO CONTENT */}
-            <div className="flex-1 w-full space-y-6 sm:space-y-7 md:space-y-8">
-              <header>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 sm:mb-5 md:mb-6 leading-tight">
-                  Hope by Furrmaa
-                </h1>
-
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 leading-snug">
-                  Helping Pets Find Safety, Care, and a Home
-                </h2>
-
-                <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-2xl">
-                  Hope connects pet parents, rescuers, and adopters
-                  to support pets who are{" "}
-                  <span className="font-bold text-gray-900">
-                    lost, found, or waiting for adoption
-                  </span>{" "}
-                  all in one trusted place.
-                </p>
-              </header>
-
-              {/* FEATURES */}
-              <ul className="space-y-3">
-                {[
-                  "Lost pets",
-                  "Found pets",
-                  "Pets available for adoption",
-                ].map((item, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-center gap-3"
-                  >
-                    <CheckCircle />
-
-                    <span className="text-sm sm:text-base text-gray-700">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* APP DOWNLOAD */}
-              <div className="pt-5 sm:pt-6 border-t border-gray-200">
-                <p className="text-sm sm:text-base text-gray-600 mb-4 leading-6">
-                  To add a Hope post, download the Furrmaa mobile
-                  app.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
-                  <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-black text-white px-5 py-3 rounded-xl hover:opacity-90 transition">
-                    <FaApple className="text-xl shrink-0" />
-
-                    <span className="text-sm font-medium">
-                      App Store
-                    </span>
-                  </button>
-
-                  <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-black text-white px-5 py-3 rounded-xl hover:opacity-90 transition">
-                    <FaGooglePlay className="text-xl shrink-0" />
-
-                    <span className="text-sm font-medium">
-                      Google Play
-                    </span>
-                  </button>
-                </div>
-              </div>
+          {/* ── PAGE HEADER ── */}
+          <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 mb-1">
+              <img src="/images/icons/hope.svg" alt="Hope" className="w-6 h-6 opacity-80" />
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Furrmaa Hope</span>
             </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Browse Hope Posts</h2>
+          </div>
 
-            {/* HERO IMAGE */}
-            <div className="flex-1 w-full flex justify-center lg:justify-end">
-              <div className="relative w-[220px] sm:w-[280px] md:w-[380px] max-w-full">
-                <img
-                  src="/images/Hopes/hopeByFurrmaa.png"
-                  alt="Furrmaa Hope"
-                  width={380}
-                  height={700}
-                  className="w-full h-auto object-contain drop-shadow-2xl"
-                />
-              </div>
+          {/* ── MAIN TOGGLE: Lost & Found | Adoption ── */}
+          <div className="flex justify-center mb-5 sm:mb-6">
+            <div className="w-full max-w-[420px] h-[52px] bg-white border border-gray-200 rounded-full p-1.5 flex items-center shadow-sm">
+              {[
+                {
+                  key: "lostFound",
+                  label: "Lost & Found",
+                  icon: (
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                  ),
+                },
+                {
+                  key: "adoption",
+                  label: "Adoption",
+                  icon: (
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                  ),
+                },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => { setMainType(item.key); setPetSub("all"); }}
+                  className={`
+                    flex-1 h-full rounded-full flex items-center justify-center gap-2
+                    text-sm font-semibold transition-all duration-200
+                    ${mainType === item.key
+                      ? "bg-[#1F2E46] text-white shadow-sm"
+                      : "text-gray-400 hover:text-gray-700"
+                    }
+                  `}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ))}
             </div>
           </div>
-        </Container>
-      </section>
 
-      {/* ================= BROWSE POSTS ================= */}
-    <section className="border-t border-gray-200 py-5 sm:py-8">
-  <Container>
-    {/* Heading */}
-    <h2 className="text-lg sm:text-2xl font-extrabold text-gray-900 mb-4 sm:mb-6">
-      Browse Hope Posts
-    </h2>
+          {/* ── PET TYPE SUB-FILTER ── */}
+          <div className="flex justify-center mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-full px-2 py-1.5">
+              {[
+                {
+                  key: "all",
+                  label: "All Pets",
+                  icon: <img src="/images/icons/hope.svg" alt="All" className="w-4 h-4" />,
+                },
+                {
+                  key: "dog",
+                  label: "Dog",
+                  icon: <img src="/images/icons/dogicon.png" alt="Dog" className="w-4 h-4 object-contain" />,
+                },
+                {
+                  key: "cat",
+                  label: "Cat",
+                  icon: <img src="/images/icons/caticon.png" alt="Cat" className="w-4 h-4 object-contain" />,
+                },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setPetSub(item.key)}
+                  className={`
+                    flex items-center gap-1.5 px-3.5 py-1.5 rounded-full
+                    text-xs sm:text-sm font-medium transition-all duration-200
+                    ${petSub === item.key
+                      ? "bg-[#1F2E46] text-white shadow-sm"
+                      : "text-gray-500 hover:bg-gray-200"
+                    }
+                  `}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-    {/* ================= SEARCH / LOCATION ================= */}
-    <div className="w-full mb-4 sm:mb-6">
+          {/* ================= SEARCH / LOCATION ================= */}
+          <div className="w-full mb-6 sm:mb-8 max-w-2xl mx-auto">
       {/* SEARCH BAR */}
       <div className="relative w-full">
         <HiOutlineSearch
@@ -371,66 +370,6 @@ function HopePageContent() {
         locError={locError}
         onUseCurrentLocation={handleUseMyLocation}
       />
-    </div>
-
-    {/* ================= CATEGORIES ================= */}
-    <div className="w-full mb-5 sm:mb-6 space-y-3">
-      {/* Main: Lost & Found | Adoption */}
-      <div className="flex gap-2 flex-wrap">
-        {[
-          { key: "lostFound", label: "Lost & Found" },
-          { key: "adoption", label: "Adoption" },
-        ].map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => {
-              setMainType(item.key);
-              setPetSub("all");
-            }}
-            className={`
-              shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 rounded-full
-              text-xs sm:text-sm font-semibold transition-all
-              ${
-                mainType === item.key
-                  ? "bg-[#1F2E46] text-white shadow-sm"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }
-            `}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Sub: All | Dog | Cat */}
-      <div className="flex gap-2 flex-wrap -mx-4 px-4 sm:mx-0 sm:px-0">
-        <p className="w-full text-[11px] sm:text-xs text-gray-400 font-medium uppercase tracking-wide mb-0.5">
-          {mainType === "lostFound" ? "Lost & Found" : "Adoption"} · Pet type
-        </p>
-        {[
-          { key: "all", label: "All" },
-          { key: "dog", label: "Dog" },
-          { key: "cat", label: "Cat" },
-        ].map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => setPetSub(item.key)}
-            className={`
-              shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-full
-              text-xs sm:text-sm font-medium transition-all
-              ${
-                petSub === item.key
-                  ? "bg-[#1F2E46] text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }
-            `}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
     </div>
 
     {/* ================= LOADING ================= */}
@@ -573,8 +512,98 @@ function HopePageContent() {
         ))}
       </div>
     )}
-  </Container>
-</section>
+        </Container>
+      </section>
+
+      {/* ================= HERO SECTION ================= */}
+      <section className="mx-auto px-4 sm:px-5 md:px-6 py-7 sm:py-8 md:py-12">
+        <Container>
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-10 lg:gap-12">
+            {/* HERO CONTENT */}
+            <div className="flex-1 w-full space-y-6 sm:space-y-7 md:space-y-8">
+              <header>
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 sm:mb-5 md:mb-6 leading-tight">
+                  Hope by Furrmaa
+                </h1>
+
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 leading-snug">
+                  Helping Pets Find Safety, Care, and a Home
+                </h2>
+
+                <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-2xl">
+                  Hope connects pet parents, rescuers, and adopters
+                  to support pets who are{" "}
+                  <span className="font-bold text-gray-900">
+                    lost, found, or waiting for adoption
+                  </span>{" "}
+                  all in one trusted place.
+                </p>
+              </header>
+
+              {/* FEATURES */}
+              <ul className="space-y-3">
+                {[
+                  "Lost pets",
+                  "Found pets",
+                  "Pets available for adoption",
+                ].map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-center gap-3"
+                  >
+                    <CheckCircle />
+
+                    <span className="text-sm sm:text-base text-gray-700">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* APP DOWNLOAD */}
+              <div className="pt-5 sm:pt-6 border-t border-gray-200">
+                <p className="text-sm sm:text-base text-gray-600 mb-4 leading-6">
+                  To add a Hope post, download the Furrmaa mobile
+                  app.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                  <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-black text-white px-5 py-3 rounded-xl hover:opacity-90 transition">
+                    <FaApple className="text-xl shrink-0" />
+
+                    <span className="text-sm font-medium">
+                      App Store
+                    </span>
+                  </button>
+
+                  <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-black text-white px-5 py-3 rounded-xl hover:opacity-90 transition">
+                    <FaGooglePlay className="text-xl shrink-0" />
+
+                    <span className="text-sm font-medium">
+                      Google Play
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* HERO IMAGE */}
+            <div className="flex-1 w-full flex justify-center lg:justify-end">
+              <div className="relative w-[220px] sm:w-[280px] md:w-[380px] max-w-full">
+                <img
+                  src="/images/Hopes/hopeByFurrmaa.png"
+                  alt="Furrmaa Hope"
+                  width={380}
+                  height={700}
+                  className="w-full h-auto object-contain drop-shadow-2xl"
+                />
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+
 
       {/* ================= WHY CHOOSE ================= */}
       <WhyChooseFurrmaa />

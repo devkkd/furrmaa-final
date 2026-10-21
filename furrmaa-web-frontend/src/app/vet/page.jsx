@@ -134,7 +134,7 @@ const Vet = () => {
             <Container>
                 <div className="px-6">
                     <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between mb-6 md:mb-8">
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 shrink-0">Vet Services</h1>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 shrink-0">Near By Services</h1>
 
                         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
                             <div className="relative flex-grow w-full md:w-auto md:max-w-md">
