@@ -106,6 +106,9 @@ export default function Footer() {
             { label: "About Us", href: "/about" },
             { label: "FAQ's", href: "/faqs" },
             { label: "Contact Us", href: "/contactus" },
+            { label: "Privacy Policy", href: "/privacypolicy" },
+            { label: "Terms & Conditions", href: "/terms-services" },
+            { label: "Refund Policy", href: "/refund-cancellation-replacement-policy" },
           ]} />
 
           <FooterCol title="Account" items={[
@@ -138,7 +141,11 @@ export default function Footer() {
 
             <div className="py-1.5 md:py-4 md:justify-center md:grid">
               <p className="font-semibold text-gray-900">Legal</p>
-              <p className="text-gray-700">Terms of Services | Privacy Policy</p>
+              <div className="flex flex-col gap-0.5 mt-0.5">
+                <Link href="/terms-services" className="text-gray-700 hover:text-black transition-colors text-[11px] md:text-[13px]">Terms &amp; Conditions</Link>
+                <Link href="/privacypolicy" className="text-gray-700 hover:text-black transition-colors text-[11px] md:text-[13px]">Privacy Policy</Link>
+                <Link href="/refund-cancellation-replacement-policy" className="text-gray-700 hover:text-black transition-colors text-[11px] md:text-[13px]">Refund &amp; Cancellation</Link>
+              </div>
             </div>
 
           </div>

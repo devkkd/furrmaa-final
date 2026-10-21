@@ -62,7 +62,7 @@ export default function Header() {
               />
               <div>
                 <h1 className="font-bold text-lg text-slate-900">FURRMAA</h1>
-                <p className="text-[10px] text-gray-500">
+                <p className="text-[10px] text-gray-700 font-bold">
                   WHERE EVERY TAIL FEELS AT HOME
                 </p>
               </div>

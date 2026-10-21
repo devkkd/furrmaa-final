@@ -83,7 +83,7 @@ export default function Wellness() {
         {data.length > 0 ? (
           <>
             <button
-              className="wellness-prev hidden md:flex shrink-0 w-12 h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10"
+              className={`wellness-prev shrink-0 w-12 h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10 ${!isMobile && data.length <= 8 ? 'hidden' : 'hidden md:flex'}`}
               aria-label="Previous slide"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +91,34 @@ export default function Wellness() {
               </svg>
             </button>
 
-            {isMobile ? (
+            {/* On desktop, if items fit within one view, use centered flex instead of Swiper */}
+            {!isMobile && data.length <= 8 ? (
+              <div className="w-full flex flex-wrap justify-center gap-4">
+                {data.map((item, index) => {
+                  const title = item.title || item.name;
+                  const image = item.img || item.image;
+                  const categorySlug = item.slug || titleToCategory(title);
+                  return (
+                    <Link
+                      key={item._id || item.id || index}
+                      href={`/shop?category=${categorySlug}${pt ? `&petType=${pt}` : ''}`}
+                      className="group flex flex-col items-center w-[120px] xl:w-[140px]"
+                    >
+                      <div className="w-full bg-[#FCEBFF] rounded-2xl p-4 flex items-center justify-center transition-shadow duration-300 group-hover:shadow-md aspect-square h-[160px]">
+                        <AdminImage
+                          src={image}
+                          alt={title}
+                          className="h-full max-h-[120px] object-contain w-full transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      <p className="text-sm font-medium text-gray-800 text-center mt-3 leading-tight">
+                        {title}
+                      </p>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : isMobile ? (
               <div className="w-full grid grid-cols-4 gap-3">
                 {data.slice(0, 8).map((item, index) => {
                   const title = item.title || item.name;
@@ -163,7 +190,7 @@ export default function Wellness() {
             )}
 
             <button
-              className="wellness-next hidden md:flex shrink-0 w-12 h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10"
+              className={`wellness-next shrink-0 w-12 h-12 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10 ${!isMobile && data.length <= 8 ? 'hidden' : 'hidden md:flex'}`}
               aria-label="Next slide"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
