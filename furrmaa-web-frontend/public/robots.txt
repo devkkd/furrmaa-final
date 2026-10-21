@@ -1,0 +1,66 @@
+# Furrmaa - robots.txt
+
+# All crawlers
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /cart
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /track-orders
+
+# Google
+User-agent: Googlebot
+User-agent: Googlebot-Image
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /cart
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /track-orders
+
+# ChatGPT (OpenAI)
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /cart
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /track-orders
+
+# Claude (Anthropic)
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /cart
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /track-orders
+
+# Perplexity
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /cart
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /track-orders
+
+Sitemap: https://furrmaa.com/sitemap.xml
