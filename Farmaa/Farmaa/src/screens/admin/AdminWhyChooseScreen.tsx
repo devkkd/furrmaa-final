@@ -13,6 +13,8 @@ import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 import AdminTextInput from './AdminTextInput';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface WhyFeature {
   _id: string;
   title: string;
@@ -119,7 +121,7 @@ const AdminWhyChooseScreen = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.title}>Why Choose Furrmaa</Text>
         <View style={{ width: 24 }} />
@@ -180,7 +182,6 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 40 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingTop: 40 },
-  back: { fontSize: 24, color: '#1F2937' },
   title: { fontSize: 18, fontWeight: '700', color: '#1F2937' },
   label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 8 },
   btn: { backgroundColor: '#1F2E46', padding: 14, borderRadius: 10, alignItems: 'center', marginTop: 12 },

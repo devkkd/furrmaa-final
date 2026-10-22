@@ -14,6 +14,8 @@ import {
   COMPANY_PHONE_WHATSAPP,
 } from '../../constants/contact';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const WhatsAppUsScreen = () => {
   const navigation = useNavigation();
   const whatsappNumber = COMPANY_PHONE_WHATSAPP;
@@ -44,7 +46,7 @@ const WhatsAppUsScreen = () => {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>WhatsApp Us</Text>
         <View style={styles.placeholder} />
@@ -112,10 +114,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 5,
-  },
-  backIcon: {
-    fontSize: 24,
-    color: '#1F2937',
   },
   headerTitle: {
     fontSize: 20,

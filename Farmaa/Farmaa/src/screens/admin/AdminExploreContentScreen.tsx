@@ -15,6 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 import AdminTextInput from './AdminTextInput';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface ExploreItem {
   _id: string;
   title: string;
@@ -150,7 +152,7 @@ const AdminExploreContentScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Explore Content</Text>
         <TouchableOpacity
@@ -277,7 +279,6 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     backgroundColor: '#FFF',
   },
-  back: { fontSize: 24, color: '#1E3A8A', marginRight: 12 },
   headerTitle: { flex: 1, fontSize: 18, fontWeight: '700' },
   add: { fontSize: 16, fontWeight: '700', color: '#1E3A8A' },
   list: { padding: 16 },

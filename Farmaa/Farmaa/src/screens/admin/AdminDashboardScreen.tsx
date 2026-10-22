@@ -12,6 +12,9 @@ import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 import { WALLET_UI_ENABLED } from '../../config/featureFlags';
 
+import { ArrowRightIcon, BackIcon } from '../../components/AppIcons';
+import { ICON_SIZES } from '../../constants/iconSizes';
+
 interface DashboardStats {
   totalUsers: number;
   totalProducts: number;
@@ -77,7 +80,7 @@ const AdminDashboardScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Admin Dashboard</Text>
         <View style={{ width: 30 }} />
@@ -126,7 +129,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage Products</Text>
             <Text style={styles.actionSubtitle}>Add, edit, or delete products with tabs</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -137,7 +140,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage Orders</Text>
             <Text style={styles.actionSubtitle}>View and update order status</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         {WALLET_UI_ENABLED ? (
           <TouchableOpacity
@@ -149,7 +152,7 @@ const AdminDashboardScreen = () => {
               <Text style={styles.actionTitle}>Manage Wallets</Text>
               <Text style={styles.actionSubtitle}>User balances and wallet activity</Text>
             </View>
-            <Text style={styles.arrowIcon}>→</Text>
+            <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
           </TouchableOpacity>
         ) : null}
         <TouchableOpacity
@@ -161,7 +164,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage Training Videos</Text>
             <Text style={styles.actionSubtitle}>Add, edit, or delete training videos and trainers</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -172,7 +175,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage Feed Posts</Text>
             <Text style={styles.actionSubtitle}>View, edit, or delete social feed posts</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -183,7 +186,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage Veterinarians</Text>
             <Text style={styles.actionSubtitle}>Add, edit, or deactivate veterinarians</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -194,7 +197,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Vet Service Types</Text>
             <Text style={styles.actionSubtitle}>Add types: Pet Shops, Hospitals, NGOs, etc. (shown on Vet Services)</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -205,7 +208,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage Hope Posts</Text>
             <Text style={styles.actionSubtitle}>Lost & Found, Adoption – edit, close, or delete posts</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -216,7 +219,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage Pet Events</Text>
             <Text style={styles.actionSubtitle}>Add, edit, or delete pet events and workshops</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -227,7 +230,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Cremation Centers</Text>
             <Text style={styles.actionSubtitle}>Add centers by city — shown in More → Cremation</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -238,7 +241,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Why Choose Furrmaa</Text>
             <Text style={styles.actionSubtitle}>Homepage features — website & app</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -249,7 +252,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Explore Content</Text>
             <Text style={styles.actionSubtitle}>Featured articles and tips on Explore screen</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -260,7 +263,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage Users</Text>
             <Text style={styles.actionSubtitle}>View, edit, or deactivate users</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -271,7 +274,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage FAQs</Text>
             <Text style={styles.actionSubtitle}>Add, edit, or delete FAQs</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -282,7 +285,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Manage Feedback</Text>
             <Text style={styles.actionSubtitle}>View and respond to feedback</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -293,7 +296,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Support Chats</Text>
             <Text style={styles.actionSubtitle}>Manage customer support chats</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionCard}
@@ -304,7 +307,7 @@ const AdminDashboardScreen = () => {
             <Text style={styles.actionTitle}>Send Notifications</Text>
             <Text style={styles.actionSubtitle}>Send notifications to users</Text>
           </View>
-          <Text style={styles.arrowIcon}>→</Text>
+          <ArrowRightIcon size={ICON_SIZES.chevron} color="#9CA3AF" />
         </TouchableOpacity>
         
       </View>
@@ -387,11 +390,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: '#FFFFFF',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#1E3A8A',
-    fontWeight: 'bold',
   },
   headerTitle: {
     fontSize: 20,
@@ -489,10 +487,6 @@ const styles = StyleSheet.create({
   actionSubtitle: {
     fontSize: 12,
     color: '#6B7280',
-  },
-  arrowIcon: {
-    fontSize: 20,
-    color: '#9CA3AF',
   },
   orderCard: {
     flexDirection: 'row',

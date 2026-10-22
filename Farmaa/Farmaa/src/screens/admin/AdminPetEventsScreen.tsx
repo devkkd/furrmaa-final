@@ -17,6 +17,8 @@ import { pickAndUploadImage } from '../../utils/imageUpload';
 import AdminTextInput from './AdminTextInput';
 import LocationAutocompleteInput from '../../components/LocationAutocompleteInput';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface PetEvent {
   _id: string;
   title: string;
@@ -451,7 +453,7 @@ const AdminPetEventsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Pet Events</Text>
         <View style={{ width: 30 }} />
@@ -592,7 +594,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
-  backButton: { fontSize: 24, color: '#1E3A8A' },
   headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1F2937' },
   tabsContainer: {
     flexDirection: 'row',

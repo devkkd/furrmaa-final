@@ -11,6 +11,8 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import api from '../../config/api';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const NAVY = '#1F2E46';
 
 type CremationRequest = {
@@ -56,7 +58,7 @@ const MyCremationRequestsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>← Back</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.title}>My Cremation Requests</Text>
       </View>
@@ -97,7 +99,6 @@ const MyCremationRequestsScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   header: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  back: { color: NAVY, marginBottom: 8 },
   title: { fontSize: 22, fontWeight: '800', color: '#111' },
   empty: { padding: 32, alignItems: 'center' },
   emptyTitle: { fontSize: 16, color: '#666', marginBottom: 12 },

@@ -25,6 +25,8 @@ import {
 } from '../../utils/productReviews';
 import heartIcon from '../../assets/images/heart.png';
 import leftArrow from '../../assets/images/arrow-left.png';
+import { MinusIcon, PlusIcon } from '../../components/AppIcons';
+import { ICON_SIZES } from '../../constants/iconSizes';
 
 const { width } = Dimensions.get('window');
 
@@ -327,14 +329,14 @@ const ProductDetailScreen = () => {
                   style={styles.quantityButton}
                   onPress={decreaseQuantity}
                 >
-                  <Text style={styles.quantityButtonText}>-</Text>
+                  <MinusIcon />
                 </TouchableOpacity>
                 <Text style={styles.quantityText}>{quantity}</Text>
                 <TouchableOpacity
                   style={styles.quantityButton}
                   onPress={increaseQuantity}
                 >
-                  <Text style={styles.quantityButtonText}>+</Text>
+                  <PlusIcon />
                 </TouchableOpacity>
               </View>
             </View>
@@ -644,8 +646,8 @@ const styles = StyleSheet.create({
     
   },
   backIcon: {
-    width: 28,
-    height: 28,
+    width: ICON_SIZES.back,
+    height: ICON_SIZES.back,
   },
   imageContainer: {
     width: '100%',
@@ -805,11 +807,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-  },
-  quantityButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
   },
   quantityText: {
     fontSize: 18,

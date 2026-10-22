@@ -14,6 +14,8 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 import AdminTextInput from './AdminTextInput';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface AdminNotification {
   _id: string;
   title: string;
@@ -170,7 +172,7 @@ const AdminNotificationsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.title}>Notifications</Text>
         <View style={{ width: 30 }} />
@@ -242,7 +244,6 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#FFF',
   },
-  back: { fontSize: 24, color: '#1E3A8A' },
   title: { fontSize: 18, fontWeight: 'bold', color: '#333' },
   actionRow: { flexDirection: 'row', padding: 12, gap: 10 },
   actionBtn: {

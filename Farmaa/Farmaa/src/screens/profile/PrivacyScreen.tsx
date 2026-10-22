@@ -13,6 +13,8 @@ import {
   COMPANY_PHONE_DISPLAY,
 } from '../../constants/contact';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const PrivacyScreen = () => {
   const navigation = useNavigation();
 
@@ -20,7 +22,7 @@ const PrivacyScreen = () => {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Privacy Policy</Text>
         <View style={{ width: 30 }} />
@@ -79,11 +81,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: '#FFFFFF',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#1F2937',
-    fontWeight: 'bold',
   },
   headerTitle: {
     fontSize: 20,

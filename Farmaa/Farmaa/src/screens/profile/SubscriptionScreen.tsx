@@ -20,6 +20,8 @@ import {
 import { paySubscriptionWithWallet } from '../../services/walletService';
 import { WALLET_UI_ENABLED } from '../../config/featureFlags';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface Subscription {
   _id?: string;
   plan: string;
@@ -235,7 +237,7 @@ const SubscriptionScreen = () => {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Subscription</Text>
         <View style={{ width: 30 }} />
@@ -354,7 +356,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: '#FFFFFF',
   },
-  backButton: { fontSize: 24, color: '#1E3A8A', fontWeight: 'bold' },
   headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1F2937' },
   currentPlanCard: {
     backgroundColor: '#1E3A8A',

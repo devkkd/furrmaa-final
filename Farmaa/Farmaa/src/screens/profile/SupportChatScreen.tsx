@@ -13,6 +13,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface Message {
   sender: string;
   message: string;
@@ -148,7 +150,7 @@ const SupportChatScreen = () => {
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => setSelectedChat(null)}>
-            <Text style={styles.backButton}>←</Text>
+            <BackIcon />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Chat With Us</Text>
           <View style={{ width: 30 }} />
@@ -230,7 +232,7 @@ const SupportChatScreen = () => {
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButton}>←</Text>
+            <BackIcon />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Chat With Us</Text>
           <TouchableOpacity onPress={createNewChat}>
@@ -252,7 +254,7 @@ const SupportChatScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chat With Us</Text>
         <TouchableOpacity onPress={createNewChat}>
@@ -319,7 +321,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: '#FFFFFF',
   },
-  backButton: { fontSize: 24, color: '#1F2937', fontWeight: 'bold' },
   headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1F2937' },
   newChatButton: { fontSize: 16, fontWeight: '600', color: '#1E3A8A' },
   listContent: { padding: 15 },

@@ -13,6 +13,8 @@ import {
   COMPANY_PHONE_DISPLAY,
 } from '../../constants/contact';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const RefundReturnScreen = () => {
   const navigation = useNavigation();
 
@@ -23,7 +25,7 @@ const RefundReturnScreen = () => {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Refund & Return Policy</Text>
         <View style={styles.placeholder} />
@@ -118,10 +120,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 5,
-  },
-  backIcon: {
-    fontSize: 24,
-    color: '#1F2937',
   },
   headerTitle: {
     fontSize: 20,

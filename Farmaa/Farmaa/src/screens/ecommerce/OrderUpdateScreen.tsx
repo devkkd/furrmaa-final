@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const OrderUpdateScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -64,7 +66,7 @@ const OrderUpdateScreen = () => {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Order Update</Text>
         <View style={styles.placeholder} />
@@ -127,10 +129,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 5,
-  },
-  backIcon: {
-    fontSize: 24,
-    color: '#1F2937',
   },
   headerTitle: {
     fontSize: 20,

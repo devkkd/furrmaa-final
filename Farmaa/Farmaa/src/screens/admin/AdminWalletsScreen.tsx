@@ -11,6 +11,8 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface WalletRow {
   _id: string;
   balance: number;
@@ -58,7 +60,7 @@ const AdminWalletsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.title}>Wallets</Text>
         <View style={{ width: 30 }} />
@@ -122,7 +124,6 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     backgroundColor: '#FFFFFF',
   },
-  back: { fontSize: 24, color: '#1F2937' },
   title: { fontSize: 20, fontWeight: 'bold', color: '#1F2937' },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 15, paddingBottom: 40 },

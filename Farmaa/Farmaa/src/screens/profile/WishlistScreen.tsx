@@ -11,6 +11,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface WishlistItem {
   _id: string;
   product: {
@@ -69,7 +71,7 @@ const WishlistScreen = () => {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Wishlist</Text>
         <View style={styles.placeholder} />
@@ -157,10 +159,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 5,
-  },
-  backIcon: {
-    fontSize: 24,
-    color: '#1F2937',
   },
   headerTitle: {
     fontSize: 20,

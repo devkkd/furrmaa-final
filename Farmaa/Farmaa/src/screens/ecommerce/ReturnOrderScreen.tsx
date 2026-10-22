@@ -12,6 +12,8 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import api from '../../config/api';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const ReturnOrderScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -69,7 +71,7 @@ const ReturnOrderScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backIcon}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Return Order</Text>
         <View style={styles.placeholder} />
@@ -152,7 +154,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   backButton: { padding: 5 },
-  backIcon: { fontSize: 24, color: '#1F2937' },
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#1F2937' },
   placeholder: { width: 34 },
   section: { padding: 20 },

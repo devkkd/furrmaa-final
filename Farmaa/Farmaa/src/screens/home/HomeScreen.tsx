@@ -1097,6 +1097,7 @@ const styles = StyleSheet.create({
   cartIcon: {
     width: 24,
     height: 24,
+    resizeMode: 'contain',
   },
   cartIconContainer: {
     width: 40,

@@ -14,6 +14,8 @@ import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 import AdminTextInput from './AdminTextInput';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface Post {
   _id: string;
   content: string;
@@ -293,7 +295,7 @@ const AdminPostsScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Feed Posts</Text>
         <View style={{ width: 30 }} />
@@ -382,10 +384,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#1E3A8A',
   },
   headerTitle: {
     fontSize: 20,

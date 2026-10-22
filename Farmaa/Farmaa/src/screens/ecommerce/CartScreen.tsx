@@ -22,6 +22,13 @@ import {
   linesToCheckoutItems,
   type CartLine,
 } from '../../services/cartService';
+import {
+  ArrowRightIcon,
+  BackIcon,
+  CloseIcon,
+  MinusIcon,
+  PlusIcon,
+} from '../../components/AppIcons';
 interface Address {
   _id: string;
   type: string;
@@ -174,7 +181,7 @@ const CartScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backIcon}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cart</Text>
         <View style={styles.placeholder} />
@@ -196,7 +203,10 @@ const CartScreen = () => {
               style={styles.emptyButton}
               onPress={() => (navigation as any).navigate('Products')}
             >
-              <Text style={styles.emptyButtonText}>Start Shopping →</Text>
+              <View style={styles.emptyButtonContent}>
+                <Text style={styles.emptyButtonText}>Start Shopping</Text>
+                <ArrowRightIcon color="#FFFFFF" />
+              </View>
             </TouchableOpacity>
           </View>
         ) : (
@@ -244,7 +254,7 @@ const CartScreen = () => {
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       accessibilityLabel="Remove from cart"
                     >
-                      <Text style={styles.removeButtonText}>✕</Text>
+                      <CloseIcon />
                     </TouchableOpacity>
                     <View style={styles.productImage}>
                       {cartImageIsUri ? (
@@ -281,14 +291,14 @@ const CartScreen = () => {
                           style={styles.quantityButton}
                           onPress={() => handleQuantityChange(line, -1)}
                         >
-                          <Text style={styles.quantityButtonText}>—</Text>
+                          <MinusIcon />
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>{line.quantity}</Text>
                         <TouchableOpacity
                           style={styles.quantityButton}
                           onPress={() => handleQuantityChange(line, 1)}
                         >
-                          <Text style={styles.quantityButtonText}>+</Text>
+                          <PlusIcon />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -378,7 +388,10 @@ const CartScreen = () => {
             <Text style={styles.footerText}>Inclusive of all taxes</Text>
           </View>
           <TouchableOpacity style={styles.placeOrderButton} onPress={placeOrder}>
-            <Text style={styles.placeOrderText}>Place Order →</Text>
+            <View style={styles.placeOrderContent}>
+              <Text style={styles.placeOrderText}>Place Order</Text>
+              <ArrowRightIcon color="#FFFFFF" />
+            </View>
           </TouchableOpacity>
         </View>
       )}
@@ -399,10 +412,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
-  backButton: { padding: 5 },
-  backIcon: { fontSize: 24, color: '#1F2937' },
+  backButton: { padding: 5, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1F2937' },
-  placeholder: { width: 34 },
+  placeholder: { width: 38 },
   section: { padding: 15, borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
   addressHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   addressInfo: { flex: 1 },
@@ -436,12 +448,6 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  removeButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6B7280',
-    lineHeight: 18,
   },
   productImage: {
     width: 100,
@@ -478,7 +484,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
-  quantityButtonText: { fontSize: 18, fontWeight: 'bold', color: '#1F2937' },
   quantityText: { fontSize: 16, fontWeight: 'bold', color: '#1F2937', minWidth: 30, textAlign: 'center' },
   couponContainer: { flexDirection: 'row', gap: 10, marginBottom: 8 },
   couponInput: {
@@ -553,6 +558,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderRadius: 30,
   },
+  placeOrderContent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   placeOrderText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
   footerTotal: { justifyContent: 'center' },
   footerPriceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -581,6 +587,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 8,
   },
+  emptyButtonContent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   emptyButtonText: { fontSize: 14, fontWeight: 'bold', color: '#FFFFFF' },
 });
 

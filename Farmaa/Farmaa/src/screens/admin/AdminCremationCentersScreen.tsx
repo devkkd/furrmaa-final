@@ -18,6 +18,8 @@ import { pickAndUploadImage } from '../../utils/imageUpload';
 import AdminTextInput from './AdminTextInput';
 import LocationAutocompleteInput from '../../components/LocationAutocompleteInput';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface CremationCenter {
   _id: string;
   name: string;
@@ -193,7 +195,7 @@ const AdminCremationCentersScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cremation Centers</Text>
         <TouchableOpacity onPress={openAdd}>
@@ -307,7 +309,6 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     backgroundColor: '#FFF',
   },
-  back: { fontSize: 24, color: '#1E3A8A', marginRight: 12 },
   headerTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: '#1F2937' },
   add: { fontSize: 16, fontWeight: '700', color: '#1E3A8A' },
   list: { padding: 16, paddingBottom: 32 },

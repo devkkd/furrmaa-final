@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
+import { ICON_SIZES } from '../constants/iconSizes';
 
 // Auth Screens
 import SplashScreen from '../screens/SplashScreen';
@@ -196,7 +197,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               name="shopping-bag"
-              size={34}
+              size={ICON_SIZES.tab}
               color={color}
               focused={focused}
             />
@@ -211,7 +212,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               name="train"
-              size={34}
+              size={ICON_SIZES.tab}
               color={color}
               focused={focused}
             />
@@ -226,7 +227,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               name="vet"
-              size={34}
+              size={ICON_SIZES.tab}
               color={color}
               focused={focused}
             />
@@ -241,7 +242,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               name="more"
-              size={34}
+              size={ICON_SIZES.tab}
               color={color}
               focused={focused}
             />

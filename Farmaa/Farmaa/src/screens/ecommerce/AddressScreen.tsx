@@ -12,6 +12,8 @@ import {
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import api from '../../config/api';
 import leftArrow from '../../assets/images/arrow-left.png';
+import { PlusIcon } from '../../components/AppIcons';
+import { ICON_SIZES } from '../../constants/iconSizes';
 
 interface Address {
   _id: string;
@@ -142,7 +144,7 @@ const AddressScreen = () => {
                 (navigation as any).navigate('AddAddress', { returnTo: returnTo || 'address' });
               }}
             >
-              <Text style={styles.addAddressIcon}>+</Text>
+              <PlusIcon size={ICON_SIZES.inline} color="#000000" />
               <Text style={styles.addAddressText}>Add New Address</Text>
             </TouchableOpacity>
           </View>
@@ -199,8 +201,8 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   backIcon: {
-    width: 30,
-    height: 30,
+    width: ICON_SIZES.back,
+    height: ICON_SIZES.back,
   },
   headerTitle: {
     fontSize: 20,
@@ -267,11 +269,6 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginTop: 4,
     fontStyle: 'italic',
-  },
-  addAddressIcon: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    marginRight: 8,
   },
   addressCard: {
     backgroundColor: '#FFFFFF',
@@ -345,6 +342,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    gap: 8,
     marginTop: 10,
   },
   selectButton: {

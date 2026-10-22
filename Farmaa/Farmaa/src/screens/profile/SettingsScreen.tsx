@@ -11,6 +11,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const DEFAULT_SETTINGS = {
   notifications: {
     push: true,
@@ -105,7 +107,7 @@ const SettingsScreen = () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Settings</Text>
         <View style={{ width: 30 }} />
@@ -213,11 +215,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: '#FFFFFF',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#1F2937',
-    fontWeight: 'bold',
   },
   headerTitle: {
     fontSize: 20,

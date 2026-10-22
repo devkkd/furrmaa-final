@@ -14,6 +14,8 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../config/api';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const AddReminderScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
@@ -110,7 +112,7 @@ const AddReminderScreen = () => {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Reminder</Text>
         <View style={{ width: 30 }} />
@@ -282,10 +284,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#1E3A8A',
   },
   headerTitle: {
     fontSize: 20,

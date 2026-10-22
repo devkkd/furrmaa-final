@@ -15,6 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 import { getProductImageUri } from '../../utils/productImage';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface Product {
   _id: string;
   name: string;
@@ -174,7 +176,7 @@ const AdminProductsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Products</Text>
         <View style={{ width: 30 }} />
@@ -307,11 +309,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: '#FFFFFF',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#1E3A8A',
-    fontWeight: 'bold',
   },
   headerTitle: {
     fontSize: 20,

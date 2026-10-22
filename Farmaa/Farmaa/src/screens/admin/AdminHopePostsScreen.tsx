@@ -15,6 +15,8 @@ import api from '../../config/api';
 import LocationAutocompleteInput from '../../components/LocationAutocompleteInput';
 import AdminTextInput from './AdminTextInput';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface HopePost {
   _id: string;
   postType: 'adoption' | 'lostFound';
@@ -408,7 +410,7 @@ const AdminHopePostsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Manage Hope Posts</Text>
         <View style={{ width: 30 }} />
@@ -533,10 +535,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#1E3A8A',
   },
   headerTitle: {
     fontSize: 20,

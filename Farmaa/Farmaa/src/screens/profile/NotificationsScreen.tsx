@@ -11,6 +11,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 
+import { ArrowRightIcon, BackIcon } from '../../components/AppIcons';
+
 interface Notification {
   _id: string;
   title: string;
@@ -115,7 +117,7 @@ const NotificationsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Notifications</Text>
         <View style={{ width: 30 }} />
@@ -129,7 +131,7 @@ const NotificationsScreen = () => {
           </Text>
           <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
             <Text style={styles.refreshButtonText}>Refresh</Text>
-            <Text style={styles.refreshButtonIcon}>→</Text>
+            <ArrowRightIcon color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       ) : (
@@ -171,11 +173,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: '#FFFFFF',
   },
-  backButton: {
-    fontSize: 24,
-    color: '#1F2937',
-    fontWeight: 'bold',
-  },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -214,11 +211,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-  },
-  refreshButtonIcon: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   listContent: {
     padding: 15,

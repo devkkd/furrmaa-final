@@ -10,6 +10,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 
+import { BackIcon, PlusIcon } from '../../components/AppIcons';
+
 interface Reminder {
   _id: string;
   title: string;
@@ -81,14 +83,14 @@ const RemindersScreen = () => {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Reminders</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate('AddReminder' as never)}
           style={styles.addButton}
         >
-          <Text style={styles.addIcon}>+</Text>
+          <PlusIcon color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
@@ -155,10 +157,6 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 5,
   },
-  backIcon: {
-    fontSize: 24,
-    color: '#1F2937',
-  },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -171,10 +169,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E3A8A',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  addIcon: {
-    fontSize: 24,
-    color: '#FFFFFF',
   },
   list: {
     padding: 15,

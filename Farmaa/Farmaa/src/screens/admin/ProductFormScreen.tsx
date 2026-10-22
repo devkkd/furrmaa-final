@@ -17,6 +17,8 @@ import { pickAndUploadImage, pickMultipleImages } from '../../utils/imageUpload'
 import { normalizeUrlList } from '../../utils/productImage';
 import AdminTextInput from './AdminTextInput';
 
+import { BackIcon } from '../../components/AppIcons';
+
 interface CategoryItem {
   _id: string;
   name: string;
@@ -232,7 +234,7 @@ const ProductFormScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {productId ? 'Edit Product' : 'Add Product'}
@@ -764,11 +766,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: '#FFFFFF',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#1E3A8A',
-    fontWeight: 'bold',
   },
   headerTitle: {
     fontSize: 20,

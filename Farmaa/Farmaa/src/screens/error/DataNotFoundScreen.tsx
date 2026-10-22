@@ -7,6 +7,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const DataNotFoundScreen = () => {
   const navigation = useNavigation();
 
@@ -19,7 +21,7 @@ const DataNotFoundScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
         <View style={{ flex: 1 }} />
       </View>
@@ -49,11 +51,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: '#FFFFFF',
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#1F2937',
-    fontWeight: 'bold',
   },
   content: {
     flex: 1,

@@ -13,6 +13,8 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const OTPVerificationScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -132,7 +134,7 @@ const OTPVerificationScreen = () => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backArrow}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
 
         {/* Title */}
@@ -209,11 +211,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
     width: 40,
-  },
-  backArrow: {
-    fontSize: 24,
-    color: '#1F2937',
-    fontWeight: '600',
   },
   title: {
     fontSize: 28,

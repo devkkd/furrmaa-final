@@ -20,6 +20,8 @@ import sortIcon from '../../assets/images/arrow-3.png';
 import filterIcon from '../../assets/images/setting-4.png';
 import leftArrow from '../../assets/images/arrow-left.png';
 import { getProductImageUri } from '../../utils/productImage';
+import { MinusIcon, PlusIcon } from '../../components/AppIcons';
+import { ICON_SIZES } from '../../constants/iconSizes';
 
 interface Product {
   id: number;
@@ -430,14 +432,14 @@ const ProductsScreen = () => {
                       style={styles.quantityButton}
                       onPress={() => handleQuantityChange(item.id, -1)}
                     >
-                      <Text style={styles.quantityButtonText}>-</Text>
+                      <MinusIcon size={ICON_SIZES.inline} />
                     </TouchableOpacity>
                     <Text style={styles.quantityText}>{quantity}</Text>
                     <TouchableOpacity
                       style={styles.quantityButton}
                       onPress={() => handleQuantityChange(item.id, 1)}
                     >
-                      <Text style={styles.quantityButtonText}>+</Text>
+                      <PlusIcon size={ICON_SIZES.inline} />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -734,11 +736,6 @@ const styles = StyleSheet.create({
 
   quantityButton: {
     paddingHorizontal: 6,
-  },
-
-  quantityButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
 
   quantityText: {

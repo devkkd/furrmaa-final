@@ -17,6 +17,8 @@ import { useAuth } from '../../context/AuthContext';
 // @ts-ignore
 import logoImage from '../../assets/images/Logo.png';
 
+import { BackIcon } from '../../components/AppIcons';
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const EmailLoginScreen = () => {
@@ -53,7 +55,7 @@ const EmailLoginScreen = () => {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
+          <BackIcon />
         </TouchableOpacity>
 
         <View style={styles.header}>
@@ -114,7 +116,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   scrollContent: { flexGrow: 1, padding: 20 },
   backButton: { marginTop: 10, marginBottom: 10, width: 40 },
-  backArrow: { fontSize: 24, color: '#1F2937', fontWeight: '600' },
   header: { marginBottom: 24 },
   headerLeft: { flexDirection: 'row', alignItems: 'center' },
   headerLogo: { marginRight: 12 },
