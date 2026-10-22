@@ -11,17 +11,16 @@ import { usePetStore } from '@/store/petStore';
 import { fetchMainCategories } from '@/lib/api';
 import { AdminImage } from '@/app/admin/components/AdminImage';
 import { dogEverydayData, catEverydayData } from '@/data/everyday';
+import { getBackendCategory } from '@/utils/productCategories';
 
 function titleToCategory(title) {
-  const slug = (title || '').toLowerCase().trim();
-  if (slug === 'medicine') return 'health';
-  return slug;
+  return getBackendCategory(title) || (title || '').toLowerCase().trim();
 }
 
 function mapCategory(item) {
   const title = item.name || item.title;
   const image = item.image || item.img;
-  const slug = item.slug || titleToCategory(title);
+  const slug = getBackendCategory(item.slug || title) || titleToCategory(title);
   return { title, img: image, slug, _id: item._id };
 }
 

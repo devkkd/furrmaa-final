@@ -913,6 +913,7 @@ appTagline: {
   fontSize: 10,
   letterSpacing: 0.6,
   color: '#9CA3AF',
+  fontWeight: '700',
 },
 
 appVersion: {

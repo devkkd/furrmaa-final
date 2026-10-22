@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   Animated,
-  Easing,
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -21,26 +20,6 @@ const SplashScreen = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
-  const spinAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const spinLoop = Animated.loop(
-      Animated.timing(spinAnim, {
-        toValue: 1,
-        duration: 900,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    );
-    spinLoop.start();
-    return () => spinLoop.stop();
-  }, [spinAnim]);
-
-  const spin = spinAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
   useEffect(() => {
     // Animation sequence
     Animated.parallel([
@@ -113,11 +92,6 @@ const SplashScreen = () => {
           <Text style={styles.appName}>FURRMAA</Text>
           <Text style={styles.tagline}>WHERE EVERY TAIL FEELS AT HOME</Text>
         </Animated.View>
-
-        {/* Loading Indicator */}
-        <Animated.View style={[styles.loaderContainer, { opacity: fadeAnim }]}>
-          <Animated.View style={[styles.loader, { transform: [{ rotate: spin }] }]} />
-        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -141,7 +115,6 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 120,
     height: 120,
-    borderRadius: 60,
   },
   textContainer: {
     alignItems: 'center',
@@ -157,21 +130,9 @@ const styles = StyleSheet.create({
   tagline: {
     fontSize: 14,
     color: '#6B7280', // Gray
-    fontWeight: '300',
+    fontWeight: '700',
     textAlign: 'center',
     letterSpacing: 0.5,
-  },
-  loaderContainer: {
-    position: 'absolute',
-    bottom: 100,
-  },
-  loader: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 4,
-    borderColor: '#1E3A8A',
-    borderTopColor: 'transparent',
   },
 });
 

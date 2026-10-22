@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   headerTagline: {
     fontSize: 10,
     color: '#6B7280',
-    fontWeight: '300',
+    fontWeight: '700',
   },
   skipButton: {
     padding: 8,
@@ -296,7 +296,6 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 50,
     height: 50,
-    borderRadius: 25,
   },
   title: {
     fontSize: 28,

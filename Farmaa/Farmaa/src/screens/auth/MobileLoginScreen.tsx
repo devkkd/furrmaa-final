@@ -203,7 +203,6 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 50,
     height: 50,
-    borderRadius: 25,
   },
   headerText: {
     flex: 1,

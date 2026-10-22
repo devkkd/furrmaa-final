@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { fetchAllCategories, fetchSizes, fetchDietary } from "@/lib/api";
+import { getBackendCategory } from "@/utils/productCategories";
 
 /* =========================
    FILTER CONFIG (Static filters)
@@ -81,11 +82,29 @@ export default function FilterSidebar({ filters, onChange }) {
         if (!cancelled) {
           const list = (data || [])
             .filter((cat) => cat && (cat.slug || cat.name || cat.title))
-            .map((cat) => ({
-              value: cat.slug || (cat.name || cat.title || "").toLowerCase().replace(/\s+/g, "-"),
-              label: cat.name || cat.title || cat.slug || "",
-            }));
-          setCategories(list);
+            .map((cat) => {
+              const raw =
+                cat.slug ||
+                (cat.name || cat.title || "").toLowerCase().replace(/\s+/g, "-");
+              // Prefer mapped backend slug so Medicine/Treats etc. match Product.category
+              const mapped =
+                getBackendCategory(raw) ||
+                getBackendCategory(cat.name || cat.title) ||
+                raw;
+              return {
+                value: mapped,
+                label: cat.name || cat.title || cat.slug || "",
+              };
+            });
+          // De-dupe by value (Medicine + Supplements → health)
+          const seen = new Set();
+          setCategories(
+            list.filter((c) => {
+              if (!c.value || seen.has(c.value)) return false;
+              seen.add(c.value);
+              return true;
+            })
+          );
         }
       })
       .catch(() => {

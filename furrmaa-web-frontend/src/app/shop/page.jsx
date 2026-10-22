@@ -8,6 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { usePetStore } from "@/store/petStore";
 import { useProducts } from "@/hooks/useProducts";
 import LogoLoader from "@/components/LogoLoader";
+import { getBackendCategory, mapCategoryParam } from "@/utils/productCategories";
 
 function StorePageContent() {
   const router = useRouter();
@@ -101,7 +102,8 @@ function StorePageContent() {
 
   // API ko sirf URL wale filters bhejo – store/persist mat use karo (purani dietary/size nahi jayegi)
   const effectiveRating = ratingFromUrl?.trim?.() || undefined;
-  const effectiveCategory = categoryFromUrl?.trim?.() || undefined;
+  // Map UI/legacy slugs (medicine, treats, …) → backend Product.category
+  const effectiveCategory = mapCategoryParam(categoryFromUrl) || undefined;
   const effectiveAge = ageFromUrl?.trim?.() || undefined;
   const effectiveSize = sizeFromUrl?.trim?.() || undefined;
   const effectiveDietary = dietaryFromUrl?.trim?.() || undefined;
@@ -118,10 +120,10 @@ function StorePageContent() {
     limit: 48,
   });
 
-  // Normalize category for comparison (case-insensitive, handle slugs)
+  // Normalize + map so client re-filter matches backend slugs
   const normalizeCategory = (cat) => {
     if (!cat) return null;
-    return cat.toLowerCase().trim();
+    return getBackendCategory(cat) || String(cat).toLowerCase().trim();
   };
 
   const filteredProducts = apiProducts.filter((p) => {

@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   header: { marginBottom: 24 },
   headerLeft: { flexDirection: 'row', alignItems: 'center' },
   headerLogo: { marginRight: 12 },
-  logoImage: { width: 50, height: 50, borderRadius: 25 },
+  logoImage: { width: 50, height: 50 },
   headerText: { flex: 1 },
   headerAppName: { fontSize: 18, fontWeight: 'bold', color: '#1F2937', marginBottom: 2 },
   headerTagline: { fontSize: 10, color: '#6B7280', fontWeight: '300' },

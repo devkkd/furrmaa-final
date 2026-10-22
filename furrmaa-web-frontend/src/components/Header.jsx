@@ -13,6 +13,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 import { usePetStore } from "@/store/petStore";
 import ToggleDogCat from "@/components/ToggleDogCat";
+import { getBackendCategory } from "@/utils/productCategories";
 
 export default function Header() {
 
@@ -24,8 +25,10 @@ export default function Header() {
 
   const petType = usePetStore((s) => s.petType);
 
-  const shopCat = (cat) =>
-    `/shop?category=${cat}${petType ? `&petType=${petType}` : ""}`;
+  const shopCat = (cat) => {
+    const backendCat = getBackendCategory(cat);
+    return `/shop?category=${backendCat}${petType ? `&petType=${petType}` : ""}`;
+  };
 
   // Centralized Navigation Links to keep code clean
   const navItems = [
@@ -34,7 +37,7 @@ export default function Header() {
     { label: "Medicine", href: shopCat("medicine"), icon: "/images/icons/medicine.svg" },
     { label: "Toys", href: shopCat("toys"), icon: "/images/icons/toys.svg" },
     { label: "Accessories", href: shopCat("accessories"), icon: "/images/icons/Accessories.svg" },
-     { label: "Supplements", href: shopCat("supplements"), icon: "/images/icons/Supplements.svg" },
+    { label: "Supplements", href: shopCat("supplements"), icon: "/images/icons/Supplements.svg" },
     { label: "Grooming", href: shopCat("grooming"), icon: "/images/icons/Grooming.svg" },
    
     { label: "Pet Training", href: "/training", icon: "/images/icons/Pet Training.svg" },
