@@ -12,6 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import AppleBrandIcon from '../../components/AppleBrandIcon';
 import GoogleBrandIcon from '../../components/GoogleBrandIcon';
@@ -21,6 +22,7 @@ import logoImage from '../../assets/images/Logo.png';
 
 const MobileLoginScreen = () => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const {
     sendOTP,
     loginSocialGoogle,
@@ -80,9 +82,21 @@ const MobileLoginScreen = () => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop: Math.max(insets.top, 12),
+            paddingBottom: Math.max(insets.bottom, 16) + 8,
+          },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header with Logo */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -99,12 +113,12 @@ const MobileLoginScreen = () => {
         {/* Main Content */}
         <View style={styles.content}>
           <Text style={styles.mainTitle}>
-            <Text>Create Your Account 🐾</Text>
-            <Text> or Login</Text>
+            Create Your Account 🐾{'\n'}or Login
           </Text>
-          
+
           <Text style={styles.description}>
-            Join Furrmaa and give your pet the care they deserve or Continue caring for your pet with ease <Text style={styles.percent}>%</Text>
+            Join Furrmaa and give your pet the care they deserve or continue caring for your pet
+            with ease.
           </Text>
 
           {/* Mobile Number Input */}
@@ -120,7 +134,7 @@ const MobileLoginScreen = () => {
               maxLength={10}
             />
             <Text style={styles.helperText}>
-              We'll send a 6-digit verification code via SMS.📩🔐
+              We'll send a 6-digit verification code via SMS.
             </Text>
           </View>
 
@@ -131,14 +145,13 @@ const MobileLoginScreen = () => {
             <View style={styles.separatorLine} />
           </View>
 
-          {/* Social Login Buttons – hamesha Google + Apple (pehle jaisa layout) */}
           <View style={styles.socialButtons}>
             <TouchableOpacity
               style={styles.socialButton}
               onPress={handleGoogleLogin}
               disabled={loading}
             >
-              <GoogleBrandIcon />
+              <GoogleBrandIcon size={22} />
               <Text style={styles.socialButtonText}>Google</Text>
             </TouchableOpacity>
 
@@ -147,7 +160,7 @@ const MobileLoginScreen = () => {
               onPress={handleAppleLogin}
               disabled={loading}
             >
-              <AppleBrandIcon />
+              <AppleBrandIcon size={22} />
               <Text style={styles.socialButtonText}>Apple</Text>
             </TouchableOpacity>
           </View>
@@ -159,9 +172,8 @@ const MobileLoginScreen = () => {
             <Text style={styles.emailLinkText}>Login with Email instead</Text>
           </TouchableOpacity>
 
-          {/* Next Button */}
-          <TouchableOpacity 
-            style={[styles.nextButton, loading && styles.disabledButton]} 
+          <TouchableOpacity
+            style={[styles.nextButton, loading && styles.disabledButton]}
             onPress={handleNext}
             disabled={loading}
           >
@@ -170,9 +182,9 @@ const MobileLoginScreen = () => {
             </Text>
           </TouchableOpacity>
 
-          {/* Terms & Privacy */}
           <Text style={styles.termsText}>
-            By continuing, you agree to our <Text style={styles.termsLink}>Terms & Privacy Policy.</Text>
+            By continuing, you agree to our{' '}
+            <Text style={styles.termsLink}>Terms & Privacy Policy.</Text>
           </Text>
         </View>
       </ScrollView>
@@ -187,11 +199,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 20,
+    paddingHorizontal: 20,
   },
   header: {
-    marginTop: 20,
-    marginBottom: 30,
+    marginBottom: 16,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -201,8 +212,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   logoImage: {
-    width: 50,
-    height: 50,
+    width: 48,
+    height: 48,
   },
   headerText: {
     flex: 1,
@@ -216,60 +227,52 @@ const styles = StyleSheet.create({
   headerTagline: {
     fontSize: 10,
     color: '#6B7280',
-    fontWeight: '300',
+    fontWeight: '700',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
   },
   mainTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#1F2937',
-    marginBottom: 15,
-    lineHeight: 40,
-  },
-  asterisk: {
-    fontSize: 32,
-    color: '#1F2937',
-  },
-  percent: {
-    fontSize: 16,
-    color: '#6B7280',
+    marginBottom: 10,
+    lineHeight: 34,
   },
   description: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#6B7280',
-    lineHeight: 24,
-    marginBottom: 30,
+    lineHeight: 22,
+    marginBottom: 20,
   },
   inputContainer: {
-    marginBottom: 30,
+    marginBottom: 12,
   },
   label: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: '#1F2937',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
     borderRadius: 12,
-    padding: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     fontSize: 16,
     backgroundColor: '#F9FAFB',
     color: '#1F2937',
   },
   helperText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#6B7280',
     marginTop: 8,
   },
   separatorContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginVertical: 30,
-    marginTop: 80,
+    alignItems: 'center',
+    marginVertical: 16,
   },
   separatorLine: {
     flex: 1,
@@ -277,14 +280,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#E5E7EB',
   },
   separatorText: {
-    marginHorizontal: 15,
-    fontSize: 14,
+    marginHorizontal: 12,
+    fontSize: 13,
     color: '#6B7280',
   },
   socialButtons: {
     flexDirection: 'row',
-    gap: 15,
-    marginBottom: 30,
+    gap: 12,
+    marginBottom: 12,
   },
   socialButton: {
     flex: 1,
@@ -293,38 +296,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#D1D5DB',
-    borderRadius: 30,
-    padding: 15,
+    borderRadius: 28,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
     backgroundColor: '#FFFFFF',
-    marginHorizontal: 10,
+    gap: 6,
   },
   socialButtonText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#1F2937',
     fontWeight: '500',
   },
   emailLinkButton: {
     alignItems: 'center',
-    marginBottom: 16,
-    paddingVertical: 8,
+    marginBottom: 12,
+    paddingVertical: 6,
   },
   emailLinkText: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#1E3A8A',
     fontWeight: '600',
   },
   nextButton: {
     backgroundColor: '#1F2937',
-    paddingVertical: 18,
-    borderRadius: 30,
+    paddingVertical: 15,
+    borderRadius: 28,
     alignItems: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 50,
-     alignSelf:'center'
+    marginBottom: 14,
+    paddingHorizontal: 40,
+    alignSelf: 'center',
+    minWidth: 180,
   },
   nextButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
   },
   disabledButton: {
@@ -343,4 +348,3 @@ const styles = StyleSheet.create({
 });
 
 export default MobileLoginScreen;
-

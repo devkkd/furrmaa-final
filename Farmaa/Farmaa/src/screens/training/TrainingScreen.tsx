@@ -12,9 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import api from '../../config/api';
 import lockIcon from '../../assets/images/lock.png';
-import btDogImage from '../../assets/images/BTdog.png';
-import itDogImage from '../../assets/images/ITdog.png';
-import atDogImage from '../../assets/images/ATdog.png';
+import { getTrainingPlanDefaults } from '../../data/trainingPlans';
 
 interface TrainingProgram {
   _id: string;
@@ -30,6 +28,8 @@ interface TrainingProgram {
 
 const TrainingScreen = () => {
   const navigation = useNavigation();
+  const [selectedPet, setSelectedPet] = useState<'dog' | 'cat'>('dog');
+  const [selectedPlan, setSelectedPlan] = useState<'basic' | 'intermediate' | 'advanced'>('basic');
   const [selectedProgram, setSelectedProgram] = useState<any>(null);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [trainingPrograms, setTrainingPrograms] = useState<any[]>([]);
@@ -37,15 +37,15 @@ const TrainingScreen = () => {
   const [loading, setLoading] = useState(true);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
 
-  // Fetch training videos from backend
   useEffect(() => {
-    const loadData = async () => {
-      await fetchSubscription();
-      await fetchTrainingPrograms();
-      await fetchMyTrainings();
-    };
-    loadData();
+    fetchSubscription();
+    fetchMyTrainings();
   }, []);
+
+  useEffect(() => {
+    setSelectedPlan('basic');
+    fetchTrainingPrograms();
+  }, [selectedPet, hasActiveSubscription]);
 
   const fetchMyTrainings = async () => {
     try {
@@ -72,162 +72,79 @@ const TrainingScreen = () => {
   };
 
   const fetchTrainingPrograms = async () => {
-    try {
-      setLoading(true);
-      const response = await api.CLIENT.get(api.ENDPOINTS.TRAINING_VIDEOS);
-      const videos = response.data?.videos || [];
-      
-      // Group videos by courseLevel (Basic Training, Intermediate Training, Advanced Training)
+    const defaults = getTrainingPlanDefaults(selectedPet);
+    const buildFromDefaults = (videos: any[] = []) => {
       const programsMap = new Map<string, any>();
-      
-      // Default programs with UI images
-      const defaultPrograms = [
-        {
-          _id: 'basic',
-          category: 'basic',
-          courseLevel: 'Basic Training',
-          title: 'Basic Training',
-          description: 'Foundational skills, obedience, and leash training.',
-          level: 'beginner',
-          isFree: true,
-          order: 1,
-          bgColor: '#FED7AA',
-          image: btDogImage,
-        },
-        {
-          _id: 'intermediate',
-          category: 'intermediate',
-          courseLevel: 'Intermediate Training',
-          title: 'Intermediate Training',
-          description: 'Discipline behavior, shaping control',
-          level: 'intermediate',
-          isFree: false,
-          order: 2,
-          bgColor: '#cd8178',
-          image: itDogImage,
-        },
-        {
-          _id: 'advanced',
-          category: 'advanced',
-          courseLevel: 'Advanced Training',
-          title: 'Advanced Training',
-          description: 'Master-level commands, agility, obedience.',
-          level: 'advanced',
-          isFree: false,
-          order: 3,
-          bgColor: '#8684f6',
-          image: atDogImage,
-        },
-      ];
-      
-      // Initialize programs
-      defaultPrograms.forEach((prog) => {
-        const isBasic = prog.category === 'basic';
-        programsMap.set(prog.category, {
-          _id: prog._id,
-          id: prog._id === 'basic' ? 1 : prog._id === 'intermediate' ? 2 : 3,
+
+      defaults.forEach((prog, index) => {
+        const isBasic = prog.program === 'basic';
+        programsMap.set(prog.program, {
+          _id: prog.program,
+          id: index + 1,
+          category: prog.program,
           title: prog.title,
           description: prog.description,
-          category: prog.category,
-          level: prog.level,
-          petType: 'dog',
+          level: prog.program,
+          petType: selectedPet,
           videos: [],
-          isFree: isBasic,
-          order: prog.order,
+          isFree: prog.isFree,
+          order: index + 1,
           bgColor: prog.bgColor,
           image: prog.image,
-          isLocked: !isBasic && !hasActiveSubscription, // Lock if not basic and no subscription
+          textLight: prog.textLight,
+          baseTags: prog.tags,
+          isLocked: !isBasic && !hasActiveSubscription,
         });
       });
-      
-      // Group videos by category
+
       videos.forEach((video: any) => {
-        const category = video.category || 'basic';
-        const courseLevel = video.courseLevel || (category === 'basic' ? 'Basic Training' : category === 'intermediate' ? 'Intermediate Training' : 'Advanced Training');
-        
-        if (programsMap.has(category)) {
-          programsMap.get(category)?.videos?.push(video);
-        } else {
-          // Create new program if category doesn't exist
-          const isBasic = category === 'basic';
-          programsMap.set(category, {
-            _id: category,
-            id: programsMap.size + 1,
-            title: courseLevel,
-            description: video.description || `${courseLevel} training program`,
-            category: category,
-            level: video.level || 'beginner',
-            petType: Array.isArray(video.petType) ? video.petType[0] : video.petType || 'dog',
-            videos: [video],
-            isFree: isBasic,
-            order: video.order || 0,
-            bgColor: category === 'basic' ? '#FED7AA' : category === 'intermediate' ? '#cd8178' : '#8684f6',
-            image: category === 'basic' ? btDogImage : category === 'intermediate' ? itDogImage : atDogImage,
-            isLocked: !isBasic && !hasActiveSubscription, // Lock if not basic and no subscription
-          });
+        const petArr = Array.isArray(video.petType)
+          ? video.petType
+          : [video.petType || 'both'];
+        const matchesPet =
+          petArr.includes(selectedPet) ||
+          petArr.includes('both') ||
+          petArr.includes('Both');
+        if (!matchesPet) return;
+
+        const category = String(video.category || 'basic').toLowerCase();
+        const key = ['basic', 'intermediate', 'advanced'].includes(category)
+          ? category
+          : 'basic';
+        if (programsMap.has(key)) {
+          programsMap.get(key)?.videos?.push(video);
         }
       });
-      
-      // Convert map to array and sort by order
-      const programs = Array.from(programsMap.values())
+
+      return Array.from(programsMap.values())
         .sort((a, b) => (a.order || 0) - (b.order || 0))
         .map((program) => {
           const videoCount = program.videos?.length || 0;
-          const totalDuration = program.videos?.reduce((sum: number, v: any) => sum + (v.duration || 0), 0) || 0;
-          const days = Math.ceil(totalDuration / 60) || videoCount; // Convert minutes to days
           const isBasic = program.category === 'basic';
-          
+          const countTags =
+            videoCount > 0
+              ? [`${videoCount} Lessons`, `${videoCount} Days`]
+              : [];
           return {
             ...program,
-            lessons: videoCount || (program.id === 1 ? 7 : program.id === 2 ? 14 : 21),
-            days: days || (program.id === 1 ? 7 : program.id === 2 ? 14 : 21),
-            ways: videoCount || (program.id === 1 ? 7 : program.id === 2 ? 14 : 21),
-            isFree: isBasic, // Basic training is always free
-            isLocked: !isBasic && !hasActiveSubscription, // Lock intermediate/advanced if no subscription
+            lessons: videoCount,
+            days: videoCount,
+            tags: [...(program.baseTags || []), ...countTags, 'View More Details'],
+            isFree: isBasic,
+            isLocked: !isBasic && !hasActiveSubscription,
           };
         });
-      
-      setTrainingPrograms(programs);
-    } catch (error: any) {
-      // Fallback to default programs if API fails
-      setTrainingPrograms([
-        {
-          id: 1,
-          title: 'Basic Training',
-          description: 'Foundational skills, obedience, and leash training.',
-          lessons: 7,
-          days: 7,
-          ways: 7,
-          bgColor: '#FED7AA',
-          image: btDogImage,
-          isFree: true,
-          isLocked: false,
-        },
-        {
-          id: 2,
-          title: 'Intermediate Training',
-          description: 'Discipline behavior, shaping control',
-          lessons: 14,
-          days: 14,
-          ways: 14,
-          bgColor: '#cd8178',
-          image: itDogImage,
-          isFree: false,
-          isLocked: true,
-        },
-        {
-          id: 3,
-          title: 'Advanced Training',
-          description: 'Master-level commands, agility, obedience.',
-          lessons: 21,
-          days: 21,
-          ways: 21,
-          bgColor: '#8684f6',
-          image: atDogImage,
-          isFree: false,
-          isLocked: true,
-        },
-      ]);
+    };
+
+    try {
+      setLoading(true);
+      const response = await api.CLIENT.get(api.ENDPOINTS.TRAINING_VIDEOS, {
+        params: { petType: selectedPet },
+      });
+      const videos = response.data?.videos || [];
+      setTrainingPrograms(buildFromDefaults(videos));
+    } catch {
+      setTrainingPrograms(buildFromDefaults([]));
     } finally {
       setLoading(false);
     }
@@ -255,15 +172,51 @@ const TrainingScreen = () => {
     (navigation as any).navigate('Subscription' as never, { program: selectedProgram } as never);
   };
 
+  const currentPlan =
+    trainingPrograms.find((p) => p.category === selectedPlan) ||
+    trainingPrograms[0];
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
+        {/* Header — same as website /training */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Train</Text>
-          <Text style={styles.headerSubtitle}>
-            Start where your pet feels comfortable
+          <Text style={styles.headerTitle}>
+            {selectedPet === 'cat' ? 'Cat Training' : 'Dog Training'}
           </Text>
+          <Text style={styles.headerSubtitle}>
+            {selectedPet === 'cat'
+              ? 'Start where your cat feels comfortable'
+              : 'Start where your dog feels comfortable'}
+          </Text>
+          <View style={styles.petToggle}>
+            <TouchableOpacity
+              style={[styles.petToggleBtn, selectedPet === 'dog' && styles.petToggleBtnActive]}
+              onPress={() => setSelectedPet('dog')}
+            >
+              <Text
+                style={[
+                  styles.petToggleText,
+                  selectedPet === 'dog' && styles.petToggleTextActive,
+                ]}
+              >
+                Dog
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.petToggleBtn, selectedPet === 'cat' && styles.petToggleBtnActive]}
+              onPress={() => setSelectedPet('cat')}
+            >
+              <Text
+                style={[
+                  styles.petToggleText,
+                  selectedPet === 'cat' && styles.petToggleTextActive,
+                ]}
+              >
+                Cat
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Loading State */}
@@ -320,70 +273,117 @@ const TrainingScreen = () => {
               </View>
             )}
 
-            {/* Training Programs */}
+            {/* Training Programs — website-style cards */}
             <View style={styles.programsContainer}>
-              {trainingPrograms.map((program) => (
-            <View
-              key={program.id}
-              style={[styles.programCard, { backgroundColor: program.bgColor }]}
-            >
-              {/* Free/Locked Badge */}
-              {program.isFree && (
-                <View style={styles.freeBadge}>
-                  <Text style={styles.freeBadgeText}>Free</Text>
-                </View>
-              )}
-              {program.isLocked && (
-                <View style={styles.lockBadge}>
-                  <Image source={lockIcon} style={styles.lockIcon} />
-                </View>
-              )}
-
-              {/* Program Content */}
-              <View style={styles.programContent}>
-                <View style={styles.programTextContainer}>
-                  <Text style={program.isLocked ? styles.lockedProgramTitle : styles.programTitle}>{program.title}</Text>
-                  <Text style={program.isLocked ? styles.lockedProgramDescription : styles.programDescription}>
-                    {program.description}
-                  </Text>
-
-                  {/* Pills */}
-                  <View style={styles.pillsContainer}>
-                    <View style={program.isLocked ? styles.lockPill : styles.pill}>
-                      <Text style={ program.isLocked ? styles.lockPillText : styles.pillText }>
-                        {program.lessons} Lessons
-                      </Text>
-                    </View>
-                    <View style={program.isLocked ? styles.lockPill : styles.pill}>
-                      <Text style={program.isLocked ? styles.lockPillText : styles.pillText}>{program.days} Days</Text>
-                    </View>
-                    <View style={program.isLocked ? styles.lockPill : styles.pill}>
-                      <Text style={program.isLocked ? styles.lockPillText : styles.pillText}>
-                        {program.ways} Great Ways to Training
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Start Button */}
+              {trainingPrograms.map((program) => {
+                const light = !program.textLight;
+                return (
                   <TouchableOpacity
-                    style={[
-                      styles.startButton,
-                      
-                    ]}
-                    onPress={() => handleStartTraining(program)}
+                    key={program.id}
+                    activeOpacity={0.92}
+                    onPress={() => {
+                      setSelectedPlan(program.category);
+                      handleStartTraining(program);
+                    }}
+                    style={[styles.programCard, { backgroundColor: program.bgColor }]}
                   >
-                    <Text style={program.isLocked ? styles.lockText : styles.startButtonText}>Let's Start ➜</Text>
-                  </TouchableOpacity>
-                </View>
+                    {program.isFree ? (
+                      <View style={styles.freeBadge}>
+                        <Text style={styles.freeBadgeText}>FREE</Text>
+                      </View>
+                    ) : (
+                      <View style={styles.lockBadge}>
+                        <Image source={lockIcon} style={styles.lockIcon} />
+                      </View>
+                    )}
 
-                {/* Dog Image */}
-                
-                  <Image source={program.image} style={styles.dogImage} />
-               
-              </View>
+                    <View style={styles.programTextContainer}>
+                      <Text
+                        style={[
+                          styles.programTitle,
+                          !light && styles.programTitleLight,
+                        ]}
+                      >
+                        {program.title}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.programDescription,
+                          !light && styles.programDescriptionLight,
+                        ]}
+                      >
+                        {program.description}
+                      </Text>
+
+                      <View style={styles.pillsContainer}>
+                        {(program.tags || []).map((tag: string) => (
+                          <View
+                            key={tag}
+                            style={[styles.pill, !light && styles.lockPill]}
+                          >
+                            <Text
+                              style={[
+                                styles.pillText,
+                                !light && styles.lockPillText,
+                              ]}
+                            >
+                              {tag}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                      <Text
+                        style={[
+                          styles.startButtonText,
+                          !light && styles.lockText,
+                        ]}
+                      >
+                        Let's Start →
+                      </Text>
+                    </View>
+
+                    <Image source={program.image} style={styles.dogImage} />
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-          ))}
-        </View>
+
+            {/* Progress strip — website style */}
+            {currentPlan ? (
+              <View
+                style={[
+                  styles.progressCard,
+                  { backgroundColor: currentPlan.bgColor },
+                ]}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.progressTitle,
+                      currentPlan.textLight && { color: '#FFFFFF' },
+                    ]}
+                  >
+                    {currentPlan.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.progressLessons,
+                      currentPlan.textLight && { color: 'rgba(255,255,255,0.85)' },
+                    ]}
+                  >
+                    LESSONS
+                  </Text>
+                </View>
+                <View style={styles.progressBox}>
+                  <Text style={styles.progressLabel}>Learning Progress</Text>
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: '0%' }]} />
+                  </View>
+                  <Text style={styles.progressPct}>0%</Text>
+                </View>
+              </View>
+            ) : null}
           </>
         )}
 
@@ -476,6 +476,33 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 14,
     color: '#6B7280',
+    marginBottom: 12,
+  },
+  petToggle: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 999,
+    padding: 4,
+    gap: 4,
+  },
+  petToggleBtn: {
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 999,
+  },
+  petToggleBtnActive: {
+    backgroundColor: '#1F2E46',
+  },
+  petToggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#6B7280',
+  },
+  petToggleTextActive: {
+    color: '#FFFFFF',
   },
   myTrainingsSection: {
     paddingHorizontal: 20,
@@ -510,141 +537,161 @@ const styles = StyleSheet.create({
   },
   programsContainer: {
     padding: 20,
-    gap: 20,
+    gap: 16,
   },
   programCard: {
-    borderRadius: 16,
-    padding: 15,
+    borderRadius: 24,
+    padding: 18,
     position: 'relative',
     overflow: 'hidden',
-    minHeight: 200,
-    paddingTop: 24,
+    minHeight: 240,
   },
   freeBadge: {
     position: 'absolute',
-    top: 15,
-    right: 15,
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 10,
+    top: 16,
+    right: 16,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
-    zIndex: 1,
+    zIndex: 2,
   },
   freeBadgeText: {
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 10,
+    fontWeight: '800',
     color: '#1F2937',
+    letterSpacing: 0.4,
   },
   lockBadge: {
     position: 'absolute',
-    bottom: 15,
-    right: 15,
-    zIndex: 1,
-    elevation: 6,
-    backgroundColor: 'rgba(200, 188, 188, 0.3)',
-    padding: 10,
-    borderRadius: 14,
+    top: 16,
+    right: 16,
+    zIndex: 2,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: 8,
+    borderRadius: 999,
   },
   lockIcon: {
-    width: 26,
-    height: 26,
-  },
-  programContent: {
-    flexDirection: 'row',
-    // justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    width: 18,
+    height: 18,
+    tintColor: '#FFFFFF',
   },
   programTextContainer: {
     flex: 1,
-    // marginRight: 15,
-    paddingRight: 120, 
+    paddingRight: 110,
+    zIndex: 1,
   },
   programTitle: {
-  fontSize: 18,
-  fontWeight: '700',
-  color: '#111827',
-  marginBottom: 6,
-},
-lockedProgramTitle: {
-  fontSize: 18,
-  fontWeight: '700',
-  color: '#fefefe',
-  marginBottom: 6,
-},
-programDescription: {
-  fontSize: 14,
-  color: '#374151',
-  marginBottom: 12,
-},
-lockedProgramDescription: {
-  fontSize: 14,
-  color: '#fefefe',
-  marginBottom: 12,
-},
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#111827',
+    marginBottom: 8,
+    paddingRight: 48,
+  },
+  programTitleLight: {
+    color: '#FFFFFF',
+  },
+  programDescription: {
+    fontSize: 13,
+    color: '#374151',
+    marginBottom: 12,
+    lineHeight: 18,
+    maxWidth: 220,
+  },
+  programDescriptionLight: {
+    color: 'rgba(255,255,255,0.9)',
+  },
   pillsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 15,
+    gap: 6,
+    marginBottom: 16,
   },
   pill: {
     backgroundColor: 'transparent',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#000000',
-    
+    borderColor: 'rgba(0,0,0,0.7)',
   },
   lockPill: {
-    backgroundColor: 'transparent',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: '#ffffff',
+    borderColor: 'rgba(255,255,255,0.75)',
   },
   pillText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: '#1F2937',
   },
   lockPillText: {
-    fontSize: 12,
-    fontWeight: '600',
     color: '#FFFFFF',
   },
-  startButton: {
-    paddingHorizontal: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-
   startButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#111827',
   },
   lockText: {
-    fontSize: 16,
-    fontWeight: 'bold',
     color: '#FFFFFF',
   },
-  dogImageContainer: {
-    width: 120,
-    height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-
-  },
   dogImage: {
-  position: 'absolute',
-  right: -10,
-  bottom: -10,
-  width: 160,
-  height: 200,
-  resizeMode: 'contain',
-},
+    position: 'absolute',
+    right: -6,
+    bottom: -4,
+    width: 140,
+    height: 150,
+    resizeMode: 'contain',
+  },
+  progressCard: {
+    marginHorizontal: 20,
+    marginBottom: 12,
+    borderRadius: 20,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  progressTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  progressLessons: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#4B5563',
+    letterSpacing: 1.2,
+  },
+  progressBox: {
+    backgroundColor: 'rgba(149,229,98,0.4)',
+    borderRadius: 16,
+    padding: 12,
+    width: 150,
+  },
+  progressLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 6,
+  },
+  progressTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.55)',
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#22C55E',
+    borderRadius: 999,
+  },
+  progressPct: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
 
   footerTextContainer: {
     marginTop: 30,

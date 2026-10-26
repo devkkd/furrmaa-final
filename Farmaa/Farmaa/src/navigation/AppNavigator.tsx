@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { Text, BackHandler, Alert, Image, View } from 'react-native';
+import { Text, BackHandler, Alert, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { navigationRef, resetToLoginScreen } from './navigationRef';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAuth } from '../context/AuthContext';
 import { ICON_SIZES } from '../constants/iconSizes';
 
@@ -127,13 +128,6 @@ import MyCremationRequestsScreen from '../screens/cremation/MyCremationRequestsS
 
 // Emergency Screen
 import EmergencyScreen from '../screens/emergency/EmergencyScreen';
-// Icons
-import shoppingBagIcon from '../assets/images/bag-2.png';
-import exploreIcon from '../assets/images/search-normal.png';
-import trainIcon from '../assets/images/pet.png';
-import vetIcon from '../assets/images/Group 16.png';
-import moreIcon from '../assets/images/category-2.png';
-
 // Admin Screens
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 import AdminProductsScreen from '../screens/admin/AdminProductsScreen';
@@ -171,81 +165,61 @@ const MainTabs = () => {
         tabBarInactiveTintColor: '#1E293B',
         tabBarStyle: {
           paddingBottom: Math.max(insets.bottom, 8),
-          paddingTop: 6,
-          height: 64 + Math.max(insets.bottom - 8, 0),
+          paddingTop: 8,
+          height: 68 + Math.max(insets.bottom - 8, 0),
           backgroundColor: '#F1F5F9',
           marginHorizontal: 8,
           marginBottom: 6,
           marginTop: 0,
-          borderTopWidth: 0, 
+          borderTopWidth: 0,
           elevation: 0,
           borderRadius: 16,
         },
         tabBarLabelStyle: {
           fontSize: 11,
+          fontWeight: '600',
           marginTop: 2,
           padding: 0,
         },
-
       }}
     >
-      <Tab.Screen 
-        name="ProductsTab" 
+      <Tab.Screen
+        name="ProductsTab"
         component={HomeScreen}
         options={{
           tabBarLabel: 'Shop',
-          tabBarIcon: ({ color, focused }) => (
-            <Icon
-              name="shopping-bag"
-              size={ICON_SIZES.tab}
-              color={color}
-              focused={focused}
-            />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="shopping-outline" focused={focused} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="TrainTab" 
+      <Tab.Screen
+        name="TrainTab"
         component={TrainingScreen}
         options={{
           tabBarLabel: 'Train',
-          tabBarIcon: ({ color, focused }) => (
-            <Icon
-              name="train"
-              size={ICON_SIZES.tab}
-              color={color}
-              focused={focused}
-            />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="paw" focused={focused} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="VetTab" 
+      <Tab.Screen
+        name="VetTab"
         component={VeterinariansScreen}
         options={{
           tabBarLabel: 'Vet',
-          tabBarIcon: ({ color, focused }) => (
-            <Icon
-              name="vet"
-              size={ICON_SIZES.tab}
-              color={color}
-              focused={focused}
-            />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="hospital-box-outline" focused={focused} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="ProfileTab" 
+      <Tab.Screen
+        name="ProfileTab"
         component={ProfileScreen}
         options={{
           tabBarLabel: 'More',
-          tabBarIcon: ({ color, focused }) => (
-            <Icon
-              name="more"
-              size={ICON_SIZES.tab}
-              color={color}
-              focused={focused}
-            />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="view-grid-outline" focused={focused} />
           ),
         }}
       />
@@ -253,53 +227,27 @@ const MainTabs = () => {
   );
 };
 
-// Simple icon component - using emoji for now
-const Icon = ({
-  name,
-  size,
-  color,
-  focused,
-}: {
-  name: string;
-  size: number;
-  color: string;
-  focused: boolean;
-}) => {
-  const iconMap: { [key: string]: any } = {
-    'shopping-bag': shoppingBagIcon,
-    train: trainIcon,
-    vet: vetIcon,
-    more: moreIcon,
-  };
-
-  const source = iconMap[name];
-  if (!source) return null;
-
-  return (
-    <View
-      style={{
-        backgroundColor: focused ? '#1E293B' : 'transparent',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 24,
-        height: 42,
-        minWidth: 48,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <Image
-        source={source}
-        resizeMode="contain"
-        style={{
-          width: size,
-          height: size,
-          tintColor: focused ? '#FFFFFF' : '#1F2E46',
-        }}
-      />
-    </View>
-  );
-};
+/** Vector tab icons — crisp on all densities (PNG tabs were blurry). */
+const TabIcon = ({ name, focused }: { name: string; focused: boolean }) => (
+  <View
+    style={{
+      backgroundColor: focused ? '#1E293B' : 'transparent',
+      paddingHorizontal: 14,
+      paddingVertical: 7,
+      borderRadius: 22,
+      minWidth: 48,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}
+  >
+    <MaterialCommunityIcons
+      name={name as any}
+      size={ICON_SIZES.tab}
+      color={focused ? '#FFFFFF' : '#1F2E46'}
+    />
+  </View>
+);
 
 
 const AppNavigator = () => {

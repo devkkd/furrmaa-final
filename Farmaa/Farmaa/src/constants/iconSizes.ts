@@ -7,8 +7,8 @@ export const ICON_SIZES = {
   back: 28,
   /** Primary header / toolbar actions */
   action: 24,
-  /** Tab bar icons (sits inside focused pill) */
-  tab: 30,
+  /** Tab bar icons (vector — crisp inside focused pill) */
+  tab: 24,
   /** +/- inside quantity circles */
   qty: 18,
   /** Inline arrows next to button labels */

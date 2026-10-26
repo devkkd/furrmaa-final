@@ -11,7 +11,6 @@ import {
   StatusBar,
   Animated,
   ActivityIndicator,
-  Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
@@ -53,8 +52,6 @@ import dogTravelIcon from '../../assets/images/dogTravel.png';
 import dogJointCareIcon from '../../assets/images/dogJoint Care.png';
 import dogLiverCareIcon from '../../assets/images/dogLiver Care.png';
 import dogKidneyCareIcon from '../../assets/images/dogKidney Care.png';
-import dogTrainingImage from '../../assets/images/image 8.png';
-import catTrainingImage from '../../assets/images/image 17.png';
 import dogCareBanner from '../../assets/images/image 9.png';
 import catCareBanner from '../../assets/images/image 18.png';
 import adoptionBanner from '../../assets/images/image 10.png';
@@ -62,17 +59,19 @@ import dogToysIcon from '../../assets/images/dogToys.png';
 import dogGroomingIcon from '../../assets/images/dogGrooming.png';
 import dogWalkIcon from '../../assets/images/dogWalk.png';
 import dogFeedersIcon from '../../assets/images/dogFeeders.png';
-import dogBanner1 from '../../assets/images/dogBanner.png';
-import catBanner1 from '../../assets/images/catBanner.png';
-import dogBanner2 from '../../assets/images/image 2.png';
-import catBanner2 from '../../assets/images/image 16.png';
 import dogProduct1Image from '../../assets/images/dogProduct1.png';
 import catProduct1Image from '../../assets/images/catProduct1.png';
 import helpBanner from '../../assets/images/image 11.png';
 import heartIcon from '../../assets/images/heart.png';
 import { getBackendCategory } from '../../utils/productCategories';
+import { BANNER_ASPECT, getHomeBanners } from '../../data/homeBanners';
+import HomeTrainingSection from '../../components/HomeTrainingSection';
 
 const { width } = Dimensions.get('window');
+/** Match website mobile banner: full width minus padding, exact 2560×900 art ratio */
+const BANNER_H_PAD = 16;
+const bannerSlideWidth = width - BANNER_H_PAD * 2;
+const bannerSlideHeight = Math.round(bannerSlideWidth / BANNER_ASPECT);
 
 interface Product {
   _id: string;
@@ -185,51 +184,26 @@ const HomeScreen = () => {
     }
   };
 
-  // Banner data for carousel — full promotional slides (website-style)
-  const mainBanners = [
-    {
-      id: 1,
-      image: selectedPet === 'dog' ? dogBanner1 : catBanner1,
-      title: selectedPet === 'dog' ? 'Dog Essentials' : 'Cat Essentials',
-    },
-    {
-      id: 2,
-      image: selectedPet === 'dog' ? dogBanner2 : catBanner2,
-      title: 'Shop Furrmaa',
-    },
-    {
-      id: 3,
-      image: selectedPet === 'dog' ? dogCareBanner : catCareBanner,
-      title: 'Pet Care',
-    },
-    {
-      id: 4,
-      image: helpBanner,
-      title: 'Furrmaa Website',
-      isWebsite: true,
-    },
-  ];
+  // Same banners as website Banner.jsx (dog/cat swap)
+  const mainBanners = getHomeBanners(selectedPet === 'cat' ? 'cat' : 'dog');
+  const bannerWidth = bannerSlideWidth;
+  const bannerHeight = bannerSlideHeight;
 
-  // Full-width slider so banner images show completely
-  const bannerWidth = width - 32;
-
-  // Auto-slide banner effect
+  // Auto-slide banner effect (matches website ~4s)
   useEffect(() => {
-    // Reset timer when pet type changes
     setCurrentBannerIndex(0);
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({ x: 0, animated: false });
     }
 
-    // Clear existing timer
     if (bannerTimerRef.current) {
       clearInterval(bannerTimerRef.current);
     }
 
-    // Set up auto-slide
+    const count = mainBanners.length;
     bannerTimerRef.current = setInterval(() => {
       setCurrentBannerIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % mainBanners.length;
+        const nextIndex = (prevIndex + 1) % count;
         if (scrollViewRef.current) {
           scrollViewRef.current.scrollTo({
             x: nextIndex * bannerWidth,
@@ -238,14 +212,14 @@ const HomeScreen = () => {
         }
         return nextIndex;
       });
-    }, 3000); // Change banner every 3 seconds
+    }, 4000);
 
     return () => {
       if (bannerTimerRef.current) {
         clearInterval(bannerTimerRef.current);
       }
     };
-  }, [selectedPet, bannerWidth]);
+  }, [selectedPet, bannerWidth, mainBanners.length]);
 
   // Category icons – static list (pehle jaisa)
   const categories = STATIC_HOME_CATEGORIES;
@@ -565,13 +539,15 @@ const HomeScreen = () => {
               }}
             >
               <View style={styles.categoryIcon}>
-                  <Image
-                    source={category.icon}
-                    style={styles.categoryIconText}
-                    resizeMode="contain"
-                  />
+                <Image
+                  source={category.icon}
+                  style={styles.categoryIconText}
+                  resizeMode="contain"
+                />
               </View>
-              <Text style={styles.categoryName}>{category.name}</Text>
+              <Text style={styles.categoryName} numberOfLines={2}>
+                {category.name}
+              </Text>
               <View
                 style={[
                   styles.activeBar,
@@ -584,9 +560,9 @@ const HomeScreen = () => {
         <View style={styles.horizontalDivider} />
         </View>
 
-        {/* Promotional Banners — full-width, full image visible */}
+        {/* Promotional Banners — same set as website, responsive 2560×900 fit */}
         <View style={styles.bannersContainer}>
-          <View style={styles.mainBannerWrapper}>
+          <View style={[styles.mainBannerWrapper, { height: bannerHeight }]}>
             <ScrollView
               ref={scrollViewRef}
               horizontal
@@ -605,28 +581,42 @@ const HomeScreen = () => {
                   key={banner.id}
                   activeOpacity={0.95}
                   onPress={() => {
-                    if ((banner as any).isWebsite) {
-                      Linking.openURL('https://furrmaa.com').catch(() => {});
-                    } else {
-                      navigateTo('Products', { petType: selectedPet });
+                    if (banner.id === 'dog-10') {
+                      navigateTo('Training', {});
+                      return;
                     }
+                    navigateTo('Products', {
+                      petType: selectedPet,
+                      filters: banner.category
+                        ? { category: [banner.category] }
+                        : undefined,
+                    });
                   }}
                   style={[
                     styles.mainBanner,
-                    selectedPet === 'cat' && styles.mainBannerCat,
-                    { width: bannerWidth },
+                    { width: bannerWidth, height: bannerHeight },
                   ]}
                 >
                   <Image
                     source={banner.image}
                     style={styles.mainBannerImage}
-                    resizeMode="contain"
+                    resizeMode="cover"
                   />
-                  {(banner as any).isWebsite ? (
-                    <View style={styles.websiteBannerBadge}>
-                      <Text style={styles.websiteBannerBadgeText}>furrmaa.com</Text>
+                  <View style={styles.bannerScrim} />
+                  <View style={styles.bannerCopy}>
+                    <Text style={styles.bannerEyebrow} numberOfLines={1}>
+                      {banner.title}
+                    </Text>
+                    <Text style={styles.bannerHeading} numberOfLines={2}>
+                      {banner.heading}
+                    </Text>
+                    <Text style={styles.bannerSubHeading} numberOfLines={1}>
+                      {banner.subHeading}
+                    </Text>
+                    <View style={styles.bannerCta}>
+                      <Text style={styles.bannerCtaText}>{banner.button}</Text>
                     </View>
-                  ) : null}
+                  </View>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -665,27 +655,20 @@ const HomeScreen = () => {
                 <View style={styles.essentialIcon}>
                   <Image source={item.icon} style={styles.essentialIconImage} resizeMode='contain'/>
                 </View>
-                <Text style={styles.essentialName}>{item.name}</Text>
+                <Text style={styles.essentialName} numberOfLines={2}>
+                  {item.name}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
           )}
         </View>
 
-        {/* Training Banner */}
-        <TouchableOpacity 
-          style={styles.trainingBanner}
-          onPress={() => navigateTo('Training', {})}
-        >
-          <Text style={styles.trainingBannerText}>
-            {selectedPet === 'dog' ? '' : 'Cat Training'} 
-          </Text>
-          <Image
-            style={styles.trainingBannerImage}
-            source={selectedPet === 'dog' ? dogTrainingImage : catTrainingImage}
-            resizeMode="cover"
-          />
-        </TouchableOpacity>
+        {/* Website PetCard — Dog/Cat Training + Hire Trainer */}
+        <HomeTrainingSection
+          petType={selectedPet === 'cat' ? 'cat' : 'dog'}
+          onOpenTraining={() => navigateTo('Training', {})}
+        />
 
         {/* All Round Wellness */}
         <View style={styles.section}>
@@ -708,7 +691,9 @@ const HomeScreen = () => {
                 <View style={styles.wellnessIcon}>
                   <Image source={item.icon} style={styles.wellnessIconImage} resizeMode='contain'/>
                 </View>
-                <Text style={styles.wellnessName}>{item.name}</Text>
+                <Text style={styles.wellnessName} numberOfLines={2}>
+                  {item.name}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -1232,103 +1217,132 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   categoriesContent: {
-    paddingHorizontal: 12,
-    gap: 4,
+    paddingHorizontal: 14,
+    gap: 14,
+    alignItems: 'flex-start',
   },
   categoryItem: {
     alignItems: 'center',
-    width: 64,
+    width: 72,
   },
   categoryIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
+    overflow: 'hidden',
   },
   categoryIconText: {
-    height: 26,
-    width: 26,
+    height: 28,
+    width: 28,
   },
   categoryName: {
     fontSize: 11,
     color: '#1F2E46',
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 6,
     lineHeight: 14,
+    width: '100%',
   },
-    horizontalDivider: {
+  horizontalDivider: {
     height: 1,
     backgroundColor: '#D9DCE2',
     marginBottom: 10,
-    marginTop: -4,
+    marginTop: 6,
   },
-    activeBar: {
+  activeBar: {
     height: 2,
-    width: '60%',
+    width: '50%',
     backgroundColor: 'transparent',
-    marginTop: 4,
+    marginTop: 6,
     borderRadius: 10,
     alignSelf: 'center',
   },
-
   activeBarActive: {
     backgroundColor: '#1E3A8A',
   },
 
   bannersContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
+    paddingHorizontal: BANNER_H_PAD,
     marginBottom: 16,
+    marginTop: 4,
   },
   mainBannerWrapper: {
     flex: 1,
-    height: 200,
     position: 'relative',
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   bannerScrollView: {
     flex: 1,
   },
   mainBanner: {
-    height: 200,
-    borderRadius: 14,
+    borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#E8E0D5',
     position: 'relative',
   },
   mainBannerImage: {
+    ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
   },
-  mainBannerCat: {
-    backgroundColor: '#FFFFFF',
+  bannerScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.12)',
   },
-  websiteBannerBadge: {
-    position: 'absolute',
-    bottom: 12,
-    right: 12,
-    backgroundColor: 'rgba(31,46,70,0.9)',
+  bannerCopy: {
+    flex: 1,
+    justifyContent: 'space-between',
+    maxWidth: '58%',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    zIndex: 2,
+  },
+  bannerEyebrow: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  bannerHeading: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    lineHeight: 20,
+  },
+  bannerSubHeading: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.92)',
+    marginTop: 2,
+  },
+  bannerCta: {
+    marginTop: 8,
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 999,
   },
-  websiteBannerBadgeText: {
-    color: '#fff',
-    fontSize: 12,
+  bannerCtaText: {
+    fontSize: 11,
     fontWeight: '700',
+    color: '#111827',
   },
   bannerIndicators: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
-    bottom: 10,
+    bottom: 8,
     left: 0,
     right: 0,
     gap: 6,
+    zIndex: 3,
   },
   indicatorDot: {
     width: 6,
@@ -1339,36 +1353,6 @@ const styles = StyleSheet.create({
   indicatorDotActive: {
     backgroundColor: '#FFFFFF',
     width: 20,
-  },
-  bannerContent: {
-    flex: 1,
-  },
-  bannerTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 15,
-  },
-  bannerButton: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  bannerButtonText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#1E3A8A',
-  },
-  bannerImage: {
-    width: 80,
-    height: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bannerEmoji: {
-    fontSize: 60,
   },
   sideBanner: {
     flex: 1,
@@ -1428,35 +1412,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
-    columnGap: 12,
-    rowGap: 18,
+    columnGap: 10,
+    rowGap: 16,
     marginTop: 8,
   },
   essentialCard: {
-    width: (width - 40 - 36) / 4,
+    width: (width - 40 - 30) / 4,
     alignItems: 'center',
   },
   essentialIcon: {
     width: '100%',
-    aspectRatio: 0.72,
-    borderRadius: 15,
+    aspectRatio: 0.85,
+    borderRadius: 14,
     backgroundColor: '#EBF3FF',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    overflow: 'hidden',
   },
   essentialIconImage: {
-    width: '85%',
-    height: '75%',
+    width: '70%',
+    height: '70%',
   },
   essentialIconText: {
     fontSize: 24,
   },
   essentialName: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#1F2937',
     textAlign: 'center',
-    minHeight: 32,
+    minHeight: 28,
+    paddingHorizontal: 2,
   },
   trainingBanner: {
     marginBottom: 50,
@@ -1487,32 +1473,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
-    columnGap: 12,
-    rowGap: 18,
+    columnGap: 10,
+    rowGap: 16,
     marginTop: 8,
   },
   wellnessCard: {
-    width: (width - 40 - 36) / 4,
+    width: (width - 40 - 30) / 4,
     alignItems: 'center',
   },
   wellnessIcon: {
     width: '100%',
-    aspectRatio: 0.72,
-    borderRadius: 15,
+    aspectRatio: 0.85,
+    borderRadius: 14,
     backgroundColor: '#FCEBFF',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    overflow: 'hidden',
   },
   wellnessIconImage: {
-    width: '85%',
-    height: '75%',
+    width: '70%',
+    height: '70%',
   },
   wellnessName: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#1F2937',
     textAlign: 'center',
-    minHeight: 32,
+    minHeight: 28,
+    paddingHorizontal: 2,
   },
   whyChooseGrid: {
     flexDirection: 'row',
