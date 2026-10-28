@@ -80,11 +80,13 @@ const SplashScreen = () => {
       >
         {/* Logo Image */}
         <View style={styles.logoContainer}>
-          <Image 
-            source={logoImage} 
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
+          <View style={styles.logoClip}>
+            <Image
+              source={logoImage}
+              style={styles.logoImage}
+              resizeMode="cover"
+            />
+          </View>
         </View>
 
         {/* App Name */}
@@ -112,9 +114,17 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     alignItems: 'center',
   },
+  logoClip: {
+    width: 112,
+    height: 112,
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+  },
   logoImage: {
-    width: 120,
-    height: 120,
+    width: 128,
+    height: 128,
+    marginLeft: -8,
+    marginTop: -8,
   },
   textContainer: {
     alignItems: 'center',

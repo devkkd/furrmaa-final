@@ -7,6 +7,7 @@ import React from 'react';
 import { StatusBar, useColorScheme, View, Text, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/context/AuthContext';
+import { AppAlertProvider } from './src/components/AppAlert';
 import AppNavigator from './src/navigation/AppNavigator';
 
 // Error Boundary Component
@@ -49,7 +50,9 @@ function App(): React.JSX.Element {
       <SafeAreaProvider>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <AuthProvider>
-          <AppNavigator />
+          <AppAlertProvider>
+            <AppNavigator />
+          </AppAlertProvider>
         </AuthProvider>
       </SafeAreaProvider>
     </ErrorBoundary>

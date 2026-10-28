@@ -8,11 +8,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { showAppAlert } from '../../components/AppAlert';
 import { useAuth } from '../../context/AuthContext';
 import AppleBrandIcon from '../../components/AppleBrandIcon';
 import GoogleBrandIcon from '../../components/GoogleBrandIcon';
@@ -33,7 +33,7 @@ const MobileLoginScreen = () => {
 
   const handleNext = async () => {
     if (!mobileNumber || mobileNumber.length < 10) {
-      Alert.alert('Error', 'Please enter a valid mobile number');
+      showAppAlert('Error', 'Please enter a valid mobile number');
       return;
     }
 
@@ -43,7 +43,7 @@ const MobileLoginScreen = () => {
       // @ts-ignore
       navigation.navigate('OTPVerification', { mobileNumber });
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      showAppAlert('Error', error.message);
     } finally {
       setLoading(false);
     }
@@ -58,7 +58,7 @@ const MobileLoginScreen = () => {
         routes: [{ name: 'MainTabs' }],
       });
     } catch (error: any) {
-      Alert.alert('Google Login Failed', error.message || 'Failed to sign in with Google');
+      showAppAlert('Google Login Failed', error.message || 'Failed to sign in with Google');
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ const MobileLoginScreen = () => {
         routes: [{ name: 'MainTabs' }],
       });
     } catch (error: any) {
-      Alert.alert('Apple Login Failed', error.message || 'Failed to sign in with Apple');
+      showAppAlert('Apple Login Failed', error.message || 'Failed to sign in with Apple');
     } finally {
       setLoading(false);
     }

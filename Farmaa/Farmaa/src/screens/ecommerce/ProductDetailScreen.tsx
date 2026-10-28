@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
-  Alert,
   TextInput,
 } from 'react-native';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
+import { showAppAlert } from '../../components/AppAlert';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../config/api';
 import { addProductToCart } from '../../services/cartService';
@@ -70,7 +70,7 @@ const ProductDetailScreen = () => {
       }
     } catch (error: any) {
       if (!productData) {
-        Alert.alert('Error', 'Failed to load product details');
+        showAppAlert('Error', 'Failed to load product details');
         navigation.goBack();
       }
     } finally {
@@ -115,13 +115,13 @@ const ProductDetailScreen = () => {
     setReviewSubmitting(true);
     try {
       await submitProductReview(productData._id, reviewRating, reviewComment);
-      Alert.alert('Thank you', 'Your review has been published');
+      showAppAlert('Thank you', 'Your review has been published');
       setReviewRating(0);
       setReviewComment('');
       setCanReview(false);
       await loadProduct();
     } catch (e: any) {
-      Alert.alert('Error', e.response?.data?.message || 'Could not submit review');
+      showAppAlert('Error', e.response?.data?.message || 'Could not submit review');
     } finally {
       setReviewSubmitting(false);
     }
@@ -205,9 +205,9 @@ const ProductDetailScreen = () => {
     try {
       await addProductToCart(productData._id, quantity);
       setQuantity(quantity);
-      Alert.alert('Added to cart', `${productData.name} added to your cart.`);
+      showAppAlert('Added to cart', `${productData.name} added to your cart.`);
     } catch (e: any) {
-      Alert.alert('Error', e.response?.data?.message || e.message || 'Could not add to cart');
+      showAppAlert('Error', e.response?.data?.message || e.message || 'Could not add to cart');
     }
   };
 

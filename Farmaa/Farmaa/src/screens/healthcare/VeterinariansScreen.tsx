@@ -479,7 +479,7 @@ const VeterinariansScreen = () => {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Vet Services</Text>
+        <Text style={styles.headerTitle}>Nearby Services</Text>
         <TouchableOpacity
           style={styles.locationContainer}
           onPress={() => (navigation as any).navigate('ChangeLocation' as never)}
@@ -558,7 +558,7 @@ const VeterinariansScreen = () => {
         </View>
       ) : shouldShowEmpty ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>No Vet Services Nearby</Text>
+          <Text style={styles.emptyTitle}>No Nearby Services Found</Text>
           <Text style={styles.emptyDescription}>
             We couldn't find any veterinary services in your current area. Try
             changing your location to discover available options.

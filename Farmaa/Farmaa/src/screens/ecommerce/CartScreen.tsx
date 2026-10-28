@@ -6,11 +6,11 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   Image,
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
+import { showAppAlert } from '../../components/AppAlert';
 import api from '../../config/api';
 import product1Image from '../../assets/images/dogProduct1.png';
 import {
@@ -64,7 +64,7 @@ const CartScreen = () => {
       }
       setCartLines(await fetchServerCart());
     } catch (e: any) {
-      Alert.alert('Error', e.response?.data?.message || 'Could not load cart');
+      showAppAlert('Error', e.response?.data?.message || 'Could not load cart');
     } finally {
       setLoadingCart(false);
     }
@@ -121,12 +121,12 @@ const CartScreen = () => {
       const lines = await updateCartItemQuantity(line.productId, newQuantity);
       setCartLines(lines);
     } catch (e: any) {
-      Alert.alert('Error', e.response?.data?.message || 'Could not update quantity');
+      showAppAlert('Error', e.response?.data?.message || 'Could not update quantity');
     }
   };
 
   const handleRemoveItem = (line: CartLine) => {
-    Alert.alert('Remove item', `Remove "${line.name}" from cart?`, [
+    showAppAlert('Remove item', `Remove "${line.name}" from cart?`, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Remove',
@@ -139,7 +139,7 @@ const CartScreen = () => {
               handleRemoveCoupon();
             }
           } catch (e: any) {
-            Alert.alert('Error', e.response?.data?.message || 'Could not remove item');
+            showAppAlert('Error', e.response?.data?.message || 'Could not remove item');
           }
         },
       },
@@ -154,7 +154,7 @@ const CartScreen = () => {
       setAppliedCouponCode(coupon.code);
       setCouponApplied(true);
     } catch (e: any) {
-      Alert.alert('Coupon', e.response?.data?.message || e.message || 'Invalid coupon');
+      showAppAlert('Coupon', e.response?.data?.message || e.message || 'Invalid coupon');
     }
   };
 
@@ -167,7 +167,7 @@ const CartScreen = () => {
 
   const placeOrder = () => {
     if (isCartEmpty) {
-      Alert.alert('Error', 'No items in cart');
+      showAppAlert('Error', 'No items in cart');
       return;
     }
     (navigation as any).navigate('Checkout', {

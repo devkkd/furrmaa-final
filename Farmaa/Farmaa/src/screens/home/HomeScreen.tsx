@@ -68,7 +68,10 @@ import { BANNER_ASPECT, getHomeBanners } from '../../data/homeBanners';
 import HomeTrainingSection from '../../components/HomeTrainingSection';
 
 const { width } = Dimensions.get('window');
-/** Match website mobile banner: full width minus padding, exact 2560×900 art ratio */
+/**
+ * Exact 2560×900 art ratio so cover does NOT crop left/right (cut-off fix).
+ * Height scales with screen width for responsive fit.
+ */
 const BANNER_H_PAD = 16;
 const bannerSlideWidth = width - BANNER_H_PAD * 2;
 const bannerSlideHeight = Math.round(bannerSlideWidth / BANNER_ASPECT);
@@ -403,7 +406,9 @@ const HomeScreen = () => {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.headerLeft}>
-            <Image source={logoImage} style={styles.logo} resizeMode="contain" />
+            <View style={styles.logoWrap}>
+              <Image source={logoImage} style={styles.logo} resizeMode="cover" />
+            </View>
             <View style={styles.headerTextContainer}>
               <Text style={styles.logoText}>FURRMAA</Text>
               <Text style={styles.tagline}>WHERE EVERY TAIL FEELS AT HOME</Text>
@@ -467,7 +472,7 @@ const HomeScreen = () => {
               activeOpacity={0.85}
             >
               <Animated.View style={{ transform: [{ scale: searchPulse }] }}>
-                <Image source={searchIcon} style={{ width: 28, height: 28 }} resizeMode="contain" />
+                <Image source={searchIcon} style={{ width: 18, height: 18 }} resizeMode="contain" />
               </Animated.View>
               <Text style={styles.searchIconHint}>Search</Text>
             </TouchableOpacity>
@@ -496,16 +501,14 @@ const HomeScreen = () => {
                   navigateTo('Search', {});
                 }}
               >
-                <Animated.View style={{ transform: [{ scale: searchPulse }], marginRight: 10 }}>
-                  <Image source={searchIcon} style={{ width: 26, height: 26 }} resizeMode="contain" />
+                <Animated.View style={{ transform: [{ scale: searchPulse }], marginRight: 8 }}>
+                  <Image source={searchIcon} style={{ width: 18, height: 18 }} resizeMode="contain" />
                 </Animated.View>
-                <Text style={styles.searchPlaceholder}>
-                  Search food, toys, meds & more...
-                </Text>
+                <Text style={styles.searchPlaceholder}>Search</Text>
               </TouchableOpacity>
               <View style={styles.verticalDivider} />
               <TouchableOpacity style={styles.micButton} onPress={handleVoiceSearch}>
-                <Image source={microphoneIcon} style={{ width: 26, height: 26 }} resizeMode="contain" />
+                <Image source={microphoneIcon} style={{ width: 18, height: 18 }} resizeMode="contain" />
               </TouchableOpacity>
             </Animated.View>
           )}
@@ -513,7 +516,7 @@ const HomeScreen = () => {
             style={styles.filterButton}
             onPress={() => navigateTo('Filter', { petType: selectedPet })}
           >
-            <Image source={filterIcon} style={{ width: 22, height: 22 }} resizeMode="contain" />
+            <Image source={filterIcon} style={{ width: 18, height: 18 }} resizeMode="contain" />
           </TouchableOpacity>
         </View>
 
@@ -703,11 +706,19 @@ const HomeScreen = () => {
         {/* Find a New Friend Banner / We Care Banner */}
         {selectedPet === 'cat' ? (
           <View style={styles.findFriendBanner}>
-            <Image source={catCareBanner} style={styles.careBannerImage}  resizeMode="cover"/>
+            <Image
+              source={catCareBanner}
+              style={styles.careBannerImage}
+              resizeMode="cover"
+            />
           </View>
         ) : (
           <View style={styles.careBanner}>
-            <Image source={dogCareBanner} style={styles.careBannerImage} resizeMode="cover"/>
+            <Image
+              source={dogCareBanner}
+              style={styles.careBannerImage}
+              resizeMode="cover"
+            />
           </View>
         )}
 
@@ -1060,10 +1071,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  logoWrap: {
+    width: 46,
+    height: 46,
+    marginRight: 10,
+    overflow: 'hidden',
+    // No ring / border — crop outer gray ring from logo asset
+    backgroundColor: 'transparent',
+  },
   logo: {
-    width: 50,
-    height: 50,
-    marginRight: 12,
+    width: 54,
+    height: 54,
+    marginLeft: -4,
+    marginTop: -4,
   },
   headerTextContainer: {
     flex: 1,
@@ -1147,26 +1167,26 @@ const styles = StyleSheet.create({
 },
   searchContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 15,
-    paddingBottom: 12,
-    gap: 10,
+    paddingHorizontal: 14,
+    paddingBottom: 8,
+    gap: 8,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
   },
   searchIconOnly: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    gap: 10,
+    borderColor: '#D9DCE2',
+    gap: 8,
   },
   searchIconHint: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#6B7280',
     fontWeight: '500',
   },
@@ -1174,19 +1194,19 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#D9DCE2',
   },
   filterButton: {
-    padding: 12,
+    padding: 10,
     backgroundColor: '#1F2E46',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   searchInputContainer: {
     flex: 1,
@@ -1217,33 +1237,33 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   categoriesContent: {
-    paddingHorizontal: 14,
-    gap: 14,
+    paddingHorizontal: 12,
+    gap: 8,
     alignItems: 'flex-start',
   },
   categoryItem: {
     alignItems: 'center',
-    width: 72,
+    width: 58,
   },
   categoryIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
     overflow: 'hidden',
   },
   categoryIconText: {
-    height: 28,
-    width: 28,
+    height: 20,
+    width: 20,
   },
   categoryName: {
-    fontSize: 11,
+    fontSize: 10,
     color: '#1F2E46',
     textAlign: 'center',
-    marginTop: 6,
-    lineHeight: 14,
+    marginTop: 4,
+    lineHeight: 12,
     width: '100%',
   },
   horizontalDivider: {
@@ -1292,44 +1312,44 @@ const styles = StyleSheet.create({
   },
   bannerScrim: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.12)',
+    backgroundColor: 'rgba(0,0,0,0.08)',
   },
   bannerCopy: {
     flex: 1,
-    justifyContent: 'space-between',
-    maxWidth: '58%',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    justifyContent: 'center',
+    maxWidth: '55%',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     zIndex: 2,
   },
   bannerEyebrow: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: 2,
   },
   bannerHeading: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
-    lineHeight: 20,
+    lineHeight: 17,
   },
   bannerSubHeading: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.92)',
+    color: 'rgba(255,255,255,0.95)',
     marginTop: 2,
   },
   bannerCta: {
-    marginTop: 8,
+    marginTop: 6,
     alignSelf: 'flex-start',
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 999,
   },
   bannerCtaText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: '#111827',
   },
@@ -1456,8 +1476,8 @@ const styles = StyleSheet.create({
   },
   trainingBannerImage: {
     width: '100%',
-    height: '250%',
-    objectFit: 'cover',
+    height: undefined,
+    aspectRatio: 16 / 7,
     borderRadius: 12,
   },
   trainingBannerText: {
@@ -1549,25 +1569,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   careBanner: {
-    marginBottom: 50,
-    marginTop: 20,
-    height: 120,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 24,
+    marginTop: 12,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#F3F4F6',
   },
   careBannerImage: {
     width: '100%',
-    height: '200%',
-    objectFit: 'cover',
-    borderRadius: 12,
+    height: undefined,
+    aspectRatio: 16 / 7,
+    borderRadius: 14,
   },
   findFriendBanner: {
-    marginBottom: 50,
-    height: 120,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 24,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#F3F4F6',
   },
   productsGrid: {
     flexDirection: 'row',
@@ -1721,12 +1741,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   adoptionBanner: {
-    marginTop: 30,
-    marginBottom: 60,
-    height: 100, 
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 20,
+    marginBottom: 28,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#F3F4F6',
   },
   adoptionBannerText: {
     flex: 1,

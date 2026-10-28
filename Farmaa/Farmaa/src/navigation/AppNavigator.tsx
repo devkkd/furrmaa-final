@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAuth } from '../context/AuthContext';
 import { ICON_SIZES } from '../constants/iconSizes';
+import { hapticLight } from '../utils/haptics';
 
 // Auth Screens
 import SplashScreen from '../screens/SplashScreen';
@@ -164,28 +165,32 @@ const MainTabs = () => {
         tabBarActiveTintColor: '#1E293B',
         tabBarInactiveTintColor: '#1E293B',
         tabBarStyle: {
-          paddingBottom: Math.max(insets.bottom, 8),
-          paddingTop: 8,
-          height: 68 + Math.max(insets.bottom - 8, 0),
-          backgroundColor: '#F1F5F9',
-          marginHorizontal: 8,
+          paddingBottom: Math.max(insets.bottom, 6),
+          paddingTop: 4,
+          height: 58 + Math.max(insets.bottom - 6, 0),
+          backgroundColor: '#F8FAFC',
+          marginHorizontal: 10,
           marginBottom: 6,
           marginTop: 0,
           borderTopWidth: 0,
           elevation: 0,
-          borderRadius: 16,
+          borderRadius: 18,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '600',
-          marginTop: 2,
+          marginTop: 0,
           padding: 0,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 2,
         },
       }}
     >
       <Tab.Screen
         name="ProductsTab"
         component={HomeScreen}
+        listeners={{ tabPress: () => hapticLight() }}
         options={{
           tabBarLabel: 'Shop',
           tabBarIcon: ({ focused }) => (
@@ -196,6 +201,7 @@ const MainTabs = () => {
       <Tab.Screen
         name="TrainTab"
         component={TrainingScreen}
+        listeners={{ tabPress: () => hapticLight() }}
         options={{
           tabBarLabel: 'Train',
           tabBarIcon: ({ focused }) => (
@@ -204,18 +210,31 @@ const MainTabs = () => {
         }}
       />
       <Tab.Screen
-        name="VetTab"
+        name="NearbyTab"
         component={VeterinariansScreen}
+        listeners={{ tabPress: () => hapticLight() }}
         options={{
-          tabBarLabel: 'Vet',
+          tabBarLabel: 'Nearby',
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="hospital-box-outline" focused={focused} />
+            <TabIcon name="map-marker-radius-outline" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="HopeTab"
+        component={HopeScreen}
+        listeners={{ tabPress: () => hapticLight() }}
+        options={{
+          tabBarLabel: 'Hope',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="heart-outline" focused={focused} />
           ),
         }}
       />
       <Tab.Screen
         name="ProfileTab"
         component={ProfileScreen}
+        listeners={{ tabPress: () => hapticLight() }}
         options={{
           tabBarLabel: 'More',
           tabBarIcon: ({ focused }) => (
@@ -227,16 +246,16 @@ const MainTabs = () => {
   );
 };
 
-/** Vector tab icons — crisp on all densities (PNG tabs were blurry). */
+/** Compact vector tab icons — crisp, not oversized. */
 const TabIcon = ({ name, focused }: { name: string; focused: boolean }) => (
   <View
     style={{
       backgroundColor: focused ? '#1E293B' : 'transparent',
-      paddingHorizontal: 14,
-      paddingVertical: 7,
-      borderRadius: 22,
-      minWidth: 48,
-      height: 40,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 16,
+      minWidth: 40,
+      height: 32,
       justifyContent: 'center',
       alignItems: 'center',
     }}

@@ -8,9 +8,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { showAppAlert } from '../../components/AppAlert';
 import { useAuth } from '../../context/AuthContext';
 
 import { BackIcon } from '../../components/AppIcons';
@@ -84,7 +84,7 @@ const OTPVerificationScreen = () => {
   const handleVerify = async () => {
     const otpString = otp.join('');
     if (otpString.length !== 6) {
-      Alert.alert('Error', 'Please enter complete 6-digit OTP');
+      showAppAlert('Error', 'Please enter complete 6-digit OTP');
       return;
     }
 
@@ -96,7 +96,7 @@ const OTPVerificationScreen = () => {
         routes: [{ name: 'MainTabs' }],
       });
     } catch (error: any) {
-      Alert.alert('Verification Failed', error.message);
+      showAppAlert('Verification Failed', error.message);
       // Clear OTP on error
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
@@ -117,9 +117,9 @@ const OTPVerificationScreen = () => {
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
-      Alert.alert('Success', 'OTP resent successfully');
+      showAppAlert('Success', 'OTP resent successfully');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to resend OTP');
+      showAppAlert('Error', error.message || 'Failed to resend OTP');
     }
   };
 

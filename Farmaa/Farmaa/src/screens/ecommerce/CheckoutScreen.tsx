@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
-  Alert,
   Image,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { showAppAlert } from '../../components/AppAlert';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../config/api';
 import {
@@ -165,7 +165,7 @@ const CheckoutScreen = () => {
       setCouponDiscountAmount(coupon.discountAmount || 0);
       setShowCouponInput(false);
     } catch (e: any) {
-      Alert.alert('Coupon', e.response?.data?.message || e.message || 'Invalid coupon');
+      showAppAlert('Coupon', e.response?.data?.message || e.message || 'Invalid coupon');
     }
   };
 
@@ -177,13 +177,13 @@ const CheckoutScreen = () => {
 
   const placeOrder = async () => {
     if (orderItems.length === 0) {
-      Alert.alert('Error', 'No items in cart');
+      showAppAlert('Error', 'No items in cart');
       return;
     }
 
     // Validate address
     if (!address.street || !address.city || !address.state || !address.zipCode || !address.phone) {
-      Alert.alert('Error', 'Please provide a complete delivery address');
+      showAppAlert('Error', 'Please provide a complete delivery address');
       return;
     }
 
@@ -213,7 +213,7 @@ const CheckoutScreen = () => {
 
       if (paymentMethod === 'cash' || paymentMethod === 'wallet') {
         if (paymentMethod === 'wallet' && walletBalance < finalSubtotal) {
-          Alert.alert(
+          showAppAlert(
             'Insufficient balance',
             'Recharge your wallet or choose another payment method.',
             [
@@ -269,7 +269,7 @@ const CheckoutScreen = () => {
         placedOrder = verifyRes.order;
       }
 
-      Alert.alert(
+      showAppAlert(
         'Order Placed Successfully!',
         `Your order has been placed. Order ID: ${placedOrder?._id?.slice(-6).toUpperCase() || 'N/A'}`,
         [
@@ -289,7 +289,7 @@ const CheckoutScreen = () => {
         return;
       }
       const errorMessage = error.response?.data?.message || error.message || 'Failed to place order. Please try again.';
-      Alert.alert('Order Failed', errorMessage, [
+      showAppAlert('Order Failed', errorMessage, [
         {
           text: 'OK',
           onPress: () => {
@@ -561,7 +561,7 @@ const CheckoutScreen = () => {
               ]}
               onPress={() => {
                 if (isWallet && walletBalance < finalSubtotal) {
-                  Alert.alert(
+                  showAppAlert(
                     'Low wallet balance',
                     `You have ₹${walletBalance.toLocaleString('en-IN')}. Add money to pay with wallet.`,
                     [

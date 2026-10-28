@@ -8,10 +8,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { showAppAlert } from '../../components/AppAlert';
 import { useAuth } from '../../context/AuthContext';
 
 // @ts-ignore
@@ -30,7 +30,7 @@ const EmailLoginScreen = () => {
   const handleNext = async () => {
     const trimmed = email.trim().toLowerCase();
     if (!EMAIL_REGEX.test(trimmed)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      showAppAlert('Error', 'Please enter a valid email address');
       return;
     }
 
@@ -42,7 +42,7 @@ const EmailLoginScreen = () => {
         devOtp: __DEV__ ? devOtp : undefined,
       });
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to send OTP');
+      showAppAlert('Error', error.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
