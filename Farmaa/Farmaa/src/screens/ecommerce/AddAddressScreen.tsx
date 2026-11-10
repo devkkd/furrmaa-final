@@ -172,28 +172,29 @@ headerTitle: {
   input: {
     height: 48,
     borderWidth: 1,
-    borderColor: "#C5C9D3",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderColor: "#D1D5DB",
+    borderRadius: 10,
+    paddingHorizontal: 14,
     fontSize: 14,
-    backgroundColor: "#F9FAFB",
-    
+    color: "#1F2937",
+    backgroundColor: "#F3F4F6",
   },
 
   button: {
-    marginTop: 30,
-    height: 48,
-    borderRadius: 24,
+    marginTop: 28,
+    marginBottom: 40,
+    height: 50,
+    borderRadius: 999,
     justifyContent: "center",
     alignItems: "center",
-    width: "50%",
+    width: "70%",
     alignSelf: "center",
   },
 
   buttonText: {
     color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });
 

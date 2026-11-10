@@ -18,7 +18,7 @@ import AppleBrandIcon from '../../components/AppleBrandIcon';
 import GoogleBrandIcon from '../../components/GoogleBrandIcon';
 
 // @ts-ignore
-import logoImage from '../../assets/images/Logo.png';
+import logoImage from '../../assets/logo.png';
 
 const MobileLoginScreen = () => {
   const navigation = useNavigation();

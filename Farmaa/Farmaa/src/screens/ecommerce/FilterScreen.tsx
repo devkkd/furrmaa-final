@@ -93,7 +93,7 @@ const FilterScreen = () => {
     ],
     size: sizesList,
     dietaryNeeds: dietaryList,
-    rating: ['4* & up', '3* & up', '2* & up', '1* & up'],
+    rating: ['4★ & up', '3★ & up', '2★ & up', '1★ & up'],
   };
 
   const toggleFilter = (category: keyof FilterState, value: string) => {
@@ -252,25 +252,25 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1D2A44',
   },
   placeholder: {
     width: 34,
   },
   scrollContent: {
-    padding: 15,
-    paddingBottom: 100,
+    padding: 16,
+    paddingBottom: 110,
   },
   filterSection: {
-    marginBottom: 30,
+    marginBottom: 24,
   },
   filterSectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 15,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 12,
   },
   filterOptions: {
     flexDirection: 'row',
@@ -279,19 +279,19 @@ const styles = StyleSheet.create({
   },
   filterOption: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    backgroundColor: '#F9FAFB',
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
   filterOptionSelected: {
-    backgroundColor: '#1F2937',
-    borderColor: '#1F2937',
+    backgroundColor: '#1D2A44',
+    borderColor: '#1D2A44',
   },
   filterOptionText: {
     fontSize: 14,
-    color: '#1F2937',
+    color: '#111827',
     fontWeight: '500',
   },
   filterOptionTextSelected: {
@@ -303,7 +303,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flexDirection: 'row',
-    padding: 15,
+    padding: 16,
+    paddingBottom: 24,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
@@ -312,7 +313,7 @@ const styles = StyleSheet.create({
   footerButton: {
     flex: 1,
     paddingVertical: 15,
-    borderRadius: 12,
+    borderRadius: 999,
     alignItems: 'center',
   },
   clearButton: {
@@ -323,10 +324,10 @@ const styles = StyleSheet.create({
   clearButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#1D2A44',
   },
   applyButton: {
-    backgroundColor: '#1F2937',
+    backgroundColor: '#1D2A44',
   },
   applyButtonText: {
     fontSize: 16,

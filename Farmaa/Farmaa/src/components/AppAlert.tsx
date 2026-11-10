@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   Modal,
   View,
   Text,
@@ -7,7 +8,6 @@ import {
   TouchableOpacity,
   Pressable,
 } from 'react-native';
-import { hapticLight, hapticMedium } from '../utils/haptics';
 
 export type AppAlertButton = {
   text: string;
@@ -29,47 +29,81 @@ const AppAlertContext = createContext<AppAlertContextValue | null>(null);
 
 let externalShow: AppAlertContextValue['showAlert'] | null = null;
 
+/** Prefer native Alert — stable across Android; themed modal is optional. */
+const USE_NATIVE_ALERT = true;
+
 /** Drop-in replacement for Alert.alert — themed to Furrmaa navy/green. */
 export function showAppAlert(
   title: string,
   message?: string,
   buttons?: AppAlertButton[]
 ) {
+  if (USE_NATIVE_ALERT) {
+    Alert.alert(title, message, buttons as any);
+    return;
+  }
   if (externalShow) {
     externalShow(title, message, buttons);
     return;
   }
-  // Fallback if provider not mounted yet
-  const { Alert } = require('react-native');
-  Alert.alert(title, message, buttons);
+  Alert.alert(title, message, buttons as any);
 }
 
 export function AppAlertProvider({ children }: { children: React.ReactNode }) {
   const [visible, setVisible] = useState(false);
   const [payload, setPayload] = useState<AlertPayload>({ title: '' });
+  const queueRef = useRef<AlertPayload[]>([]);
+  const closingRef = useRef(false);
 
-  const showAlert = useCallback((title: string, message?: string, buttons?: AppAlertButton[]) => {
-    hapticLight();
+  const present = useCallback((next: AlertPayload) => {
     setPayload({
-      title,
-      message,
-      buttons: buttons?.length
-        ? buttons
+      title: next.title,
+      message: next.message,
+      buttons: next.buttons?.length
+        ? next.buttons
         : [{ text: 'OK', style: 'default' }],
     });
     setVisible(true);
   }, []);
 
+  const showAlert = useCallback(
+    (title: string, message?: string, buttons?: AppAlertButton[]) => {
+      if (USE_NATIVE_ALERT) {
+        Alert.alert(title, message, buttons as any);
+        return;
+      }
+      const next: AlertPayload = { title, message, buttons };
+      if (visible || closingRef.current) {
+        queueRef.current.push(next);
+        return;
+      }
+      present(next);
+    },
+    [visible, present]
+  );
+
   externalShow = showAlert;
 
-  const close = () => setVisible(false);
+  const close = useCallback(() => {
+    closingRef.current = true;
+    setVisible(false);
+    setTimeout(() => {
+      closingRef.current = false;
+      const queued = queueRef.current.shift();
+      if (queued) present(queued);
+    }, 80);
+  }, [present]);
 
   const onButton = (btn: AppAlertButton) => {
-    if (btn.style === 'destructive') hapticMedium();
-    else hapticLight();
     close();
     // Defer so modal can close first
-    setTimeout(() => btn.onPress?.(), 50);
+    setTimeout(() => {
+      try {
+        btn.onPress?.();
+      } catch (e) {
+        console.warn('AppAlert button error', e);
+      }
+    }, 100);
   };
 
   const value = useMemo(() => ({ showAlert }), [showAlert]);
@@ -85,8 +119,9 @@ export function AppAlertProvider({ children }: { children: React.ReactNode }) {
         statusBarTranslucent
         onRequestClose={close}
       >
-        <Pressable style={styles.backdrop} onPress={close}>
-          <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
+        <View style={styles.backdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={close} />
+          <View style={styles.card}>
             <Text style={styles.title}>{payload.title}</Text>
             {payload.message ? (
               <Text style={styles.message}>{payload.message}</Text>
@@ -124,8 +159,8 @@ export function AppAlertProvider({ children }: { children: React.ReactNode }) {
                 );
               })}
             </View>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </AppAlertContext.Provider>
   );
@@ -163,6 +198,7 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
     elevation: 8,
+    zIndex: 2,
   },
   title: {
     fontSize: 18,

@@ -1,42 +1,16 @@
-import { Platform, Vibration } from 'react-native';
-
 /**
- * Light haptic / vibration — no extra native module required.
- * Used on tab presses, primary buttons, confirm actions.
+ * Haptics disabled by default — Vibration without android.permission.VIBRATE
+ * hard-crashes the app process on many Android builds (tab press / cart confirm).
+ * Keep these as safe no-ops so UI never depends on the vibrator.
  */
 export function hapticLight() {
-  try {
-    if (Platform.OS === 'android') {
-      Vibration.vibrate(12);
-    } else {
-      // iOS: short vibration pattern (best-effort without extra deps)
-      Vibration.vibrate(10);
-    }
-  } catch {
-    // ignore devices without vibrator
-  }
+  // no-op (stable)
 }
 
 export function hapticMedium() {
-  try {
-    if (Platform.OS === 'android') {
-      Vibration.vibrate(25);
-    } else {
-      Vibration.vibrate(20);
-    }
-  } catch {
-    // ignore
-  }
+  // no-op (stable)
 }
 
 export function hapticSuccess() {
-  try {
-    if (Platform.OS === 'android') {
-      Vibration.vibrate([0, 12, 40, 12]);
-    } else {
-      Vibration.vibrate(15);
-    }
-  } catch {
-    // ignore
-  }
+  // no-op (stable)
 }

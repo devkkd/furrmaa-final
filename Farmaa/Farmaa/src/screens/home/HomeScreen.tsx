@@ -18,7 +18,7 @@ import api from '../../config/api';
 import { getProductImageUri } from '../../utils/productImage';
 
 // @ts-ignore
-import logoImage from '../../assets/images/Logo.png';
+import logoImage from '../../assets/logo.png';
 import dogFace from '../../assets/images/DogFace.png';
 import catFace from '../../assets/images/CatFace.png';
 import microphoneIcon from '../../assets/images/microphone-2.png';
@@ -73,8 +73,12 @@ const { width } = Dimensions.get('window');
  * Height scales with screen width for responsive fit.
  */
 const BANNER_H_PAD = 16;
-const bannerSlideWidth = width - BANNER_H_PAD * 2;
+/** Figma: next banner peeks on the right edge */
+const BANNER_PEEK = 28;
+const BANNER_GAP = 10;
+const bannerSlideWidth = width - BANNER_H_PAD * 2 - BANNER_PEEK;
 const bannerSlideHeight = Math.round(bannerSlideWidth / BANNER_ASPECT);
+const bannerSnap = bannerSlideWidth + BANNER_GAP;
 
 interface Product {
   _id: string;
@@ -192,7 +196,7 @@ const HomeScreen = () => {
   const bannerWidth = bannerSlideWidth;
   const bannerHeight = bannerSlideHeight;
 
-  // Auto-slide banner effect (matches website ~4s)
+  // Auto-slide banner effect (matches website ~4s) — snap accounts for peek gap
   useEffect(() => {
     setCurrentBannerIndex(0);
     if (scrollViewRef.current) {
@@ -209,7 +213,7 @@ const HomeScreen = () => {
         const nextIndex = (prevIndex + 1) % count;
         if (scrollViewRef.current) {
           scrollViewRef.current.scrollTo({
-            x: nextIndex * bannerWidth,
+            x: nextIndex * bannerSnap,
             animated: true,
           });
         }
@@ -222,7 +226,7 @@ const HomeScreen = () => {
         clearInterval(bannerTimerRef.current);
       }
     };
-  }, [selectedPet, bannerWidth, mainBanners.length]);
+  }, [selectedPet, bannerSnap, mainBanners.length]);
 
   // Category icons – static list (pehle jaisa)
   const categories = STATIC_HOME_CATEGORIES;
@@ -563,23 +567,31 @@ const HomeScreen = () => {
         <View style={styles.horizontalDivider} />
         </View>
 
-        {/* Promotional Banners — same set as website, responsive 2560×900 fit */}
+        {/* Promotional Banners — Figma peek: next card slightly visible */}
         <View style={styles.bannersContainer}>
           <View style={[styles.mainBannerWrapper, { height: bannerHeight }]}>
             <ScrollView
               ref={scrollViewRef}
               horizontal
-              pagingEnabled
+              pagingEnabled={false}
+              decelerationRate="fast"
+              snapToInterval={bannerSnap}
+              snapToAlignment="start"
+              disableIntervalMomentum
               showsHorizontalScrollIndicator={false}
               scrollEnabled={true}
               style={styles.bannerScrollView}
               onMomentumScrollEnd={(e) => {
-                const idx = Math.round(e.nativeEvent.contentOffset.x / bannerWidth);
-                setCurrentBannerIndex(idx);
+                const idx = Math.round(
+                  e.nativeEvent.contentOffset.x / bannerSnap
+                );
+                setCurrentBannerIndex(
+                  Math.max(0, Math.min(idx, mainBanners.length - 1))
+                );
               }}
-              contentContainerStyle={{ width: bannerWidth * mainBanners.length }}
+              contentContainerStyle={styles.bannerContent}
             >
-              {mainBanners.map((banner) => (
+              {mainBanners.map((banner, index) => (
                 <TouchableOpacity
                   key={banner.id}
                   activeOpacity={0.95}
@@ -597,7 +609,12 @@ const HomeScreen = () => {
                   }}
                   style={[
                     styles.mainBanner,
-                    { width: bannerWidth, height: bannerHeight },
+                    {
+                      width: bannerWidth,
+                      height: bannerHeight,
+                      marginRight:
+                        index === mainBanners.length - 1 ? 0 : BANNER_GAP,
+                    },
                   ]}
                 >
                   <Image
@@ -606,6 +623,11 @@ const HomeScreen = () => {
                     resizeMode="cover"
                   />
                   <View style={styles.bannerScrim} />
+                  <View style={styles.bannerCounter}>
+                    <Text style={styles.bannerCounterText}>
+                      {index + 1}/{mainBanners.length}
+                    </Text>
+                  </View>
                   <View style={styles.bannerCopy}>
                     <Text style={styles.bannerEyebrow} numberOfLines={1}>
                       {banner.title}
@@ -1286,24 +1308,42 @@ const styles = StyleSheet.create({
 
   bannersContainer: {
     flexDirection: 'row',
-    paddingHorizontal: BANNER_H_PAD,
+    paddingLeft: BANNER_H_PAD,
+    paddingRight: 0,
     marginBottom: 16,
     marginTop: 4,
   },
   mainBannerWrapper: {
     flex: 1,
     position: 'relative',
-    borderRadius: 16,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   bannerScrollView: {
-    flex: 1,
+    flexGrow: 0,
+  },
+  bannerContent: {
+    paddingRight: BANNER_H_PAD,
   },
   mainBanner: {
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#E8E0D5',
     position: 'relative',
+  },
+  bannerCounter: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 4,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
+  bannerCounterText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
   },
   mainBannerImage: {
     ...StyleSheet.absoluteFillObject,

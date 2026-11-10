@@ -8,6 +8,7 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { showAppAlert } from '../../components/AppAlert';
@@ -126,21 +127,31 @@ const CartScreen = () => {
   };
 
   const handleRemoveItem = (line: CartLine) => {
-    showAppAlert('Remove item', `Remove "${line.name}" from cart?`, [
+    if (!line?.productId) {
+      Alert.alert('Error', 'Could not remove item');
+      return;
+    }
+    const label = line.name || 'this item';
+    // Native Alert — avoids custom Modal / Vibration crash paths on Android
+    Alert.alert('Remove item', `Remove "${label}" from cart?`, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Remove',
         style: 'destructive',
-        onPress: async () => {
-          try {
-            const lines = await removeFromCart(line.productId);
-            setCartLines(lines);
-            if (couponApplied && lines.length === 0) {
-              handleRemoveCoupon();
-            }
-          } catch (e: any) {
-            showAppAlert('Error', e.response?.data?.message || 'Could not remove item');
-          }
+        onPress: () => {
+          removeFromCart(line.productId)
+            .then((lines) => {
+              setCartLines(Array.isArray(lines) ? lines : []);
+              if (couponApplied && (!lines || lines.length === 0)) {
+                handleRemoveCoupon();
+              }
+            })
+            .catch((e: any) => {
+              Alert.alert(
+                'Error',
+                e?.response?.data?.message || e?.message || 'Could not remove item'
+              );
+            });
         },
       },
     ]);

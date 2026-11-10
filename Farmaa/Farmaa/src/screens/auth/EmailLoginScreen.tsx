@@ -15,7 +15,7 @@ import { showAppAlert } from '../../components/AppAlert';
 import { useAuth } from '../../context/AuthContext';
 
 // @ts-ignore
-import logoImage from '../../assets/images/Logo.png';
+import logoImage from '../../assets/logo.png';
 
 import { BackIcon } from '../../components/AppIcons';
 

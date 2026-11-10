@@ -11,8 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 import { ONBOARDING_COMPLETE_KEY } from '../services/auth0Session';
 
-// @ts-ignore
-import logoImage from '../assets/images/Logo.png';
+import logoImage from '../assets/logo.png';
 
 const SplashScreen = () => {
   const navigation = useNavigation();

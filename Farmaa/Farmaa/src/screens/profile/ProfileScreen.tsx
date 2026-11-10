@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Image,
   Linking,
   Platform,
@@ -16,13 +15,15 @@ import { WALLET_UI_ENABLED } from '../../config/featureFlags';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
+import { showAppAlert } from '../../components/AppAlert';
+import { navigateRoot } from '../../utils/navigateRoot';
 import {
   COMPANY_ADDRESS,
   COMPANY_PHONE_DISPLAY,
 } from '../../constants/contact';
 import sectionIcon from '../../assets/images/pet.png';
 import rightArrow from '../../assets/images/arrow-right1.png';
-import logo from '../../assets/images/Logo.png';
+import logo from '../../assets/logo.png';
 import cremationIcon from '../../assets/images/Group 202.png';
 import aiChatIcon from '../../assets/images/Group 230.png';
 import hopeIcon from '../../assets/images/lovely.png';
@@ -63,35 +64,32 @@ const ProfileScreen = () => {
     }, [refreshUser])
   );
 
+  const go = (screen: string, params?: Record<string, unknown>) => {
+    navigateRoot(navigation as any, screen, params);
+  };
+
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
+    showAppAlert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await logout();
+          } catch {
+            showAppAlert('Error', 'Could not complete logout. Please try again.');
+          }
         },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-            } catch {
-              Alert.alert('Error', 'Could not complete logout. Please try again.');
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
   const handleAdminPanel = () => {
     if (!isAdmin) {
-      Alert.alert('Access denied', 'Admin panel is only available for admin accounts.');
+      showAppAlert('Access denied', 'Admin panel is only available for admin accounts.');
       return;
     }
-    (navigation as any).navigate('AdminDashboard');
+    go('AdminDashboard');
   };
 
 
@@ -112,7 +110,7 @@ const ProfileScreen = () => {
       {/* Profile Section */}
       <TouchableOpacity
         style={styles.profileBanner}
-        onPress={() => (navigation as any).navigate('EditProfile', {})}
+        onPress={() => go('EditProfile')}
       >
         <View style={styles.profileIconContainer}>
           {user?.profileImage ? (
@@ -133,7 +131,7 @@ const ProfileScreen = () => {
         <View style={styles.quickLinksGrid}>
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => navigation.navigate('Orders' as never)}
+            onPress={() => go('Orders')}
           >
             <Image source={ordersIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>My Orders</Text>
@@ -141,7 +139,7 @@ const ProfileScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => (navigation as any).navigate('Wishlist', {})}
+            onPress={() => go('Wishlist')}
           >
             <Image source={heartIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>My Wishlist</Text>
@@ -150,7 +148,7 @@ const ProfileScreen = () => {
           
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => navigation.navigate('PetEvents' as never)}
+            onPress={() => go('PetEvents')}
           >
             <Image source={eventsIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>Pet Events</Text>
@@ -158,7 +156,7 @@ const ProfileScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => (navigation as any).navigate('Reminders', {})}
+            onPress={() => go('Reminders')}
           >
             <Image source={clockIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>My Reminders</Text>
@@ -167,7 +165,7 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => navigation.navigate('MyBookings' as never)}
+            onPress={() => go('MyBookings')}
           >
             <Image source={clockIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>My Bookings</Text>
@@ -176,7 +174,7 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => navigation.navigate('Emergency' as never)}
+            onPress={() => go('Emergency')}
           >
             <Image source={cremationIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>Emergency</Text>
@@ -185,7 +183,7 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => navigation.navigate('PetAIChat' as never)}
+            onPress={() => go('PetAIChat')}
           >
             <Image source={aiChatIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>Furrmaa Pet AI Chat</Text>
@@ -194,7 +192,7 @@ const ProfileScreen = () => {
           
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => navigation.navigate('Cremation' as never)}
+            onPress={() => go('Cremation')}
           >
             <Image source={cremationIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>Cremation</Text>
@@ -203,7 +201,7 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => navigation.navigate('MyCremationRequests' as never)}
+            onPress={() => go('MyCremationRequests')}
           >
             <Image source={cremationIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>Cremation Requests</Text>
@@ -212,7 +210,7 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => navigation.navigate('Hope' as never)}
+            onPress={() => go('Hope')}
           >
             <Image source={hopeIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>Hope</Text>
@@ -221,7 +219,7 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
             style={styles.serviceCard}
-            onPress={() => navigation.navigate('HopeChats' as never)}
+            onPress={() => go('HopeChats')}
           >
             <Image source={hopeIcon} style={styles.serviceIcon} />
             <Text style={styles.serviceTitle}>Hope Post & Chats</Text>
@@ -231,7 +229,7 @@ const ProfileScreen = () => {
           {WALLET_UI_ENABLED ? (
             <TouchableOpacity
               style={styles.serviceCard}
-              onPress={() => (navigation as any).navigate('Wallet', {})}
+              onPress={() => go('Wallet')}
             >
               <Image source={accountsIcon} style={styles.serviceIcon} />
               <Text style={styles.serviceTitle}>My Wallet</Text>
@@ -261,7 +259,7 @@ const ProfileScreen = () => {
       {/* Pet Profile Section */}
       <TouchableOpacity
         style={styles.sectionCard}
-        onPress={() => (navigation as any).navigate('PetProfile', {})}
+        onPress={() => go('PetProfile')}
       >
         <View style={styles.sectionHeader}>
           <Image source={sectionIcon} style={styles.sectionIcon} />
@@ -280,7 +278,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity
           style={styles.accountItemCard}
-          onPress={() => (navigation as any).navigate('EditProfile', {})}
+          onPress={() => go('EditProfile')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={profileIcon} style={styles.accountIcon} />
@@ -296,7 +294,7 @@ const ProfileScreen = () => {
 
           <TouchableOpacity
           style={styles.accountItemCard}
-          onPress={() => (navigation as any).navigate('AddressManagement', {})}
+          onPress={() => go('AddressManagement')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={addressIcon} style={styles.accountIcon} />
@@ -312,7 +310,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity 
           style={styles.accountItemCard}
-          onPress={() => (navigation as any).navigate('SubscriptionPlan', {})}
+          onPress={() => go('SubscriptionPlan')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={accountsIcon} style={styles.accountIcon} />
@@ -333,7 +331,7 @@ const ProfileScreen = () => {
         
         <TouchableOpacity 
           style={styles.accountItemCard}
-          onPress={() => (navigation as any).navigate('Notifications', {})}
+          onPress={() => go('Notifications')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={notificationsIcon} style={styles.accountIcon} />
@@ -349,7 +347,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity 
           style={styles.accountItemCard}
-          onPress={() => (navigation as any).navigate('Settings', {})}
+          onPress={() => go('Settings')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={settingsIcon} style={styles.accountIcon} />
@@ -369,7 +367,7 @@ const ProfileScreen = () => {
         
         <TouchableOpacity 
           style={styles.accountItemCard}
-          onPress={() => (navigation as any).navigate('FAQ', {})}
+          onPress={() => go('FAQ')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={faqIcon} style={styles.accountIcon} />
@@ -384,7 +382,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity 
           style={styles.accountItemCard}
-          onPress={() => (navigation as any).navigate('MailWithUs', {})}
+          onPress={() => go('MailWithUs')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={chatUsIcon} style={styles.accountIcon} />
@@ -398,7 +396,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity 
           style={styles.accountItemCard}
-          onPress={() => (navigation as any).navigate('WhatsAppUs', {})}
+          onPress={() => go('WhatsAppUs')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={chatUsIcon} style={styles.accountIcon} />
@@ -413,7 +411,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity
           style={styles.accountItemCard}
-          onPress={() => navigation.navigate('ShareFeedback' as never)}
+          onPress={() => go('ShareFeedback')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={feedbackIcon} style={styles.accountIcon} />
@@ -436,7 +434,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity
           style={styles.accountItemCard}
-          onPress={() => navigation.navigate('AboutUs' as never)}
+          onPress={() => go('AboutUs')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={aboutUsIcon} style={styles.accountIcon} />
@@ -454,7 +452,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity
           style={styles.accountItemCard}
-          onPress={() => navigation.navigate('Terms' as never)}
+          onPress={() => go('Terms')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={termsIcon} style={styles.accountIcon} />
@@ -472,7 +470,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity
           style={styles.accountItemCard}
-          onPress={() => navigation.navigate('Privacy' as never)}
+          onPress={() => go('Privacy')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={privacyIcon} style={styles.accountIcon} />
@@ -490,7 +488,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity
           style={styles.accountItemCard}
-          onPress={() => navigation.navigate('RefundReturn' as never)}
+          onPress={() => go('RefundReturn')}
         >
           <View style={styles.accountIconWrapper}>
             <Image source={privacyIcon} style={styles.accountIcon} />
@@ -519,7 +517,7 @@ const ProfileScreen = () => {
                 ? 'https://apps.apple.com/app/id0000000000'
                 : 'https://play.google.com/store/apps/details?id=com.farmaa';
             Linking.openURL(url).catch(() =>
-              Alert.alert('Rate us', 'Could not open the app store.')
+              showAppAlert('Rate us', 'Could not open the app store.')
             );
           }}
         >
@@ -540,7 +538,7 @@ const ProfileScreen = () => {
       <TouchableOpacity
           style={styles.accountItemCard}
           onPress={() => {
-            Alert.alert('Furrmaa', 'You are on the latest version (1.0.0).');
+            showAppAlert('Furrmaa', 'You are on the latest version (1.0.0).');
           }}
         >
           <View style={styles.accountIconWrapper}>

@@ -18,6 +18,7 @@ import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/nativ
 import { useAuth } from '../../context/AuthContext';
 import api from '../../config/api';
 import { getCurrentLocationString } from '../../utils/geolocation';
+import { navigateRoot, safeGoBack } from '../../utils/navigateRoot';
 import leftArrow from '../../assets/images/arrow-left.png';
 import locationIcon from '../../assets/images/location.png';
 import searchIcon from '../../assets/images/search-normal.png';
@@ -181,7 +182,7 @@ const HopeScreen = () => {
   }, [posts, searchQuery]);
 
   const handlePetPress = (post: HopePost) => {
-    navigation.navigate('HopeDetail' as never, { pet: post } as never);
+    navigateRoot(navigation as any, 'HopeDetail', { pet: post });
   };
 
   const renderPetCard = ({ item }: { item: HopePost }) => (
@@ -217,13 +218,17 @@ const HopeScreen = () => {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image source={leftArrow} style={styles.backIcon} />
-        </TouchableOpacity>
+        {(navigation as any).canGoBack?.() ? (
+          <TouchableOpacity onPress={() => safeGoBack(navigation as any)}>
+            <Image source={leftArrow} style={styles.backIcon} />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.backIcon} />
+        )}
         <Text style={styles.headerTitle}>Hope</Text>
         <TouchableOpacity
           style={styles.locationContainer}
-          onPress={() => navigation.navigate('HopeChangeLocation' as never)}
+          onPress={() => navigateRoot(navigation as any, 'HopeChangeLocation')}
         >
           <Image source={locationIcon} style={styles.locationIcon} />
           <Text style={styles.locationText}>
@@ -328,7 +333,7 @@ const HopeScreen = () => {
           </Text>
           <TouchableOpacity
             style={styles.emptyBtn}
-            onPress={() => navigation.navigate('HopeChangeLocation' as never)}
+            onPress={() => navigateRoot(navigation as any, 'HopeChangeLocation')}
           >
             <Text style={styles.emptyBtnText}>Change location →</Text>
           </TouchableOpacity>
@@ -336,9 +341,10 @@ const HopeScreen = () => {
       ) : (
         <FlatList
           data={filteredPets}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => String(item.id || item._id)}
           renderItem={renderPetCard}
           numColumns={2}
+          style={{ flex: 1 }}
           contentContainerStyle={styles.petsGrid}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={<View style={{ height: 100 }} />}
@@ -348,7 +354,11 @@ const HopeScreen = () => {
       {/* Add Post Button */}
       <TouchableOpacity
         style={styles.addPostButton}
-        onPress={() => navigation.navigate('AddHopePost' as never, { selectedLocation: currentLocation } as never)}
+        onPress={() =>
+          navigateRoot(navigation as any, 'AddHopePost', {
+            selectedLocation: currentLocation,
+          })
+        }
       >
         <Text style={styles.addPostButtonText}>+ Add Post</Text>
       </TouchableOpacity>
@@ -396,7 +406,7 @@ const HopeScreen = () => {
                 style={styles.allowBtn}
                 onPress={() => {
                   setShowLocationModal(false);
-                  navigation.navigate('HopeChangeLocation' as never);
+                  navigateRoot(navigation as any, 'HopeChangeLocation');
                 }}
               >
                 <Text style={styles.allowText}>Allow</Text>

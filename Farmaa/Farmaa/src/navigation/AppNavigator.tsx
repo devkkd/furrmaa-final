@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAuth } from '../context/AuthContext';
 import { ICON_SIZES } from '../constants/iconSizes';
-import { hapticLight } from '../utils/haptics';
 
 // Auth Screens
 import SplashScreen from '../screens/SplashScreen';
@@ -190,7 +189,6 @@ const MainTabs = () => {
       <Tab.Screen
         name="ProductsTab"
         component={HomeScreen}
-        listeners={{ tabPress: () => hapticLight() }}
         options={{
           tabBarLabel: 'Shop',
           tabBarIcon: ({ focused }) => (
@@ -201,7 +199,6 @@ const MainTabs = () => {
       <Tab.Screen
         name="TrainTab"
         component={TrainingScreen}
-        listeners={{ tabPress: () => hapticLight() }}
         options={{
           tabBarLabel: 'Train',
           tabBarIcon: ({ focused }) => (
@@ -212,7 +209,6 @@ const MainTabs = () => {
       <Tab.Screen
         name="NearbyTab"
         component={VeterinariansScreen}
-        listeners={{ tabPress: () => hapticLight() }}
         options={{
           tabBarLabel: 'Nearby',
           tabBarIcon: ({ focused }) => (
@@ -223,7 +219,6 @@ const MainTabs = () => {
       <Tab.Screen
         name="HopeTab"
         component={HopeScreen}
-        listeners={{ tabPress: () => hapticLight() }}
         options={{
           tabBarLabel: 'Hope',
           tabBarIcon: ({ focused }) => (
@@ -234,7 +229,6 @@ const MainTabs = () => {
       <Tab.Screen
         name="ProfileTab"
         component={ProfileScreen}
-        listeners={{ tabPress: () => hapticLight() }}
         options={{
           tabBarLabel: 'More',
           tabBarIcon: ({ focused }) => (
@@ -246,27 +240,49 @@ const MainTabs = () => {
   );
 };
 
-/** Compact vector tab icons — crisp, not oversized. */
-const TabIcon = ({ name, focused }: { name: string; focused: boolean }) => (
-  <View
-    style={{
-      backgroundColor: focused ? '#1E293B' : 'transparent',
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      borderRadius: 16,
-      minWidth: 40,
-      height: 32,
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-  >
-    <MaterialCommunityIcons
-      name={name as any}
-      size={ICON_SIZES.tab}
-      color={focused ? '#FFFFFF' : '#1F2E46'}
-    />
-  </View>
-);
+/** Compact vector tab icons — crisp, not oversized. Fallback text if font fails. */
+const TAB_FALLBACK: Record<string, string> = {
+  'shopping-outline': 'Shop',
+  paw: 'Train',
+  'map-marker-radius-outline': 'Near',
+  'heart-outline': 'Hope',
+  'view-grid-outline': 'More',
+};
+
+const TabIcon = ({ name, focused }: { name: string; focused: boolean }) => {
+  let iconNode: React.ReactNode = (
+    <Text style={{ fontSize: 11, color: focused ? '#FFFFFF' : '#1F2E46', fontWeight: '700' }}>
+      {TAB_FALLBACK[name] || '•'}
+    </Text>
+  );
+  try {
+    iconNode = (
+      <MaterialCommunityIcons
+        name={name as any}
+        size={ICON_SIZES.tab}
+        color={focused ? '#FFFFFF' : '#1F2E46'}
+      />
+    );
+  } catch {
+    // keep text fallback
+  }
+  return (
+    <View
+      style={{
+        backgroundColor: focused ? '#1E293B' : 'transparent',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 16,
+        minWidth: 40,
+        height: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      {iconNode}
+    </View>
+  );
+};
 
 
 const AppNavigator = () => {

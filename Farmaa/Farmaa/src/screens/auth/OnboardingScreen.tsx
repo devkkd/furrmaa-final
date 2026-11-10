@@ -28,7 +28,7 @@ import splash5 from '../../assets/images/Group 12.png';
 // @ts-ignore
 import splash6 from '../../assets/images/Group 11.png';
 // @ts-ignore
-import logoImage from '../../assets/images/Logo.png';
+import logoImage from '../../assets/logo.png';
 
 const OnboardingScreen = () => {
   const navigation = useNavigation();
