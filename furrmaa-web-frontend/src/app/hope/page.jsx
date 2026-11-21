@@ -147,6 +147,12 @@ function HopePageContent() {
   return (
     <div className="bg-white overflow-x-hidden">
       {/* ================= BROWSE POSTS ================= */}
+      <title>Pet Adoption & Lost and Found Pets | Furrmaa Hope</title>
+      <meta
+        name="description"
+        content="Adopt a pet or help reunite lost pets with their families. Browse adoption and lost and found posts from your community on Furrmaa."
+      />
+      <link rel="canonical" href="https://furrmaa.com/hope" />
       <section className="border-t border-gray-200 py-5 sm:py-8">
         <Container>
           {/* ── PAGE HEADER ── */}
@@ -522,9 +528,9 @@ function HopePageContent() {
             {/* HERO CONTENT */}
             <div className="flex-1 w-full space-y-6 sm:space-y-7 md:space-y-8">
               <header>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 sm:mb-5 md:mb-6 leading-tight">
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 sm:mb-5 md:mb-6 leading-tight">
                   Hope by Furrmaa
-                </h1>
+                </h2>
 
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 leading-snug">
                   Helping Pets Find Safety, Care, and a Home

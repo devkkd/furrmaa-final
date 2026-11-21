@@ -131,10 +131,16 @@ const Vet = () => {
 
     return (
         <section className="bg-white py-6 md:py-8">
+             <title>Find Vets, Pet Shops & Pet Hotels Near You | Furrmaa</title>
+      <meta
+        name="description"
+        content="Find veterinarians, hospitals, pet shops, pet hotels, NGOs, shelters and rescue centers near you. Explore verified listings on Furrmaa."
+      />
+      <link rel="canonical" href="https://furrmaa.com/vet" />
             <Container>
                 <div className="px-6">
                     <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between mb-6 md:mb-8">
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 shrink-0">Near By Services</h1>
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 shrink-0">Near By Services</h2>
 
                         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
                             <div className="relative flex-grow w-full md:w-auto md:max-w-md">

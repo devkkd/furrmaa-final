@@ -6,6 +6,12 @@ import WhyChooseFurrmaa from '@/components/WhyChooseFurrmaa';
 const AboutUs = () => {
     return (
         <section className="bg-white pt-6 md:py-12">
+              <title>About Furrmaa - India's AI-Powered Pet Care Ecosystem</title>
+      <meta
+        name="description"
+        content="Furrmaa connects pet parents with verified vets, products and local services in one place. Learn our mission and vision."
+      />
+      <link rel="canonical" href="https://furrmaa.com/about" />
             <Container>
                 <div className="max-w-7xl pl-9 pr-8 md:pl-9 md:pr-9 ">
                     {/* --- EXISTING TOP SECTION --- */}
@@ -13,9 +19,9 @@ const AboutUs = () => {
                         <h2 className="text-2xl mb-3 md:text-4xl font-extrabold text-gray-800">
                             About Us
                         </h2>
-                        <h1 className="text-4xl my-7 md:text-5xl lg:text-6xl font-bold text-black tracking-tight leading-tight mb-6">
+                        <h2 className="text-4xl my-7 md:text-5xl lg:text-6xl font-bold text-black tracking-tight leading-tight mb-6">
                             Reimagining Pet Care in India
-                        </h1>
+                        </h2>
                     </div>
 
                     <div className="space-y-6 max-w-6xl text-[#0E0E0E]">

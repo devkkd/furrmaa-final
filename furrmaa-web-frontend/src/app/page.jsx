@@ -45,6 +45,7 @@ useEffect(() => {
 
   return (
     <div className="bg-white text-black">
+      <link rel="canonical" href="https://furrmaa.com/" />
       <Banner />
       <div className="hidden lg:block">
    <ToggleDogCat />

@@ -77,11 +77,17 @@ const PetEvents = () => {
 
     return (
         <section className="bg-white py-10">
+               <title>Pet Events Near You - Meets, Shows & Camps | Furrmaa</title>
+      <meta
+        name="description"
+        content="Discover pet events near you, from meets and shows to adoption camps. Find upcoming events on Furrmaa."
+      />
+      <link rel="canonical" href="https://furrmaa.com/events" />
             <Container>
                 <div className="px-5">
                     {/* Header Section */}
                     <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-                        <h1 className="text-4xl font-bold text-gray-900">Pet Events</h1>
+                        <h2 className="text-4xl font-bold text-gray-900">Pet Events</h2>
 
                         {/* Location Picker */}
                         <div className="relative w-full md:w-auto min-w-[280px]">

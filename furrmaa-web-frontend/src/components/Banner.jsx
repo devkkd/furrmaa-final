@@ -168,11 +168,11 @@ export default function Banner() {
                 <p className="text-[10px] md:text-lg font-semibold mb-1">
                   {item.title}
                 </p>
-                <h1 className="text-[18px] sm:text-2xl md:text-5xl font-bold leading-[1.1]">
+                <h2 className="text-[18px] sm:text-2xl md:text-5xl font-bold leading-[1.1]">
                   {item.heading}
                   <br />
                   {item.subHeading}
-                </h1>
+                </h2>
                 <p className="hidden md:block mt-4 text-base text-black/70 max-w-md">
                   {item.description}
                 </p>

@@ -71,13 +71,19 @@ const ContactUs = () => {
 
     return (
         <section className="bg-white px-7 py-12 md:py-20">
+              <title>Contact Furrmaa - Support & Partnerships, Jaipur</title>
+      <meta
+        name="description"
+        content="Contact Furrmaa for app support, orders or partnerships. Call +91-8829026003 or email support@furrmaa.com. Based in Jaipur."
+      />
+      <link rel="canonical" href="https://furrmaa.com/contactus" />
             <Container>
                 {/* Header Section */}
                 <div className="mb-16 md:px-9">
                     <h2 className="text-2xl mb-3 md:text-4xl font-extrabold text-gray-800">Contact Us</h2>
-                    <h1 className="text-4xl my-7 md:text-5xl lg:text-5xl font-bold text-black tracking-tight leading-tight mb-6">
+                    <h2 className="text-4xl my-7 md:text-5xl lg:text-5xl font-bold text-black tracking-tight leading-tight mb-6">
                         We're Here to Help For Pets and People
-                    </h1>
+                    </h2>
                     <p className="text-lg text-gray-800 max-w-4xl leading-relaxed">
                         Have a question, need support, or want to partner with <span className="font-extrabold">FURRMAA</span>?<br></br>
                         <span className="font-extrabold"> We'd love to hear from you.</span> Our team is here to assist pet parents, partners, and collaborators at every step.

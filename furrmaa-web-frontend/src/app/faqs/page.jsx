@@ -21,14 +21,20 @@ const FaqPage = () => {
 
   return (
     <section className="w-full bg-white py-12 md:py-12">
+       <title>Furrmaa FAQs - Orders, Refunds, Vets & App Help</title>
+      <meta
+        name="description"
+        content="Answers to common questions about orders, refunds, bookings and the Furrmaa app."
+      />
+      <link rel="canonical" href="https://furrmaa.com/faqs" />
       <Container>
         <div className="max-w-7xl mx-auto px-6 md:px-9">
           
           {/* Centered Top Heading */}
           <div className="mb-16">
-            <h1 className="text-4xl font-extrabold text-black tracking-tight">
+            <h2 className="text-4xl font-extrabold text-black tracking-tight">
               Frequently Asked Questions
-            </h1>
+            </h2>
           </div>
 
           {/* Full Width Question List */}

@@ -86,12 +86,18 @@ const CremationServices = () => {
 
   return (
     <section className="bg-white py-6 sm:py-8 md:py-10 px-4 sm:px-5 md:px-0 min-h-screen overflow-x-hidden">
+        <title>Pet Cremation Services Near You | Furrmaa</title>
+      <meta
+        name="description"
+        content="Find pet cremation and last-rites services near you. View contact details and locations on Furrmaa."
+      />
+      <link rel="canonical" href="https://furrmaa.com/cremation" />
       <Container>
         {/* ================= HEADER ================= */}
         <div className="flex flex-col lg:flex-row gap-5 lg:gap-6 items-start lg:items-center justify-between mb-6 md:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
             Cremation
-          </h1>
+          </h2>
 
           {/* ================= CONTROLS ================= */}
           <div className="w-full lg:w-auto">

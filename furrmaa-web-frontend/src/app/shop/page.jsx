@@ -136,11 +136,30 @@ function StorePageContent() {
     return true;
   });
 
+  const categoryTitle = categoryFromUrl
+    ? categoryFromUrl
+        .split(",")
+        .map((cat) =>
+          cat
+            .trim()
+            .replace(/[-_]+/g, " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase())
+        )
+        .filter(Boolean)
+        .join(", ") || "Shop"
+    : "Shop";
+
   return (
     <div className="bg-white w-full">
+      <title>{categoryFromUrl ? `${categoryTitle} | Shop Online - Furrmaa` : "Shop Pet Products Online in India | Furrmaa"}</title>
+      <meta
+        name="description"
+        content="Browse pet food, treats, medicine, toys, accessories, grooming and supplements for dogs and cats. Order online at Furrmaa."
+      />
+      <link rel="canonical" href="https://furrmaa.com/shop" />
       <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
         <div className="flex justify-between items-center mb-8 flex-wrap gap-2">
-          <h1 className="text-4xl font-bold text-gray-900">Shop</h1>
+          <h2 className="text-4xl font-bold text-gray-900">{categoryTitle}</h2>
           <button
             type="button"
             onClick={() => setMobileFilterOpen(true)}

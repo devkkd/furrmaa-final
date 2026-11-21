@@ -69,12 +69,18 @@ const PetTrainingPage = () => {
 
   return (
     <section className="w-full bg-white py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-6 overflow-hidden">
+      <title>Dog Training Lessons & Trainers at Home | Furrmaa</title>
+      <meta
+        name="description"
+        content="Start with free basic dog training lessons or hire a personal trainer for one-on-one sessions at home. Positive methods, real results."
+      />
+      <link rel="canonical" href="https://furrmaa.com/training" />
       <Container>
         {/* Header */}
         <header className="mb-6 sm:mb-8 md:mb-12">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-black mb-2">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-black mb-2">
             {isCat ? "Cat Training" : "Dog Training"}
-          </h1>
+          </h2>
 
           <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium mb-4">
             {isCat

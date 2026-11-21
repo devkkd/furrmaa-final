@@ -11,8 +11,12 @@ const monaSans = Mona_Sans({
 });
 
 export const metadata = {
-  title: "Furrmaa",
-  description: "Furrmaa is a pet care platform that provides a wide range of products and services for pets, including food, toys, grooming, and veterinary care. Our mission is to make pet care easy and accessible for all pet owners.",
+  metadataBase: new URL("https://furrmaa.com"),
+  title: "Furrmaa.com | Online Pet Store, Vets & Training India",
+  description: "Furrmaa is a complete pet-care platform from Jaipur. Shop pet food, toys and grooming, find vets and shelters, and learn dog training.",
+  alternates: {
+    canonical: "https://furrmaa.com/",
+  },
 
   verification: {
     google: "wtlYAi09_nJhIQnihNunuJqAcjslW8SlW39lC_kRkHY",
