@@ -3,6 +3,7 @@
  */
 import { getApiBaseUrl } from '@/lib/apiBase';
 import { withCache, clearApiCache, fetchWithTimeout, fetchWithRetry, getCached, setCached } from '@/lib/apiCache';
+import { inferProductCategory } from '@/utils/productCategories';
 
 export const getBaseUrl = () => getApiBaseUrl();
 
@@ -235,11 +236,14 @@ export function normalizeProduct(p) {
   const price = p.discountPrice ?? p.price ?? 0;
   const oldPrice = p.discountPrice ? p.price : undefined;
   const petTypeArr = Array.isArray(p.petType) ? p.petType : [p.petType].filter(Boolean);
+  const inferredCategory = inferProductCategory(p);
   return {
     ...p,
     id: p._id || p.id,
     _id: p._id,
     name: p.name || 'Product',
+    category: inferredCategory || p.category,
+    rawCategory: p.category,
     price,
     oldPrice,
     image: (p.images && p.images[0]) || p.image || '/images/products/p1.png',

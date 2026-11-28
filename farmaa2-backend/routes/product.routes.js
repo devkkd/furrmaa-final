@@ -16,6 +16,17 @@ function withNormalizedImages(doc) {
 
 const router = express.Router();
 
+const CATEGORY_EXPANSIONS = {
+  food: ['food', 'foodnew', 'cat-food', 'treats', 'diet', 'cat-treats'],
+  health: ['health', 'medicine', 'supplements', 'dewormer', 'kidney-care', 'cardiac-care', 'joint-care', 'liver-care', 'tick--fleas', 'cat-kidney-care', 'cat-dewormer', 'cat-joint-care', 'cat-cardiac-care', 'cat-liver-care', 'cat-supplements', 'cat-tick--fleas'],
+  medicine: ['health', 'medicine', 'supplements', 'dewormer', 'kidney-care', 'cardiac-care', 'joint-care', 'liver-care', 'tick--fleas', 'cat-kidney-care', 'cat-dewormer', 'cat-joint-care', 'cat-cardiac-care', 'cat-liver-care', 'cat-supplements', 'cat-tick--fleas'],
+  toys: ['toys', 'toyss', 'cat-toys'],
+  accessories: ['accessories', 'walk', 'feeders', 'feederss', 'cat-walk', 'cat-feeders', 'travel', 'cat-travel'],
+  grooming: ['grooming', 'groomings', 'cat-grooming'],
+  bedding: ['bedding', 'litter', 'cat-litter', 'beds-mats', 'cat-beds--mats'],
+  feeders: ['feeders', 'feederss', 'cat-feeders'],
+};
+
 // Helper: filter sirf tab lagao jab param select ho (non-empty)
 const hasVal = (v) => v != null && String(v).trim() !== '';
 
@@ -44,21 +55,52 @@ router.get(['/', ''], async (req, res) => {
       }
     }
 
-    // Category filter – sirf jab category select ho (case-insensitive)
+    // Category filter – supports category aliases and excludes mislabeled products
     if (hasVal(category)) {
-      const cats = Array.isArray(category)
+      const rawCats = Array.isArray(category)
         ? category.map(c => c.trim().toLowerCase()).filter(Boolean)
         : typeof category === 'string'
           ? category.split(',').map(c => c.trim().toLowerCase()).filter(Boolean)
           : [];
+
+      // Expand categories using aliases
+      const expandedCats = new Set();
+      for (const cat of rawCats) {
+        if (CATEGORY_EXPANSIONS[cat]) {
+          CATEGORY_EXPANSIONS[cat].forEach(c => expandedCats.add(c));
+        } else {
+          expandedCats.add(cat);
+        }
+      }
+
+      const cats = Array.from(expandedCats);
       if (cats.length) {
         const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        if (cats.length === 1) {
-          query.category = new RegExp('^' + escapeRegex(cats[0]) + '$', 'i');
-        } else {
-          query.$and = query.$and || [];
+        query.$and = query.$and || [];
+
+        // Main category match condition
+        const catConditions = cats.map((c) => ({ category: new RegExp('^' + escapeRegex(c) + '$', 'i') }));
+
+        // Include items matching by name if filtering specific category
+        if (rawCats.includes('grooming')) {
+          catConditions.push({ name: /\b(comb|combs|brush|brushes|grooming|shampoo|conditioner|dryer|trimmer|nail)\b/i });
+        }
+        if (rawCats.includes('accessories')) {
+          catConditions.push({ name: /\b(harness|collar|leash|carrier|crate|feeder|bowl)\b/i });
+        }
+        if (rawCats.includes('health') || rawCats.includes('medicine')) {
+          catConditions.push({ name: /\b(lotion|syrup|drops|spray|dewormer|nutricoat|paw cream)\b/i });
+        }
+        if (rawCats.includes('bedding')) {
+          catConditions.push({ name: /\b(cat litter|litter|pet bed|mat|cushion)\b/i });
+        }
+
+        query.$and.push({ $or: catConditions });
+
+        // If filtering strictly for food, exclude mislabeled non-food items
+        if (rawCats.includes('food') && !rawCats.includes('grooming') && !rawCats.includes('accessories') && !rawCats.includes('bedding')) {
           query.$and.push({
-            $or: cats.map((c) => ({ category: new RegExp('^' + escapeRegex(c) + '$', 'i') })),
+            name: { $not: /\b(comb|combs|brush|brushes|shampoo|harness|collar|leash|cat litter)\b/i }
           });
         }
       }

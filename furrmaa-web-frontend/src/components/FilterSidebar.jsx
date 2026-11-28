@@ -74,6 +74,20 @@ export default function FilterSidebar({ filters, onChange }) {
   const [sizes, setSizes] = useState([]);
   const [dietary, setDietary] = useState([]);
 
+  // Friendly category labels lookup
+  const CATEGORY_LABEL_MAP = {
+    food: "Food",
+    toys: "Toys",
+    accessories: "Accessories",
+    grooming: "Grooming",
+    health: "Medicine",
+    medicine: "Medicine",
+    supplements: "Supplements",
+    bedding: "Bedding",
+    feeders: "Feeders",
+    other: "Other",
+  };
+
   // Fetch categories from API (name for display, slug for filter value)
   useEffect(() => {
     let cancelled = false;
@@ -91,9 +105,19 @@ export default function FilterSidebar({ filters, onChange }) {
                 getBackendCategory(raw) ||
                 getBackendCategory(cat.name || cat.title) ||
                 raw;
+
+              const rawName = String(cat.name || cat.title || "").trim();
+              const isNumeric = /^\d+$/.test(rawName);
+              const label =
+                (!rawName || isNumeric)
+                  ? CATEGORY_LABEL_MAP[mapped] ||
+                    CATEGORY_LABEL_MAP[raw] ||
+                    (raw ? raw.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Category")
+                  : rawName;
+
               return {
                 value: mapped,
-                label: cat.name || cat.title || cat.slug || "",
+                label,
               };
             });
           // De-dupe by value (Medicine + Supplements → health)
@@ -114,7 +138,7 @@ export default function FilterSidebar({ filters, onChange }) {
             { value: "toys", label: "Toys" },
             { value: "accessories", label: "Accessories" },
             { value: "grooming", label: "Grooming" },
-            { value: "health", label: "Health" },
+            { value: "health", label: "Medicine" },
             { value: "bedding", label: "Bedding" },
             { value: "other", label: "Other" },
           ]);
@@ -172,7 +196,7 @@ export default function FilterSidebar({ filters, onChange }) {
         { value: "toys", label: "Toys" },
         { value: "accessories", label: "Accessories" },
         { value: "grooming", label: "Grooming" },
-        { value: "health", label: "Health" },
+        { value: "health", label: "Medicine" },
         { value: "bedding", label: "Bedding" },
         { value: "other", label: "Other" },
       ],

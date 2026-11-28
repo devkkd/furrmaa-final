@@ -9,10 +9,24 @@ const DEFAULT_CATEGORIES = [
   { name: 'Toys', slug: 'toys', displayOrder: 2 },
   { name: 'Accessories', slug: 'accessories', displayOrder: 3 },
   { name: 'Grooming', slug: 'grooming', displayOrder: 4 },
-  { name: 'Health', slug: 'health', displayOrder: 5 },
+  { name: 'Medicine', slug: 'health', displayOrder: 5 },
   { name: 'Bedding', slug: 'bedding', displayOrder: 6 },
-  { name: 'Other', slug: 'other', displayOrder: 7 },
+  { name: 'Feeders', slug: 'feeders', displayOrder: 7 },
+  { name: 'Other', slug: 'other', displayOrder: 8 },
 ];
+
+const CATEGORY_NAME_MAP = {
+  food: 'Food',
+  toys: 'Toys',
+  accessories: 'Accessories',
+  grooming: 'Grooming',
+  health: 'Medicine',
+  medicine: 'Medicine',
+  supplements: 'Supplements',
+  bedding: 'Bedding',
+  feeders: 'Feeders',
+  other: 'Other',
+};
 
 let defaultCategoriesEnsured = false;
 
@@ -22,10 +36,9 @@ async function ensureDefaultCategories() {
     await Category.findOneAndUpdate(
       { slug: c.slug, section: 'all', petScope: 'both' },
       {
+        $set: { name: c.name, displayOrder: c.displayOrder },
         $setOnInsert: {
-          name: c.name,
           slug: c.slug,
-          displayOrder: c.displayOrder,
           section: 'all',
           petType: ['both'],
           petScope: 'both',
@@ -50,8 +63,20 @@ router.get('/', async (req, res) => {
       .select('name slug displayOrder section petType petScope image icon isActive')
       .sort({ displayOrder: 1, name: 1 })
       .lean();
+
+    const normalizedCategories = categories.map((c) => {
+      let displayName = c.name;
+      // If name is numeric (e.g. "8", "1") or missing, use standard category name
+      if (!displayName || /^\d+$/.test(String(displayName).trim())) {
+        displayName =
+          CATEGORY_NAME_MAP[c.slug?.toLowerCase()] ||
+          (c.slug ? c.slug.replace(/[-_]+/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()) : 'Category');
+      }
+      return { ...c, name: displayName };
+    });
+
     setPublicCache(res, 600);
-    res.json({ success: true, categories });
+    res.json({ success: true, categories: normalizedCategories });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

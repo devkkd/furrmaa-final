@@ -139,12 +139,22 @@ function StorePageContent() {
   const categoryTitle = categoryFromUrl
     ? categoryFromUrl
         .split(",")
-        .map((cat) =>
-          cat
-            .trim()
-            .replace(/[-_]+/g, " ")
-            .replace(/\b\w/g, (char) => char.toUpperCase())
-        )
+        .map((cat) => {
+          const val = cat.trim();
+          const friendly = {
+            health: "Medicine",
+            medicine: "Medicine",
+            supplements: "Supplements",
+            food: "Food",
+            toys: "Toys",
+            accessories: "Accessories",
+            grooming: "Grooming",
+            bedding: "Bedding",
+            feeders: "Feeders",
+          }[val.toLowerCase()];
+          if (friendly) return friendly;
+          return val.replace(/[-_]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+        })
         .filter(Boolean)
         .join(", ") || "Shop"
     : "Shop";
