@@ -51,7 +51,8 @@ function HopePageContent() {
       ? "lostFound"
       : filterFromUrl === "adoption"
       ? "adoption"
-      : "lostFound";
+      : 
+      "adoption";
 
   const initialPetSub =
     petFromUrl === "dog" || petFromUrl === "cat" ? petFromUrl : "all";
@@ -153,58 +154,170 @@ function HopePageContent() {
         content="Adopt a pet or help reunite lost pets with their families. Browse adoption and lost and found posts from your community on Furrmaa."
       />
       <link rel="canonical" href="https://furrmaa.com/hope" />
-      <section className="border-t border-gray-200 py-5 sm:py-8">
+      {/* ================= HEADER BANNER WITH DYNAMIC TOGGLE ================= */}
+      <section className="border-t border-gray-200 bg-[#FAFAFA]">
         <Container>
-          {/* ── PAGE HEADER ── */}
-          <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
-            <div className="flex items-center gap-2 mb-1">
-              <img src="/images/icons/hope.svg" alt="Hope" className="w-6 h-6 opacity-80" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Furrmaa Hope</span>
+          <div className="pt-6 sm:pt-10 pb-8 sm:pb-10">
+            {/* ── MAIN TOGGLE: Adoption | Lost & Found ── */}
+            <div className="flex justify-center mb-6 sm:mb-8">
+              <div className="w-full max-w-[420px] h-[52px] bg-white border border-gray-200 rounded-full p-1.5 flex items-center shadow-sm">
+                {[
+                  {
+                    key: "adoption",
+                    label: "Adoption",
+                    icon: (
+                      <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    key: "lostFound",
+                    label: "Lost & Found",
+                    icon: (
+                      <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                      </svg>
+                    ),
+                  },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => { setMainType(item.key); setPetSub("all"); }}
+                    className={`
+                      flex-1 h-full rounded-full flex items-center justify-center gap-2
+                      text-sm font-semibold transition-all duration-300
+                      ${mainType === item.key
+                        ? "bg-[#1F2E46] text-white shadow-md"
+                        : "text-gray-400 hover:text-gray-700"
+                      }
+                    `}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Browse Hope Posts</h2>
-          </div>
 
-          {/* ── MAIN TOGGLE: Lost & Found | Adoption ── */}
-          <div className="flex justify-center mb-5 sm:mb-6">
-            <div className="w-full max-w-[420px] h-[52px] bg-white border border-gray-200 rounded-full p-1.5 flex items-center shadow-sm">
-              {[
-                {
-                  key: "lostFound",
-                  label: "Lost & Found",
-                  icon: (
-                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                  ),
-                },
-                {
-                  key: "adoption",
-                  label: "Adoption",
-                  icon: (
-                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                    </svg>
-                  ),
-                },
-              ].map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => { setMainType(item.key); setPetSub("all"); }}
-                  className={`
-                    flex-1 h-full rounded-full flex items-center justify-center gap-2
-                    text-sm font-semibold transition-all duration-200
-                    ${mainType === item.key
-                      ? "bg-[#1F2E46] text-white shadow-sm"
-                      : "text-gray-400 hover:text-gray-700"
-                    }
-                  `}
-                >
-                  {item.icon}
-                  {item.label}
-                </button>
-              ))}
+            {/* ── DYNAMIC HERO BANNER CARD (Furrmaa Theme Matching) ── */}
+            <div
+              className={`relative overflow-hidden rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-12 transition-all duration-500 shadow-sm border ${
+                mainType === "adoption"
+                  ? "bg-gradient-to-br from-[#F5FAF1] via-[#ECF7E5] to-[#DFEFD4] border-[#CCEAC0]"
+                  : "bg-gradient-to-br from-[#F0F4F9] via-[#E4ECF6] to-[#D5E2F0] border-[#C3D5EA]"
+              }`}
+            >
+              <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-6 md:gap-10 relative z-10">
+                {/* Left Text Column */}
+                <div className="flex-1 text-center md:text-left">
+                  <div
+                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold mb-3 tracking-wide uppercase shadow-xs bg-white border ${
+                      mainType === "adoption"
+                        ? "text-[#1F2E46] border-[#95E562]/60"
+                        : "text-[#1F2E46] border-[#1F2E46]/20"
+                    }`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        mainType === "adoption" ? "bg-[#95E562]" : "bg-[#1F2E46]"
+                      }`}
+                    />
+                    <span>{mainType === "adoption" ? "Furrmaa Hope • Adoption" : "Furrmaa Hope • Lost & Found"}</span>
+                  </div>
+
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#1F2E46] leading-tight mb-3">
+                    {mainType === "adoption" ? (
+                      <>
+                        Find Your Forever Friend. <br className="hidden sm:inline" />
+                        <span className="text-[#1F2E46] underline decoration-[#95E562] decoration-4 underline-offset-4">
+                          Adopt, Don't Shop.
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        Help Bring Them Home. <br className="hidden sm:inline" />
+                        <span className="text-[#1F2E46] underline decoration-[#1F2E46]/40 decoration-4 underline-offset-4">
+                          Reunite Lost Pets.
+                        </span>
+                      </>
+                    )}
+                  </h1>
+
+                  <p className="text-sm sm:text-base md:text-lg text-[#1F2E46]/80 max-w-xl mb-6 leading-relaxed">
+                    {mainType === "adoption"
+                      ? "Connect with loving dogs and cats waiting for a warm home. Every adoption gives a rescued pet a second chance at happiness."
+                      : "Report or find missing pets in your community with instant location-based alerts. Together, we can help lost pets reunite safely."}
+                  </p>
+
+                  {/* Feature badges */}
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 text-xs sm:text-sm font-semibold text-[#1F2E46]">
+                    {mainType === "adoption" ? (
+                      <>
+                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/95 border border-[#95E562]/50 shadow-xs">
+                          🏡 100% Free Adoption
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/95 border border-[#95E562]/50 shadow-xs">
+                          ❤️ Direct Pet Parent Contact
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/95 border border-[#95E562]/50 shadow-xs">
+                          🐾 Loving Forever Homes
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/95 border border-[#1F2E46]/20 shadow-xs">
+                          📍 Location-Based Alerts
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/95 border border-[#1F2E46]/20 shadow-xs">
+                          ⚡ Instant Community Reach
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/95 border border-[#1F2E46]/20 shadow-xs">
+                          🤝 Safe & Quick Reunions
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Image Column */}
+                <div className="w-full max-w-[200px] sm:max-w-[260px] md:max-w-[320px] shrink-0 flex justify-center">
+                  <div className="relative aspect-square w-full flex items-center justify-center">
+                    <div
+                      className={`absolute inset-0 rounded-full blur-2xl opacity-40 ${
+                        mainType === "adoption" ? "bg-[#95E562]" : "bg-[#1F2E46]/40"
+                      }`}
+                    />
+                    <img
+                      key={`${mainType}-${petSub}`}
+                      src={
+                        mainType === "adoption"
+                          ? (petSub === "cat" ? "/images/cat-1.1.png" : "/images/CardTwo/inter.png")
+                          : (petSub === "cat" ? "/images/cat-1.2.png" : "/images/td.png")
+                      }
+                      alt={mainType === "adoption" ? "Pet Adoption" : "Lost and Found Pet"}
+                      className="relative z-10 w-full h-full object-contain drop-shadow-xl transition-all duration-500 transform hover:scale-105"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* ================= BROWSE POSTS SECTION ================= */}
+      <section className="py-6 sm:py-8">
+        <Container>
+          {/* ── SECTION TITLE ── */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900">
+              {mainType === "adoption" ? "Browse Adoptable Pets" : "Browse Lost & Found Reports"}
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+              {mainType === "adoption" ? "Find pets looking for a home near you" : "Search recent reports and help reunite pets"}
+            </p>
           </div>
 
           {/* ── PET TYPE SUB-FILTER ── */}
